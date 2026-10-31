@@ -45,6 +45,32 @@
   <footer><div class="shell">© 2025 ARCADE GAME LOUNGE · PLAY YOUR WAY ✦</div></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <dialog class="profile-dialog" id="profileDialog" aria-labelledby="profileTitle">
+    <div class="profile-dialog-header">
+      <div>
+        <p class="section-kicker">PLAYER CARD</p>
+        <h2 id="profileTitle">나의 프로필</h2>
+      </div>
+      <button class="profile-close" id="closeProfileButton" type="button" aria-label="프로필 닫기">×</button>
+    </div>
+    <div class="profile-card">
+      <div class="profile-avatar" aria-hidden="true">👾</div>
+      <div class="profile-identity">
+        <strong id="profileName">아케이드 게이머</strong>
+        <span>오늘도 즐겁게 플레이 중</span>
+      </div>
+      <button class="profile-edit" id="editProfileButton" type="button">이름 변경</button>
+    </div>
+    <div class="profile-level-row"><span>LEVEL 08</span><span>640 / 1,000 XP</span></div>
+    <div class="profile-progress" role="progressbar" aria-label="레벨 진행도" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="640"><span></span></div>
+    <div class="profile-stats">
+      <div><strong id="favoriteCount">0</strong><span>즐겨찾기</span></div>
+      <div><strong>12</strong><span>이번 주 플레이</span></div>
+      <div><strong>8</strong><span>수집 배지</span></div>
+    </div>
+    <p class="profile-hint">즐겨찾기한 게임은 이 기기에 저장됩니다.</p>
+  </dialog>
+
   <script src="script.js" defer></script>
 </body>
 </html>
