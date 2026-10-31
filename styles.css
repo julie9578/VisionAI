@@ -78,7 +78,8 @@
     .game-cover::before { content: ''; position: absolute; z-index: -1; inset: 0; opacity: .48; background-image: linear-gradient(135deg, #ffffff15 1px, transparent 1px), linear-gradient(45deg, #ffffff11 1px, transparent 1px); background-size: 17px 17px, 24px 24px; }
     .cover-emoji { font-size: 62px; filter: drop-shadow(0 9px 13px #0008); transition: transform .3s; }
     .game-card:hover .cover-emoji { transform: scale(1.12) rotate(-5deg); }
-    .game-cover[style*="--game-image"]::before { opacity: .08; }
+    .game-cover[style*="--game-image"] { background-color: #151421; background-image: linear-gradient(180deg, #08071122 0%, #08071100 42%, #080711a8 100%), var(--game-image); }
+    .game-cover[style*="--game-image"]::before { opacity: 0; }
     .game-cover[style*="--game-image"] .cover-label { z-index: 1; }
     .cover-valorant { background: radial-gradient(circle at 55% 35%, #ff9779, #bd433e 48%, #371e36); }
     .cover-hades { background: radial-gradient(circle at 50% 40%, #fbb16b, #c64b3d 45%, #33203b); }
