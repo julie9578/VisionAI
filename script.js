@@ -91,10 +91,14 @@ const games = [
       updateProfileStats();
       loadProfileName();
       profileDialog.showModal();
+      document.getElementById('closeProfileButton').focus();
     });
     document.getElementById('closeProfileButton').addEventListener('click', () => profileDialog.close());
     profileDialog.addEventListener('click', event => {
       if (event.target === profileDialog) profileDialog.close();
+    });
+    profileDialog.addEventListener('close', () => {
+      document.getElementById('profileButton').focus();
     });
     document.getElementById('editProfileButton').addEventListener('click', () => {
       const currentName = document.getElementById('profileName').textContent;
