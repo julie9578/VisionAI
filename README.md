@@ -2,7 +2,7 @@
 
 인기 게임을 둘러보고, 취향에 맞는 다음 플레이를 발견할 수 있는 한국어 게임 큐레이션 홈페이지입니다.
 
-**라이브 홈페이지:** https://julie9578.github.io/VisionAI/
+**라이브 홈페이지:** https://arcade.nextarcade.workers.dev/
 
 ## 주요 기능
 
@@ -47,11 +47,7 @@ sitemap.xml  공개 페이지 사이트맵
 
 ## 배포
 
-GitHub Pages가 `main` 브랜치의 저장소 루트를 배포합니다. `main`에 변경 사항을 푸시하면 홈페이지가 업데이트됩니다.
-
-- 홈페이지: <https://julie9578.github.io/VisionAI/>
-- 크롤러 정책: <https://julie9578.github.io/VisionAI/robots.txt>
-- 사이트맵: <https://julie9578.github.io/VisionAI/sitemap.xml>
+- 라이브 홈페이지: <https://arcade.nextarcade.workers.dev/>
 
 ## 기술
 
