@@ -12,6 +12,7 @@ const games = [
     const grid = document.getElementById('gameGrid');
     const searchInput = document.getElementById('searchInput');
     const filters = [...document.querySelectorAll('.filter')];
+    const profileDialog = document.getElementById('profileDialog');
     let activeFilter = '전체';
     let favorites = new Set();
     try {
@@ -46,6 +47,7 @@ const games = [
         const title = decodeURIComponent(button.dataset.title);
         favorites.has(title) ? favorites.delete(title) : favorites.add(title);
         try { localStorage.setItem('arcade-favorites', JSON.stringify([...favorites])); } catch { showToast('즐겨찾기를 저장할 수 없어요.'); }
+        updateProfileStats();
         renderGames();
       }));
     }
@@ -74,7 +76,43 @@ const games = [
       const game = games[Math.floor(Math.random() * games.length)];
       showToast(`오늘의 추천은 ${game.title}! ${game.emoji} ${game.genre} · ${game.tag}`);
     });
-    document.getElementById('profileButton').addEventListener('click', () => showToast('프로필 기능은 준비 중이에요. 즐거운 플레이! 👾'));
+    function updateProfileStats() {
+      document.getElementById('favoriteCount').textContent = String(favorites.size);
+    }
+
+    function loadProfileName() {
+      try {
+        const savedName = localStorage.getItem('arcade-profile-name');
+        if (savedName) document.getElementById('profileName').textContent = savedName;
+      } catch { /* Keep the default profile name when storage is unavailable. */ }
+    }
+
+    document.getElementById('profileButton').addEventListener('click', () => {
+      updateProfileStats();
+      loadProfileName();
+      profileDialog.showModal();
+      document.getElementById('closeProfileButton').focus();
+    });
+    document.getElementById('closeProfileButton').addEventListener('click', () => profileDialog.close());
+    profileDialog.addEventListener('click', event => {
+      if (event.target === profileDialog) profileDialog.close();
+    });
+    profileDialog.addEventListener('close', () => {
+      document.getElementById('profileButton').focus();
+    });
+    document.getElementById('editProfileButton').addEventListener('click', () => {
+      const currentName = document.getElementById('profileName').textContent;
+      const nextName = window.prompt('프로필에 표시할 이름을 입력해 주세요.', currentName);
+      if (nextName === null) return;
+      const trimmedName = nextName.trim().slice(0, 20);
+      if (!trimmedName) {
+        showToast('이름은 한 글자 이상 입력해 주세요.');
+        return;
+      }
+      document.getElementById('profileName').textContent = trimmedName;
+      try { localStorage.setItem('arcade-profile-name', trimmedName); }
+      catch { showToast('이름을 저장하지 못했지만 화면에는 반영했어요.'); }
+    });
     document.getElementById('showAllLink').addEventListener('click', () => {
       activeFilter = '전체';
       searchInput.value = '';
@@ -86,4 +124,6 @@ const games = [
       renderGames();
     });
 
+    loadProfileName();
+    updateProfileStats();
     renderGames();
