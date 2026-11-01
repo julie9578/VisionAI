@@ -31,7 +31,7 @@
         <div><label for="address">집 주소</label><input id="address" name="address" type="text" minlength="5" maxlength="500" autocomplete="street-address" required placeholder="주소를 입력해 주세요" /><p class="field-hint">집 주소는 계정 확인 목적을 위해 암호화해 저장합니다.</p></div>
         <div><label for="password">비밀번호</label><input id="password" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required placeholder="10자 이상 입력" /></div>
         <div><label for="passwordConfirm">비밀번호 확인</label><input id="passwordConfirm" name="passwordConfirm" type="password" minlength="10" maxlength="128" autocomplete="new-password" required placeholder="비밀번호를 다시 입력" /></div>
-        <div class="auth-privacy">정적 사이트 자체에는 계정이 저장되지 않습니다. 회원가입을 완료하려면 연결된 Worker와 D1 데이터베이스가 필요합니다. 주소는 서버에서 암호화되어 저장됩니다.</div>
+        <div class="auth-privacy">회원가입 정보는 D1 데이터베이스에 저장됩니다. 비밀번호는 해시 처리하고, 집 주소는 암호화하여 보관합니다.</div>
         <p class="auth-message" id="signupMessage" role="status" aria-live="polite"></p>
         <button class="button" type="submit">계정 만들기</button>
         <p class="auth-switch">이미 계정이 있나요? <a href="login.html">로그인</a></p>
