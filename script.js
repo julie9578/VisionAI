@@ -64,10 +64,12 @@ function initializeArcade() {
 
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('gameSort');
+    const sortDirection = document.getElementById('sortDirection');
     const filters = [...document.querySelectorAll('.filter')];
     const profileDialog = document.getElementById('profileDialog');
     let activeFilter = '전체';
     let activeSort = 'recommended';
+    let sortDirectionActive = false;
     let favorites = new Set();
     try {
       const stored = JSON.parse(localStorage.getItem('arcade-favorites') || '[]');
@@ -84,17 +86,24 @@ function initializeArcade() {
         const matchesSearch = `${game.title} ${game.english} ${game.genre} ${game.tag}`.toLocaleLowerCase('ko').includes(query);
         return matchesFilter && matchesSearch;
       }).sort((left, right) => {
+        let order = sortDirectionActive ? -1 : 1;
         if (activeSort === 'rating-desc' || activeSort === 'rating-asc') {
-          if (left.reviewScore === null) return right.reviewScore === null ? 0 : 1;
-          if (right.reviewScore === null) return -1;
-          return activeSort === 'rating-desc' ? right.reviewScore - left.reviewScore : left.reviewScore - right.reviewScore;
+          if (left.reviewScore === null) return right.reviewScore === null ? 0 : 1 * order;
+          if (right.reviewScore === null) return -1 * order;
+          return (activeSort === 'rating-desc' ? right.reviewScore - left.reviewScore : left.reviewScore - right.reviewScore) * order;
         }
         if (activeSort === 'steam-rank') {
-          if (left.steamRank === null) return right.steamRank === null ? 0 : 1;
-          if (right.steamRank === null) return -1;
-          return left.steamRank - right.steamRank;
+          if (left.steamRank === null) return right.steamRank === null ? 0 : 1 * order;
+          if (right.steamRank === null) return -1 * order;
+          return (left.steamRank - right.steamRank) * order;
         }
-        if (activeSort === 'name') return left.title.localeCompare(right.title, 'ko');
+        if (activeSort === 'haken') {
+          if (left.reviewScore === null && right.reviewScore === null) return 0;
+          if (left.reviewScore === null) return 1 * order;
+          if (right.reviewScore === null) return -1 * order;
+          return (right.reviewScore - left.reviewScore) * order;
+        }
+        if (activeSort === 'name') return left.title.localeCompare(right.title, 'ko') * order;
         return 0;
       });
 
@@ -136,6 +145,11 @@ function initializeArcade() {
     searchInput.addEventListener('input', renderGames);
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
+      renderGames();
+    });
+    sortDirection.addEventListener('click', () => {
+      sortDirectionActive = !sortDirectionActive;
+      sortDirection.textContent = sortDirectionActive ? '▼' : '▲';
       renderGames();
     });
     filters.forEach(button => button.addEventListener('click', () => {

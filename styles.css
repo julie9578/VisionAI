@@ -106,6 +106,17 @@
     .official-link-icon { color: var(--muted); font-size: 12px; opacity: .7; transition: transform .2s, color .2s; }
     .game-title a:hover .official-link-icon { color: var(--cyan); transform: translate(2px, -2px); }
     .review-score { flex: none; color: #f5d27c; font-size: 10px; font-weight: 700; }
+.review-score[title*="자료 없음"] { color: var(--muted); font-weight: 500; }
+.detail-rating-source { margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+.favorite { position: absolute; top: 8px; right: 8px; z-index: 2; display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 50%; background: #00000033; color: #ccc3d4; font-size: 15px; line-height: 1; cursor: pointer; transition: background-color .2s, color .2s, transform .2s; backdrop-filter: blur(5px); }
+.favorite:hover { background: #9c76ff44; color: #ff9ccc; transform: scale(1.12); }
+.favorite.saved { color: #ff70bb; background: #ff70bb33; }
+.favorite.saved:hover { color: #ff96cd; background: #ff70bb44; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters .filter { display: inline-flex; min-height: 33px; align-items: center; padding: 0 14px; border: 1px solid #ffffff22; border-radius: 99px; background-color: #171522; color: #d8d3e2; font: inherit; font-size: 11px; cursor: pointer; transition: background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
+.filters .filter:hover:not([aria-pressed="true"]) { border-color: #c0a5ff; background-color: #353047; color: #fff; }
+.filters .filter[aria-pressed="true"], .filters .filter[aria-pressed="true"]:hover { border-color: #e1d3ff; background-color: #e4d8ff; color: #211a30; box-shadow: 0 3px 14px #b99aff35; font-weight: 700; }
+.filters .filter:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
     .review-score[title*="자료 없음"] { color: var(--muted); font-weight: 500; }
     .detail-rating-source { margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
     .game-meta { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-top: 8px; color: var(--muted); font-size: 10px; }
@@ -130,10 +141,16 @@
     .daily-panel .button { min-height: 52px; margin-top: 17px; padding: 0 24px; font-size: 14px; box-shadow: 0 7px 22px #a477ff40; }
     .daily-panel .button:hover { box-shadow: 0 9px 30px #a477ff80; transform: translateY(-2px); }
     .game-list-actions { display: flex; align-items: center; gap: 16px; }
-    .sort-control { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
-    .sort-note { margin: 8px 0 0; color: #777386; font-size: 10px; line-height: 1.6; }
-    .sort-control select { min-height: 34px; max-width: 205px; padding: 0 29px 0 10px; border: 1px solid var(--line); border-radius: 8px; outline: none; background: var(--panel); color: var(--text); font: inherit; font-size: 10px; }
+    .game-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin: 25px 0 22px; }
+    .sort-control { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
+    .sort-control select { min-height: 36px; max-width: 230px; padding: 0 18px 0 10px; border: 1px solid var(--line); border-radius: 8px; outline: none; background: var(--panel); color: var(--text); font: inherit; font-size: 11px; }
     .sort-control select:focus-visible { border-color: var(--purple); }
+    .sort-direction { display: grid; width: 29px; height: 29px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 7px; outline: none; background: var(--panel); color: #d4cee0; font-size: 11px; cursor: pointer; }
+    .sort-direction:hover { border-color: #c0a5ff; background: #353047; }
+    .games-title-row { display: flex; align-items: baseline; gap: 15px; margin: 8px 0 0; }
+    .games-title-row h2 { margin: 0; font-size: 29px; }
+    .games-title-row .section-note { margin: 0; color: var(--muted); font-size: 12px; }
+    .sort-note { margin: 12px 0 0; color: #777386; font-size: 10px; line-height: 1.6; max-width: 650px; }
     .toast { position: fixed; z-index: 5; right: 24px; bottom: 24px; max-width: calc(100% - 48px); padding: 12px 17px; border: 1px solid #ffffff1c; border-radius: 11px; background: #242033; box-shadow: 0 8px 35px #0007; color: #f6f3ff; font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s; }
     .toast.show { opacity: 1; transform: translateY(0); }
     .profile-dialog { width: min(440px, calc(100% - 32px)); padding: 25px; border: 1px solid #ffffff20; border-radius: 20px; background: #151421; color: var(--text); box-shadow: 0 24px 80px #000b; }
