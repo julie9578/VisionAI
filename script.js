@@ -74,7 +74,6 @@ const games = [
       const game = games[Math.floor(Math.random() * games.length)];
       showToast(`오늘의 추천은 ${game.title}! ${game.emoji} ${game.genre} · ${game.tag}`);
     });
-    document.getElementById('profileButton').addEventListener('click', () => showToast('프로필 기능은 준비 중이에요. 즐거운 플레이! 👾'));
     document.getElementById('showAllLink').addEventListener('click', () => {
       activeFilter = '전체';
       searchInput.value = '';
