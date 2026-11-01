@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS posts (
   content TEXT NOT NULL CHECK (length(content) BETWEEN 1 AND 10000),
   author TEXT NOT NULL CHECK (length(author) BETWEEN 1 AND 40),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  deleted_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);

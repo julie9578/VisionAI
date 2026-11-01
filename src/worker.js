@@ -49,7 +49,7 @@ async function handleApi(request, env, url) {
     const query = (url.searchParams.get("q") || "").trim().slice(0, 100);
     if (category && !ALLOWED_CATEGORIES.has(category)) return json({ error: "올바르지 않은 분류입니다." }, 400, headers);
 
-    const conditions = [];
+    const conditions = ["deleted_at IS NULL"];
     const values = [];
     if (category) { conditions.push("category = ?"); values.push(category); }
     if (query) { conditions.push("(title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')"); const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`; values.push(escaped, escaped); }
@@ -57,14 +57,14 @@ async function handleApi(request, env, url) {
     const offset = (page - 1) * PAGE_SIZE;
     const [count, result] = await Promise.all([
       env.DB.prepare(`SELECT COUNT(*) AS total FROM posts ${where}`).bind(...values).first(),
-      env.DB.prepare(`SELECT id, category, title, content, author, created_at, updated_at FROM posts ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`).bind(...values, PAGE_SIZE, offset).all(),
+      env.DB.prepare(`SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`).bind(...values, PAGE_SIZE, offset).all(),
     ]);
     return json({ posts: result.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
   }
 
   const singleMatch = url.pathname.match(/^\/api\/posts\/(\d+)$/);
   if (singleMatch && request.method === "GET") {
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at FROM posts WHERE id = ?").bind(Number(singleMatch[1])).first();
+    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NULL").bind(Number(singleMatch[1])).first();
     return post ? json({ post }, 200, headers) : json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
   }
 
@@ -82,7 +82,7 @@ async function handleApi(request, env, url) {
     if (!author || author.length > 40) return json({ error: "작성자 이름은 1~40자로 입력해 주세요." }, 400, headers);
 
     const result = await env.DB.prepare("INSERT INTO posts (category, title, content, author) VALUES (?, ?, ?, ?)").bind(category, title, content, author).run();
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at FROM posts WHERE id = ?").bind(result.meta.last_row_id).first();
+    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts WHERE id = ?").bind(result.meta.last_row_id).first();
     return json({ post }, 201, headers);
   }
 
