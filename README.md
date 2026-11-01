@@ -54,7 +54,7 @@ src/worker.js 게시판 REST API
 
 ## 게시판 데이터베이스 (SQLite / Cloudflare D1)
 
-게시판은 SQLite 호환 Cloudflare D1 데이터베이스의 단일 `posts` 테이블에 게시글을 저장하도록 준비되어 있습니다. 테이블에는 분류, 제목, 내용, 작성자, 생성·수정 시각과 soft delete용 `deleted_at`이 들어갑니다. `deleted_at`이 `NULL`이면 활성 게시글이며, 값이 설정된 게시글은 기본 조회에서 제외합니다. 스키마는 `migrations/0001_create_posts.sql`에 있습니다.
+게시판은 SQLite 호환 Cloudflare D1 데이터베이스의 단일 `posts` 테이블에 게시글을 저장하도록 준비되어 있습니다. 테이블에는 분류, 제목, 내용, 작성자, 생성·수정 시각과 soft delete용 `deleted_at`이 들어갑니다. `deleted_at`이 `NULL`이면 활성 게시글이며, 값이 설정된 게시글은 기본 조회에서 제외합니다. `0001_create_posts.sql`에서 기본 테이블을 만들고 `0002_add_deleted_at.sql`에서 삭제 시각 컬럼을 추가합니다.
 
 GitHub Pages는 정적 호스팅이므로 D1에 직접 접속할 수 없습니다. 게시판 데이터를 영구 저장하려면 Cloudflare D1 데이터베이스와 별도의 Worker API를 실제로 생성·배포해야 합니다. API 이름은 `arcade-board-api`로 설정했습니다. 현재 저장소에는 Wrangler 설정과 API 코드가 있지만, 실제 Cloudflare 계정에 DB/Worker를 만들거나 배포하지는 않았습니다.
 
