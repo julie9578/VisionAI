@@ -51,6 +51,28 @@
   <footer><div class="shell"><a class="footer-logo" href="#home">ARCADE</a><span>게임을 발견하고, 공식 사이트에서 더 알아보세요.</span><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <dialog class="roulette-dialog" id="rouletteDialog" aria-labelledby="rouletteTitle">
+    <button class="roulette-close" id="closeRouletteButton" type="button" aria-label="팝업 닫기">×</button>
+    <p class="section-kicker">A LITTLE SURPRISE</p>
+    <h2 class="roulette-title" id="rouletteTitle">오늘의 게임 룰렛</h2>
+    <p class="roulette-subtitle">룰렛을 돌려 다음 플레이를 찾아보세요.</p>
+    <div class="slot-machine" id="slotMachine">
+      <div class="slot-machine-top"><span class="slot-light"></span><span>ARCADE ROULETTE</span><span class="slot-light"></span></div>
+      <div class="slot-reels" aria-label="추천 게임 룰렛">
+        <div class="slot-reel" id="slotReelOne"><span>🎮</span></div>
+        <div class="slot-reel" id="slotReelTwo"><span>👾</span></div>
+        <div class="slot-reel" id="slotReelThree"><span>🎲</span></div>
+      </div>
+      <div class="slot-machine-bottom"><span>✦</span><span>SPIN THE ROULETTE</span><span>✦</span></div>
+    </div>
+    <div class="slot-lever-area"><span class="slot-lever-ball" aria-hidden="true">●</span><span class="slot-lever-stem" aria-hidden="true"></span><span class="slot-lever-base" aria-hidden="true"></span></div>
+    <p class="roulette-result" id="rouletteResult" aria-live="polite">버튼을 눌러 룰렛을 시작하세요.</p>
+    <div class="roulette-actions">
+      <button class="button" id="spinRouletteButton" type="button">🎰 룰렛 돌리기</button>
+      <a class="button secondary roulette-game-link" id="rouletteGameLink" href="#" hidden>게임 정보 보기 ↗</a>
+    </div>
+  </dialog>
+
   <script src="script.js" defer></script>
 </body>
 </html>

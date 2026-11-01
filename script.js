@@ -107,8 +107,83 @@ const games = [
     }));
 
     document.getElementById('randomButton').addEventListener('click', () => {
-      const game = games[Math.floor(Math.random() * games.length)];
-      showToast(`오늘의 추천은 ${game.title}! ${game.emoji} ${game.genre} · ${game.tag}`);
+      const rouletteDialog = document.getElementById('rouletteDialog');
+      const result = document.getElementById('rouletteResult');
+      const gameLink = document.getElementById('rouletteGameLink');
+      result.classList.remove('winner');
+      result.textContent = '버튼을 눌러 룰렛을 시작하세요.';
+      gameLink.hidden = true;
+      rouletteDialog.showModal();
+      document.getElementById('spinRouletteButton').focus();
+    });
+    const rouletteDialog = document.getElementById('rouletteDialog');
+    const reelElements = [
+      document.getElementById('slotReelOne'),
+      document.getElementById('slotReelTwo'),
+      document.getElementById('slotReelThree')
+    ];
+    let spinTimers = [];
+    let isSpinning = false;
+
+    document.getElementById('closeRouletteButton').addEventListener('click', () => rouletteDialog.close());
+    rouletteDialog.addEventListener('click', event => {
+      if (event.target === rouletteDialog) rouletteDialog.close();
+    });
+    rouletteDialog.addEventListener('close', () => {
+      spinTimers.forEach(clearInterval);
+      spinTimers = [];
+      isSpinning = false;
+      document.getElementById('slotMachine').classList.remove('spinning');
+      document.getElementById('spinRouletteButton').disabled = false;
+      document.getElementById('spinRouletteButton').textContent = '🎰 룰렛 돌리기';
+      document.getElementById('randomButton').focus();
+    });
+
+    document.getElementById('spinRouletteButton').addEventListener('click', () => {
+      if (isSpinning) return;
+      isSpinning = true;
+      const machine = document.getElementById('slotMachine');
+      const spinButton = document.getElementById('spinRouletteButton');
+      const result = document.getElementById('rouletteResult');
+      const gameLink = document.getElementById('rouletteGameLink');
+      const selectedGame = games[Math.floor(Math.random() * games.length)];
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const selectedEmojis = [selectedGame.emoji, selectedGame.emoji, selectedGame.emoji];
+
+      spinButton.disabled = true;
+      spinButton.textContent = '룰렛 진행 중…';
+      gameLink.hidden = true;
+      result.classList.remove('winner');
+      result.textContent = '룰렛이 돌아가고 있어요…';
+      machine.classList.add('spinning');
+
+      reelElements.forEach((reel, index) => {
+        const label = reel.querySelector('span');
+        let tick = 0;
+        const delay = reducedMotion ? 0 : 850 + index * 480;
+        const interval = setInterval(() => {
+          const randomGame = games[Math.floor(Math.random() * games.length)];
+          label.textContent = randomGame.emoji;
+          label.setAttribute('aria-label', randomGame.title);
+          tick += 1;
+          if (tick >= Math.max(1, Math.floor(delay / 75))) {
+            clearInterval(interval);
+            label.textContent = selectedEmojis[index];
+            label.setAttribute('aria-label', selectedGame.title);
+            if (index === reelElements.length - 1) {
+              machine.classList.remove('spinning');
+              result.innerHTML = `오늘의 추천은 <strong>${selectedGame.title}</strong>! ${selectedGame.emoji}`;
+              result.classList.add('winner');
+              gameLink.href = `game.html?game=${encodeURIComponent(selectedGame.id)}`;
+              gameLink.hidden = false;
+              spinButton.disabled = false;
+              spinButton.textContent = '다시 돌리기';
+              isSpinning = false;
+            }
+          }
+        }, reducedMotion ? 1 : 75);
+        spinTimers.push(interval);
+      });
     });
     document.getElementById('showAllLink').addEventListener('click', () => {
       activeFilter = '전체';
