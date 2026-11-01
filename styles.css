@@ -142,14 +142,11 @@
     .daily-panel .button:hover { box-shadow: 0 9px 30px #a477ff80; transform: translateY(-2px); }
     .game-list-actions { display: flex; align-items: center; gap: 16px; }
     .game-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin: 25px 0 22px; }
-    .sort-control { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
-    .sort-control select { min-height: 36px; max-width: 230px; padding: 0 18px 0 10px; border: 1px solid var(--line); border-radius: 8px; outline: none; background: var(--panel); color: var(--text); font: inherit; font-size: 11px; }
+    .sort-control { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .sort-control select { min-height: 38px; max-width: 250px; padding: 0 20px 0 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; background: var(--panel); color: var(--text); font: inherit; font-size: 13px; }
     .sort-control select:focus-visible { border-color: var(--purple); }
-    .sort-direction { display: grid; width: 29px; height: 29px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 7px; outline: none; background: var(--panel); color: #d4cee0; font-size: 11px; cursor: pointer; }
+    .sort-direction { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 8px; outline: none; background: var(--panel); color: #d4cee0; font-size: 13px; cursor: pointer; }
     .sort-direction:hover { border-color: #c0a5ff; background: #353047; }
-    .games-title-row { display: flex; align-items: baseline; gap: 15px; margin: 8px 0 0; }
-    .games-title-row h2 { margin: 0; font-size: 29px; }
-    .games-title-row .section-note { margin: 0; color: var(--muted); font-size: 12px; }
     .sort-note { margin: 12px 0 0; color: #777386; font-size: 10px; line-height: 1.6; max-width: 650px; }
     .toast { position: fixed; z-index: 5; right: 24px; bottom: 24px; max-width: calc(100% - 48px); padding: 12px 17px; border: 1px solid #ffffff1c; border-radius: 11px; background: #242033; box-shadow: 0 8px 35px #0007; color: #f6f3ff; font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s; }
     .toast.show { opacity: 1; transform: translateY(0); }
