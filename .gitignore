@@ -3,3 +3,8 @@
 /cline-app.exe
 /cline-cli.exe
 /uninstall.exe
+/node_modules/
+/.wrangler/
+/.dev.vars
+*.sqlite
+*.sqlite3

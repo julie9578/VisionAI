@@ -39,24 +39,25 @@
 
       <div class="board-toolbar">
         <nav class="board-categories" aria-label="게시글 카테고리">
-          <a class="category-chip active" href="#all-posts" aria-current="page">전체</a>
-          <a class="category-chip" href="#all-posts">자유</a>
-          <a class="category-chip" href="#all-posts">게임 추천</a>
-          <a class="category-chip" href="#all-posts">공략·팁</a>
-          <a class="category-chip" href="#all-posts">모집</a>
+          <button class="category-chip active" type="button" data-category="" aria-pressed="true">전체</button>
+          <button class="category-chip" type="button" data-category="free" aria-pressed="false">자유</button>
+          <button class="category-chip" type="button" data-category="recommend" aria-pressed="false">게임 추천</button>
+          <button class="category-chip" type="button" data-category="guide" aria-pressed="false">공략·팁</button>
+          <button class="category-chip" type="button" data-category="recruit" aria-pressed="false">모집</button>
         </nav>
-        <form class="board-search" action="board.html" method="get" role="search">
+        <form class="board-search" id="boardSearchForm" role="search">
           <label class="visually-hidden" for="boardQuery">게시글 검색어</label>
           <input id="boardQuery" name="q" type="search" placeholder="게시글 검색" />
           <button type="submit" aria-label="검색">⌕</button>
         </form>
       </div>
 
+      <p class="board-status" id="boardStatus" role="status" aria-live="polite"></p>
       <div class="post-table-wrap" id="all-posts">
         <table class="post-table">
           <caption class="visually-hidden">ARCADE 게시판 게시글 목록</caption>
           <thead><tr><th scope="col" class="post-category-col">분류</th><th scope="col">제목</th><th scope="col" class="post-author-col">작성자</th><th scope="col" class="post-date-col">날짜</th><th scope="col" class="post-views-col">조회</th></tr></thead>
-          <tbody>
+          <tbody id="postRows">
             <tr class="notice-row"><td><span class="post-badge notice">공지</span></td><td><a class="post-title" href="#notice">ARCADE 커뮤니티 이용 안내 <span class="reply-count">[3]</span></a></td><td class="post-author">운영팀</td><td class="post-date">11.01</td><td class="post-views">1,284</td></tr>
             <tr><td><span class="post-badge recommend">게임 추천</span></td><td><a class="post-title" href="#post-1">처음 해보는 분께 협동 게임 추천 부탁드려요 <span class="reply-count">[12]</span></a></td><td class="post-author">플레이어A</td><td class="post-date">11.01</td><td class="post-views">248</td></tr>
             <tr><td><span class="post-badge guide">공략·팁</span></td><td><a class="post-title" href="#post-2">주말에 시작한 발헤임 초반 생존 팁 정리 <span class="reply-count">[8]</span></a></td><td class="post-author">북쪽바람</td><td class="post-date">10.31</td><td class="post-views">391</td></tr>
@@ -72,17 +73,36 @@
       </div>
 
       <nav class="board-pagination" aria-label="게시글 페이지">
-        <a class="page-arrow disabled" href="#all-posts" aria-label="이전 페이지">‹</a>
-        <a class="page-number active" href="#all-posts" aria-current="page">1</a>
-        <a class="page-number" href="#all-posts">2</a>
-        <a class="page-number" href="#all-posts">3</a>
-        <a class="page-number" href="#all-posts">4</a>
-        <a class="page-number" href="#all-posts">5</a>
-        <a class="page-arrow" href="#all-posts" aria-label="다음 페이지">›</a>
+        <button class="page-arrow disabled" type="button" aria-label="이전 페이지" disabled>‹</button>
+        <button class="page-number active" type="button" aria-current="page">1</button>
+        <button class="page-arrow" type="button" aria-label="다음 페이지" disabled>›</button>
       </nav>
-      <p class="board-note" id="write-info">현재 게시판은 정적 미리보기입니다. 글쓰기·검색·페이지 이동은 화면 예시이며 게시글이 저장되지는 않습니다.</p>
+      <p class="board-note" id="write-info">게시글은 SQLite 호환 Cloudflare D1 데이터베이스에 저장됩니다.</p>
     </section>
   </main>
+
+  <dialog class="post-dialog" id="postDialog" aria-labelledby="postDialogTitle">
+    <form class="post-form" id="postForm">
+      <div class="post-dialog-heading">
+        <div><p class="section-kicker">NEW POST</p><h2 id="postDialogTitle">새 글 작성</h2></div>
+        <button class="post-dialog-close" id="closePostDialog" type="button" aria-label="작성 창 닫기">×</button>
+      </div>
+      <label for="postCategory">분류</label>
+      <select id="postCategory" name="category" required>
+        <option value="free">자유</option><option value="recommend">게임 추천</option><option value="guide">공략·팁</option><option value="recruit">모집</option>
+      </select>
+      <label for="postAuthor">작성자</label>
+      <input id="postAuthor" name="author" maxlength="40" required placeholder="작성자 이름" />
+      <label for="postTitle">제목</label>
+      <input id="postTitle" name="title" maxlength="160" required placeholder="제목을 입력해 주세요" />
+      <label for="postContent">내용</label>
+      <textarea id="postContent" name="content" rows="7" maxlength="10000" required placeholder="게임 이야기를 나눠보세요."></textarea>
+      <p class="post-form-error" id="postFormError" role="alert"></p>
+      <button class="button post-submit" type="submit">게시글 저장</button>
+    </form>
+  </dialog>
+
+  <script src="board.js"></script>
 
   <footer><div class="shell"><a class="footer-logo" href="index.html">ARCADE</a><span>게임을 발견하고, 공식 사이트에서 더 알아보세요.</span><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
 </body>

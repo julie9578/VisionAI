@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arcade-board-api",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "arcade-board",
+      "database_id": "SET_AFTER_CREATING_D1_DATABASE",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://arcade.nextarcade.workers.dev,https://julie9578.github.io"
+  }
+}
