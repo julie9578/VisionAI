@@ -1,0 +1,29 @@
+.auth-page { display: grid; min-height: calc(100vh - 150px); place-items: center; padding-top: 35px; padding-bottom: 65px; }
+.auth-shell { width: min(100%, 510px); overflow: hidden; border: 1px solid #ffffff18; border-radius: 21px; background: linear-gradient(180deg, #191725, #11101a); box-shadow: 0 24px 75px #0005; }
+.auth-heading { padding: 30px 34px 22px; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 90% 0, #9c76ff20, transparent 48%); }
+.auth-heading h1 { margin: 7px 0 8px; font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif; font-size: 29px; }
+.auth-heading p:last-child { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.auth-form { display: grid; gap: 13px; padding: 25px 34px 30px; }
+.auth-form label, .auth-label { display: block; margin-bottom: 6px; color: #d8d3e2; font-size: 11px; font-weight: 600; }
+.auth-form input, .auth-form select { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid #ffffff1c; border-radius: 9px; outline: none; background: #0d0c14; color: var(--text); font: inherit; font-size: 12px; }
+.auth-form input:focus, .auth-form select:focus { border-color: #a477ff99; box-shadow: 0 0 0 3px #a477ff1c; }
+.auth-form input::placeholder { color: #706c7e; }
+.auth-form select { appearance: none; }
+.auth-form .field-hint { margin: 5px 0 0; color: #888396; font-size: 10px; line-height: 1.6; }
+.auth-form .button { width: 100%; min-height: 44px; margin-top: 4px; }
+.auth-message { min-height: 17px; margin: 0; color: #ff93b7; font-size: 11px; line-height: 1.6; }
+.auth-message.success { color: #8de2c4; }
+.auth-switch { margin: 0; color: var(--muted); text-align: center; font-size: 11px; }
+.auth-switch a { color: #cdbaff; font-weight: 700; }
+.auth-privacy { padding: 13px 15px; border: 1px solid #f2c66d2b; border-radius: 9px; background: #f2c66d0b; color: #bcb4a0; font-size: 10px; line-height: 1.7; }
+.auth-profile-card { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff05; }
+.auth-profile-card p { margin: 0; color: var(--muted); font-size: 11px; }
+.auth-profile-card strong { color: var(--text); }
+.auth-profile-card .button { margin-top: 5px; }
+@media (max-width: 580px) {
+  .auth-page { min-height: calc(100vh - 125px); padding-top: 22px; padding-bottom: 40px; }
+  .auth-shell { border-radius: 17px; }
+  .auth-heading { padding: 25px 22px 19px; }
+  .auth-heading h1 { font-size: 25px; }
+  .auth-form { padding: 21px 22px 25px; }
+}

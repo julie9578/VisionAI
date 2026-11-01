@@ -6,5 +6,7 @@
 /node_modules/
 /.wrangler/
 /.dev.vars
+/.env
+/.env.*
 *.sqlite
 *.sqlite3
