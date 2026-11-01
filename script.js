@@ -1,4 +1,5 @@
-const games = [
+(() => {
+  const games = [
       { id: 'valorant', title: '발로란트', english: 'VALORANT', genre: '액션', tag: '슈팅', emoji: '🎯', cover: 'valorant', rating: '4.8', url: 'https://playvalorant.com/ko-kr/', image: 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/9167b57d3c081d04e75abe28387d87a27bb83953-3440x1020.jpg?accountingTag=VAL', imagePosition: 'center 43%', description: '요원마다 고유한 능력을 활용해 공격과 수비를 펼치는 5대5 전술 슈팅 게임입니다. 정확한 사격과 팀 전략으로 라운드를 승리로 이끄세요.', screenshots: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b7e3f4fddaad9797eff1541359ed6c7ec4222f17-1920x1080.jpg?accountingTag=VAL', 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/afb2198aaba170268feaaf799511a56ee40192be-1920x1080.jpg?accountingTag=VAL'] },
       { id: 'hades-2', title: '하데스 II', english: 'HADES II', genre: '액션', tag: 'RPG', emoji: '🔥', cover: 'hades', rating: '4.9', url: 'https://www.supergiantgames.com/games/hades-ii/', image: 'https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=900&q=80', imagePosition: 'center 38%', description: '시간의 타이탄에 맞서 지하 세계 너머를 탐험하는 로그라이크 액션 게임입니다. 어둠의 마법과 다양한 무기를 조합해 매번 새로운 전투에 도전하세요.', screenshots: ['https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=1200&q=80'] },
       { id: 'stardew-valley', title: '스타듀 밸리', english: 'STARDEW VALLEY', genre: '인디', tag: '시뮬레이션', emoji: '🌻', cover: 'stardew', rating: '4.9', url: 'https://www.stardewvalley.net/', image: 'https://www.stardewvalley.net/wp-content/uploads/2017/12/stardewbackground.png', imagePosition: 'center 48%', description: '할아버지에게 물려받은 농장을 가꾸며 나만의 새로운 삶을 시작하세요. 작물을 기르고, 낚시와 채집을 즐기고, 마을 주민들과 관계를 쌓을 수 있습니다.', screenshots: ['https://www.stardewvalley.net/wp-content/uploads/2018/12/1_1screenshot15.png'] },
@@ -58,7 +59,7 @@ const games = [
     }
 
     const grid = document.getElementById('gameGrid');
-    if (!grid) return;
+    if (grid) {
 
     const searchInput = document.getElementById('searchInput');
     const filters = [...document.querySelectorAll('.filter')];
@@ -257,3 +258,5 @@ const games = [
     loadProfileName();
     updateProfileStats();
     renderGames();
+    }
+})();
