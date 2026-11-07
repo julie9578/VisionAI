@@ -156,6 +156,7 @@ async function handleAuth(request, env, url, headers) {
 
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
