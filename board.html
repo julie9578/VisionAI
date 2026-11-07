@@ -13,7 +13,7 @@
   <header class="topbar">
     <div class="shell nav">
       <a class="logo" href="index.html" aria-label="ARCADE 홈"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 8.5h10a4 4 0 0 1 3.8 5.2l-.7 2.3a2.5 2.5 0 0 1-4 1.2l-2.2-1.7h-3.8l-2.2 1.7a2.5 2.5 0 0 1-4-1.2l-.7-2.3A4 4 0 0 1 7 8.5Z" stroke="white" stroke-width="1.8"/><path d="M8 11v4m-2-2h4m7-1h.01M18 14h.01" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></span>ARCADE</a>
-      <nav class="nav-links" aria-label="메인 메뉴"><a href="index.html#games">게임 둘러보기</a><a class="active" href="board.html" aria-current="page">게시판</a><a href="index.html#about">추천·안내</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
+      <nav class="nav-links" aria-label="메인 메뉴"><a href="index.html#games">게임 둘러보기</a><a href="index.html#daily">오늘의 게임</a><a class="active" href="board.html" aria-current="page">게시판</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
       <div class="nav-actions"><a class="avatar" href="login.html" aria-label="로그인 후 프로필 보기" id="profileButton">👾</a></div>
     </div>
   </header>
@@ -34,7 +34,7 @@
           <p class="section-kicker">COMMUNITY BOARD</p>
           <h2 id="postListTitle">전체 게시글 <span>24</span></h2>
         </div>
-        <a class="button board-write" href="#write-info" aria-label="글쓰기 안내 보기">✎ 글쓰기</a>
+        <a class="button board-write" href="post-write.html" target="_blank" aria-label="새 탭에서 글쓰기 페이지 열기">✎ 글쓰기</a>
       </div>
 
       <div class="board-toolbar">
@@ -57,18 +57,7 @@
         <table class="post-table">
           <caption class="visually-hidden">ARCADE 게시판 게시글 목록</caption>
           <thead><tr><th scope="col" class="post-category-col">분류</th><th scope="col">제목</th><th scope="col" class="post-author-col">작성자</th><th scope="col" class="post-date-col">날짜</th><th scope="col" class="post-views-col">조회</th><th scope="col" class="post-actions-col">반응</th></tr></thead>
-          <tbody id="postRows">
-            <tr class="notice-row"><td><span class="post-badge notice">공지</span></td><td><a class="post-title" href="#notice">ARCADE 커뮤니티 이용 안내 <span class="reply-count">[3]</span></a></td><td class="post-author">운영팀</td><td class="post-date">11.01</td><td class="post-views">1,284</td></tr>
-            <tr><td><span class="post-badge recommend">게임 추천</span></td><td><a class="post-title" href="#post-1">처음 해보는 분께 협동 게임 추천 부탁드려요 <span class="reply-count">[12]</span></a></td><td class="post-author">플레이어A</td><td class="post-date">11.01</td><td class="post-views">248</td></tr>
-            <tr><td><span class="post-badge guide">공략·팁</span></td><td><a class="post-title" href="#post-2">주말에 시작한 발헤임 초반 생존 팁 정리 <span class="reply-count">[8]</span></a></td><td class="post-author">북쪽바람</td><td class="post-date">10.31</td><td class="post-views">391</td></tr>
-            <tr><td><span class="post-badge recruit">모집</span></td><td><a class="post-title" href="#post-3">오늘 밤 리썰 컴퍼니 같이 하실 분! <span class="reply-count">[5]</span></a></td><td class="post-author">밤샘게이머</td><td class="post-date">10.31</td><td class="post-views">176</td></tr>
-            <tr><td><span class="post-badge free">자유</span></td><td><a class="post-title" href="#post-4">요즘 가장 오래 붙잡고 있는 게임은 뭔가요? <span class="reply-count">[21]</span></a></td><td class="post-author">코인줍는중</td><td class="post-date">10.30</td><td class="post-views">512</td></tr>
-            <tr><td><span class="post-badge recommend">게임 추천</span></td><td><a class="post-title" href="#post-5">짧게 즐길 수 있는 인디 게임 추천해 주세요 <span class="reply-count">[9]</span></a></td><td class="post-author">작은모험</td><td class="post-date">10.30</td><td class="post-views">205</td></tr>
-            <tr><td><span class="post-badge guide">공략·팁</span></td><td><a class="post-title" href="#post-6">스타듀 밸리 첫해 봄에 해두면 좋은 것들 <span class="reply-count">[6]</span></a></td><td class="post-author">파스닙농부</td><td class="post-date">10.29</td><td class="post-views">334</td></tr>
-            <tr><td><span class="post-badge free">자유</span></td><td><a class="post-title" href="#post-7">게임 OST 듣다가 원작 다시 켠 사람? <span class="reply-count">[14]</span></a></td><td class="post-author">BGM수집가</td><td class="post-date">10.29</td><td class="post-views">287</td></tr>
-            <tr><td><span class="post-badge recruit">모집</span></td><td><a class="post-title" href="#post-8">주말 로켓 리그 캐주얼 파티 구합니다 <span class="reply-count">[2]</span></a></td><td class="post-author">골대앞</td><td class="post-date">10.28</td><td class="post-views">94</td></tr>
-            <tr><td><span class="post-badge free">자유</span></td><td><a class="post-title" href="#post-9">이번 달 플레이 기록 공유해요 <span class="reply-count">[17]</span></a></td><td class="post-author">세이브파일</td><td class="post-date">10.28</td><td class="post-views">429</td></tr>
-          </tbody>
+          <tbody id="postRows"></tbody>
         </table>
       </div>
 
@@ -77,32 +66,14 @@
         <button class="page-number active" type="button" aria-current="page">1</button>
         <button class="page-arrow" type="button" aria-label="다음 페이지" disabled>›</button>
       </nav>
-      <p class="board-note" id="write-info">게시글은 SQLite 호환 Cloudflare D1 데이터베이스에 저장됩니다.</p>
+      <p class="board-note" id="write-info">글 작성, 댓글, 좋아요와 북마크는 로그인한 회원만 이용할 수 있습니다.</p>
     </section>
   </main>
 
-  <dialog class="post-dialog" id="postDialog" aria-labelledby="postDialogTitle">
-    <form class="post-form" id="postForm">
-      <div class="post-dialog-heading">
-        <div><p class="section-kicker">NEW POST</p><h2 id="postDialogTitle">새 글 작성</h2></div>
-        <button class="post-dialog-close" id="closePostDialog" type="button" aria-label="작성 창 닫기">×</button>
-      </div>
-      <label for="postCategory">분류</label>
-      <select id="postCategory" name="category" required>
-        <option value="free">자유</option><option value="recommend">게임 추천</option><option value="guide">공략·팁</option><option value="recruit">모집</option>
-      </select>
-      <label for="postAuthor">작성자</label>
-      <input id="postAuthor" name="author" maxlength="40" required placeholder="작성자 이름" />
-      <label for="postTitle">제목</label>
-      <input id="postTitle" name="title" maxlength="160" required placeholder="제목을 입력해 주세요" />
-      <label for="postContent">내용</label>
-      <textarea id="postContent" name="content" rows="7" maxlength="10000" required placeholder="게임 이야기를 나눠보세요."></textarea>
-      <p class="post-form-error" id="postFormError" role="alert"></p>
-      <button class="button post-submit" type="submit">게시글 저장</button>
-    </form>
-  </dialog>
+
 
   <script src="board.js"></script>
+  <script src="community.js"></script>
 
   <footer><div class="shell"><a class="footer-logo" href="index.html">ARCADE</a><span>게임을 발견하고, 공식 사이트에서 더 알아보세요.</span><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
 </body>

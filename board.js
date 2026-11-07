@@ -1,13 +1,11 @@
 (() => {
   const apiBase = 'https://arcade-board-api.nextarcade.workers.dev';
+  const tokenKey = 'arcade-session-token';
   const rows = document.getElementById('postRows');
   const status = document.getElementById('boardStatus');
   const searchForm = document.getElementById('boardSearchForm');
   const searchInput = document.getElementById('boardQuery');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
-  const postDialog = document.getElementById('postDialog');
-  const postForm = document.getElementById('postForm');
-  const formError = document.getElementById('postFormError');
   const writeButton = document.querySelector('.board-write');
   let selectedCategory = '';
   let query = new URLSearchParams(window.location.search).get('q') || '';
@@ -39,10 +37,11 @@
     } else {
       rows.innerHTML = posts.map(post => {
         const category = categoryLabels[post.category] || '자유';
+        const authorHref = post.author_id ? `user.html?id=${encodeURIComponent(post.author_id)}` : `user.html?name=${encodeURIComponent(post.author || '운영팀')}`;
         return `<tr>
           <td><span class="post-badge ${escapeHtml(post.category)}">${escapeHtml(category)}</span></td>
-          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)}</a></td>
-          <td class="post-author">${escapeHtml(post.author)}</td>
+          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)} <span class="reply-count">[${Number(post.comments_count) || 0}]</span></a></td>
+          <td class="post-author"><a href="${authorHref}">${escapeHtml(post.author)}</a></td>
           <td class="post-date">${escapeHtml(formatDate(post.created_at))}</td>
           <td class="post-views">—</td>
           <td class="post-actions"><span class="post-reaction-count" aria-label="좋아요 ${Number(post.likes_count) || 0}개">♥ <span>${Number(post.likes_count) || 0}</span></span><span class="post-reaction-count" aria-label="북마크 ${Number(post.bookmarks_count) || 0}개">▣ <span>${Number(post.bookmarks_count) || 0}</span></span></td>
@@ -58,7 +57,10 @@
     if (query) params.set('q', query);
     status.textContent = '게시글을 불러오는 중…';
     try {
-      const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: { accept: 'application/json' } });
+      const requestHeaders = { accept: 'application/json' };
+      const authToken = sessionStorage.getItem(tokenKey);
+      if (authToken) requestHeaders.authorization = `Bearer ${authToken}`;
+      const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: requestHeaders });
       if (!response.ok) throw new Error(`API ${response.status}`);
       const data = await response.json();
       renderPosts(data.posts || [], data.total);
@@ -89,50 +91,15 @@
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();
+    if (!sessionStorage.getItem(tokenKey)) {
+      window.open(`login.html?next=${encodeURIComponent('post-write.html')}`, '_blank');
+      return;
+    }
     if (!apiAvailable) {
       status.textContent = 'Cloudflare D1 게시판 API가 아직 배포되지 않아 글을 저장할 수 없습니다.';
       return;
     }
-    formError.textContent = '';
-    postDialog.showModal();
-    document.getElementById('postCategory').focus();
-  });
-  document.getElementById('closePostDialog').addEventListener('click', () => postDialog.close());
-  postDialog.addEventListener('click', event => {
-    if (event.target === postDialog) postDialog.close();
-  });
-
-  postForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    const submit = postForm.querySelector('[type="submit"]');
-    submit.disabled = true;
-    formError.textContent = '';
-    const formData = new FormData(postForm);
-    try {
-      const response = await fetch(`${apiBase}/api/posts`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(Object.fromEntries(formData.entries())),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || '게시글을 저장하지 못했습니다.');
-      postDialog.close();
-      postForm.reset();
-      query = '';
-      searchInput.value = '';
-      selectedCategory = '';
-      categoryButtons.forEach((item, index) => {
-        const selected = index === 0;
-        item.classList.toggle('active', selected);
-        item.setAttribute('aria-pressed', String(selected));
-      });
-      status.textContent = '게시글을 저장했습니다.';
-      await loadPosts();
-    } catch (error) {
-      formError.textContent = error.message || '게시글을 저장하지 못했습니다.';
-    } finally {
-      submit.disabled = false;
-    }
+    window.open('post-write.html', '_blank');
   });
 
   loadPosts();
