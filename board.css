@@ -42,6 +42,13 @@
 .post-title:hover { color: #d3beff; }
 .reply-count { margin-left: 3px; color: #b59aff; font-size: 10px; }
 .post-author { color: #8f8a9d !important; }
+.post-author a { color: inherit; }
+.post-author a:hover { color: #d3beff; }
+.post-actions { white-space: nowrap; text-align: right; padding-right: 10px; }
+.post-actions-col { width: 125px; text-align: right; padding-right: 10px; }
+.post-reaction { min-width: 42px; min-height: 28px; margin-left: 4px; padding: 0 7px; border: 1px solid #ffffff18; border-radius: 99px; background: #ffffff05; color: #aaa5b6; font: inherit; font-size: 10px; cursor: pointer; }
+.post-reaction:hover, .post-reaction.active { border-color: #f093bf75; background: #ff79b817; color: #ff9fc6; }
+.post-reaction:disabled { opacity: .55; cursor: wait; }
 .post-date, .post-views { color: #777386 !important; font-size: 10px !important; }
 .post-views { text-align: right; padding-right: 13px; }
 .notice-row { background: #ff70bb06; }

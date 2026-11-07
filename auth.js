@@ -5,6 +5,9 @@
   const loginForm = document.getElementById('loginForm');
   const profileForm = document.getElementById('profileForm');
   const token = () => sessionStorage.getItem(tokenKey);
+  const requestedNext = new URLSearchParams(window.location.search).get('next') || '';
+  const allowedNext = ['post-write.html', 'board.html', 'profile.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
+  const loginDestination = allowedNext ? requestedNext : 'profile.html';
 
   async function request(path, options = {}) {
     const headers = { accept: 'application/json', ...(options.headers || {}) };
@@ -51,6 +54,7 @@
       status.textContent = error.message || '게시글을 불러오지 못했습니다.';
     }
   }
+
 
   if (signupForm) {
     signupForm.addEventListener('submit', async event => {
@@ -139,7 +143,7 @@
   if (loginForm) {
     const message = document.getElementById('loginMessage');
     if (token()) {
-      request('/api/auth/me').then(() => window.location.replace('profile.html')).catch(() => sessionStorage.removeItem(tokenKey));
+      request('/api/auth/me').then(() => window.location.replace(loginDestination)).catch(() => sessionStorage.removeItem(tokenKey));
     }
 
     loginForm.addEventListener('submit', async event => {
@@ -155,7 +159,7 @@
         });
         sessionStorage.setItem(tokenKey, data.token);
         setMessage(message, '로그인됐습니다. 내 프로필 페이지로 이동합니다.', true);
-        window.location.assign('profile.html');
+        window.location.assign(loginDestination);
       } catch (error) {
         setMessage(message, error.message || '로그인하지 못했습니다.');
       } finally {
