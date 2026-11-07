@@ -220,7 +220,7 @@
       .hero-art { width: 46%; }
       .hero-orb { width: 210px; height: 210px; }
       .orb-icon { font-size: 92px; }
-      .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+      .game-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
       .game-toolbar { gap: 6px; }
       .game-list-actions { gap: 5px; }
       .sort-label { display: none; }
@@ -278,14 +278,18 @@
       .sort-direction { width: 28px; height: 32px; flex-basis: 28px; }
       .game-list-actions .text-link { font-size: 8px; }
       h2 { font-size: 19px; }
-      .game-grid { grid-template-columns: 1fr; gap: 14px; }
-      .game-card { display: grid; grid-template-columns: minmax(120px, 38%) 1fr; align-items: stretch; }
-      .favorite { top: 6px; right: 6px; width: 27px; height: 27px; font-size: 14px; }
-      .game-cover { height: auto; min-height: 132px; aspect-ratio: 1.05; }
-      .cover-emoji { font-size: 47px; }
-      .game-info { display: flex; flex-direction: column; justify-content: center; padding: 13px; }
-      .game-title { font-size: 13px; }
-      .game-meta { flex-wrap: wrap; font-size: 10px; }
+      .game-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+      .game-card { border-radius: 9px; }
+      .favorite { top: 4px; right: 4px; width: 22px; height: 22px; font-size: 11px; }
+      .game-cover { height: auto; min-height: 0; aspect-ratio: 1 / 1; }
+      .cover-label { top: 5px; left: 5px; max-width: calc(100% - 34px); overflow: hidden; padding: 3px 4px; font-size: 6px; text-overflow: ellipsis; white-space: nowrap; }
+      .cover-emoji { font-size: clamp(20px, 8vw, 42px); }
+      .game-info { display: flex; min-width: 0; flex-direction: column; justify-content: center; padding: 6px 5px 7px; }
+      .game-title-row { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .game-title { max-width: 100%; font-size: clamp(9px, 2.5vw, 12px); }
+      .review-score { font-size: clamp(7px, 1.8vw, 9px); }
+      .game-meta { display: block; margin-top: 4px; font-size: clamp(7px, 1.8vw, 9px); line-height: 1.35; }
+      .game-meta span:last-child { display: none; }
       .lower-grid { grid-template-columns: 1fr; gap: 13px; padding-top: 48px; padding-bottom: 50px; }
       .panel { min-height: 150px; }
       .daily-panel, .about-panel { padding: 21px; }
