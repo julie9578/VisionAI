@@ -1,5 +1,5 @@
 function initializeArcade() {
-  const games = [
+    const games = [
       { id: 'valorant', title: '발로란트', english: 'VALORANT', genre: '액션', tag: '전술 슈팅', reviewScore: null, steamRank: null, ratingSource: null, emoji: '🎯', cover: 'valorant', url: 'https://playvalorant.com/ko-kr/', image: 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/9167b57d3c081d04e75abe28387d87a27bb83953-3440x1020.jpg?accountingTag=VAL', imagePosition: 'center 43%', description: '요원마다 고유한 능력을 활용해 공격과 수비를 펼치는 5대5 전술 슈팅 게임입니다. 정확한 사격과 팀 전략으로 라운드를 승리로 이끄세요.', screenshots: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b7e3f4fddaad9797eff1541359ed6c7ec4222f17-1920x1080.jpg?accountingTag=VAL', 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/afb2198aaba170268feaaf799511a56ee40192be-1920x1080.jpg?accountingTag=VAL'] },
       { id: 'hades-2', title: '하데스 II', english: 'HADES II', genre: '액션', tag: '로그라이크 RPG', reviewScore: 93, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🔥', cover: 'hades', url: 'https://www.supergiantgames.com/games/hades-ii/', image: 'https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=900&q=80', imagePosition: 'center 38%', description: '시간의 타이탄에 맞서 지하 세계 너머를 탐험하는 로그라이크 액션 게임입니다. 어둠의 마법과 다양한 무기를 조합해 매번 새로운 전투에 도전하세요.', screenshots: ['https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=1200&q=80'] },
       { id: 'stardew-valley', title: '스타듀 밸리', english: 'STARDEW VALLEY', genre: '인디', tag: '농장 시뮬레이션', reviewScore: 98, steamRank: 23, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🌻', cover: 'stardew', url: 'https://www.stardewvalley.net/', image: 'https://www.stardewvalley.net/wp-content/uploads/2017/12/stardewbackground.png', imagePosition: 'center 48%', description: '할아버지에게 물려받은 농장을 가꾸며 나만의 새로운 삶을 시작하세요. 작물을 기르고, 낚시와 채집을 즐기고, 마을 주민들과 관계를 쌓을 수 있습니다.', screenshots: ['https://www.stardewvalley.net/wp-content/uploads/2018/12/1_1screenshot15.png'] },
@@ -25,6 +25,7 @@ function initializeArcade() {
       { id: 'efootball', title: 'eFootball', english: 'eFOOTBALL', genre: '스포츠', source: 'steam', tag: '축구', reviewScore: 64, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '⚽', cover: 'efootball', url: 'https://store.steampowered.com/app/1665460/eFootball/', image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/86619d0fb7126b3d5276004175f9a62181223c0f/header.jpg?t=1792635226', description: '전 세계 이용자와 겨루는 무료 축구 게임입니다. 팀과 선수를 구성하고 온라인 경기에서 패스와 전술을 활용해 승리를 노려보세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/3b0db0c05317dec6063cfcdbc1ed7d079a33c87d/ss_3b0db0c05317dec6063cfcdbc1ed7d079a33c87d.1920x1080.jpg?t=1792635226', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/6c864a19497fbad11d70fd3078819e341b53e710/ss_6c864a19497fbad11d70fd3078819e341b53e710.1920x1080.jpg?t=1792635226'] },
       { id: 'farming-simulator-25', title: '파밍 시뮬레이터 25', english: 'FARMING SIMULATOR 25', genre: '시뮬레이션', source: 'steam', tag: '농업', reviewScore: 91, steamRank: 87, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🚜', cover: 'farming-simulator-25', url: 'https://store.steampowered.com/app/2300320/Farming_Simulator_25/', image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/c2a205133d23cd24faf3c152d972a1d0177661b8/header.jpg?t=1793106374', description: '농장을 운영하며 작물을 재배하고 수확하는 농업 시뮬레이션입니다. 다양한 농기계를 운전하고 혼자 또는 멀티플레이로 농장을 키워보세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/0bd36a1bd96d3c4a428bfd56f8697d045011e23c/ss_0bd36a1bd96d3c4a428bfd56f8697d045011e23c.1920x1080.jpg?t=1793106374', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/4fa589ab4b102a4b346d03295b5d26c6a14726be/ss_4fa589ab4b102a4b346d03295b5d26c6a14726be.1920x1080.jpg?t=1793106374'] }
     ];
+    const recommendedOrder = ['hades-2', 'valorant', 'stardew-valley', 'elden-ring', 'zelda-totk', 'cyberpunk-2077', 'persona-5-royal', 'ori-will-of-wisps', 'team-fortress-2', 'apex-legends', 'overwatch', 'rainbow-six-siege', 'valheim', 'warframe', 'rocket-league', 'project-zomboid', 'no-mans-sky', 'lethal-company', 'cities-skylines', 'euro-truck-simulator-2', 'the-sims-4', 'ea-sports-fc-26', 'efootball', 'farming-simulator-25'];
 
     const detailPage = document.getElementById('gameDetail');
     const currentGameId = new URLSearchParams(window.location.search).get('game');
@@ -86,31 +87,20 @@ function initializeArcade() {
         const matchesSearch = `${game.title} ${game.english} ${game.genre} ${game.tag}`.toLocaleLowerCase('ko').includes(query);
         return matchesFilter && matchesSearch;
       }).sort((left, right) => {
-        let order = sortDirectionActive ? -1 : 1;
-        if (activeSort === 'rating-desc' || activeSort === 'rating-asc') {
-          if (left.reviewScore === null) return right.reviewScore === null ? 0 : 1 * order;
-          if (right.reviewScore === null) return -1 * order;
-          return (activeSort === 'rating-desc' ? right.reviewScore - left.reviewScore : left.reviewScore - right.reviewScore) * order;
+        const direction = sortDirectionActive ? -1 : 1;
+        if (activeSort === 'rating-desc') {
+          if (left.reviewScore === null) return right.reviewScore === null ? 0 : 1;
+          if (right.reviewScore === null) return -1;
+          return (right.reviewScore - left.reviewScore) * direction;
         }
         if (activeSort === 'steam-rank') {
-          if (left.steamRank === null) return right.steamRank === null ? 0 : 1 * order;
-          if (right.steamRank === null) return -1 * order;
-          return (left.steamRank - right.steamRank) * order;
+          if (left.steamRank === null) return right.steamRank === null ? 0 : 1;
+          if (right.steamRank === null) return -1;
+          return (left.steamRank - right.steamRank) * direction;
         }
-        if (activeSort === 'haken') {
-          if (left.reviewScore === null && right.reviewScore === null) return 0;
-          if (left.reviewScore === null) return 1 * order;
-          if (right.reviewScore === null) return -1 * order;
-          return (right.reviewScore - left.reviewScore) * order;
-        }
-        if (activeSort === 'name') return left.title.localeCompare(right.title, 'ko') * order;
-        return 0;
+        if (activeSort === 'name') return left.title.localeCompare(right.title, 'ko') * direction;
+        return (recommendedOrder.indexOf(left.id) - recommendedOrder.indexOf(right.id)) * direction;
       });
-
-      if (!visibleGames.length) {
-        grid.innerHTML = '<div class="empty-state">표시할 게임이 없어요. 다른 검색어나 필터를 선택해 보세요.</div>';
-        return;
-      }
 
       grid.innerHTML = visibleGames.map(game => `
         <article class="game-card">
@@ -145,11 +135,14 @@ function initializeArcade() {
     searchInput.addEventListener('input', renderGames);
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
+      sortDirection.setAttribute('aria-label', sortDirectionActive ? '내림차순 정렬' : '오름차순 정렬');
       renderGames();
     });
     sortDirection.addEventListener('click', () => {
       sortDirectionActive = !sortDirectionActive;
       sortDirection.textContent = sortDirectionActive ? '▼' : '▲';
+      sortDirection.setAttribute('aria-label', sortDirectionActive ? '내림차순 정렬' : '오름차순 정렬');
+      sortDirection.setAttribute('aria-pressed', String(sortDirectionActive));
       renderGames();
     });
     filters.forEach(button => button.addEventListener('click', () => {
