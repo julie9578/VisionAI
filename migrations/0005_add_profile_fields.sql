@@ -1,2 +1,0 @@
-ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT '' CHECK (length(bio) <= 240);
-ALTER TABLE users ADD COLUMN avatar_color TEXT NOT NULL DEFAULT 'violet' CHECK (avatar_color IN ('violet', 'cyan', 'rose', 'amber'));

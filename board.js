@@ -1,11 +1,13 @@
 (() => {
   const apiBase = 'https://arcade-board-api.nextarcade.workers.dev';
-  const tokenKey = 'arcade-session-token';
   const rows = document.getElementById('postRows');
   const status = document.getElementById('boardStatus');
   const searchForm = document.getElementById('boardSearchForm');
   const searchInput = document.getElementById('boardQuery');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
+  const postDialog = document.getElementById('postDialog');
+  const postForm = document.getElementById('postForm');
+  const formError = document.getElementById('postFormError');
   const writeButton = document.querySelector('.board-write');
   let selectedCategory = '';
   let query = new URLSearchParams(window.location.search).get('q') || '';
@@ -33,47 +35,20 @@
 
   function renderPosts(posts, total) {
     if (!posts.length) {
-      rows.innerHTML = '<tr><td class="board-empty" colspan="6">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
+      rows.innerHTML = '<tr><td class="board-empty" colspan="5">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
     } else {
       rows.innerHTML = posts.map(post => {
         const category = categoryLabels[post.category] || '자유';
-        const authorHref = post.author_id ? `user.html?id=${encodeURIComponent(post.author_id)}` : `user.html?name=${encodeURIComponent(post.author || '운영팀')}`;
         return `<tr>
           <td><span class="post-badge ${escapeHtml(post.category)}">${escapeHtml(category)}</span></td>
-          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)} <span class="reply-count">[${Number(post.comments_count) || 0}]</span></a></td>
-          <td class="post-author"><a href="${authorHref}">${escapeHtml(post.author)}</a></td>
+          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)}</a></td>
+          <td class="post-author">${escapeHtml(post.author)}</td>
           <td class="post-date">${escapeHtml(formatDate(post.created_at))}</td>
           <td class="post-views">—</td>
-          <td class="post-actions"><button class="post-reaction ${post.liked_by_me ? 'active' : ''}" type="button" data-reaction="like" data-post-id="${post.id}" aria-pressed="${Boolean(post.liked_by_me)}" aria-label="좋아요">♥ <span>${Number(post.likes_count) || 0}</span></button><button class="post-reaction ${post.bookmarked_by_me ? 'active' : ''}" type="button" data-reaction="bookmark" data-post-id="${post.id}" aria-pressed="${Boolean(post.bookmarked_by_me)}" aria-label="북마크">▣ <span>${Number(post.bookmarks_count) || 0}</span></button></td>
         </tr>`;
       }).join('');
     }
     document.getElementById('postListTitle').innerHTML = `전체 게시글 <span>${Number(total) || 0}</span>`;
-    rows.querySelectorAll('.post-reaction').forEach(button => button.addEventListener('click', () => toggleReaction(button)));
-  }
-
-  async function toggleReaction(button) {
-    const authToken = sessionStorage.getItem(tokenKey);
-    if (!authToken) {
-      window.location.assign(`login.html?next=${encodeURIComponent('board.html')}`);
-      return;
-    }
-    const postId = button.dataset.postId;
-    const method = button.getAttribute('aria-pressed') === 'true' ? 'DELETE' : 'PUT';
-    button.disabled = true;
-    try {
-      const response = await fetch(`${apiBase}/api/posts/${postId}/${button.dataset.reaction}`, {
-        method,
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || '반응을 저장하지 못했습니다.');
-      await loadPosts();
-    } catch (error) {
-      status.textContent = error.message;
-    } finally {
-      button.disabled = false;
-    }
   }
 
   async function loadPosts() {
@@ -82,10 +57,7 @@
     if (query) params.set('q', query);
     status.textContent = '게시글을 불러오는 중…';
     try {
-      const requestHeaders = { accept: 'application/json' };
-      const authToken = sessionStorage.getItem(tokenKey);
-      if (authToken) requestHeaders.authorization = `Bearer ${authToken}`;
-      const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: requestHeaders });
+      const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: { accept: 'application/json' } });
       if (!response.ok) throw new Error(`API ${response.status}`);
       const data = await response.json();
       renderPosts(data.posts || [], data.total);
@@ -116,15 +88,50 @@
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();
-    if (!sessionStorage.getItem(tokenKey)) {
-      window.open(`login.html?next=${encodeURIComponent('post-write.html')}`, '_blank');
-      return;
-    }
     if (!apiAvailable) {
       status.textContent = 'Cloudflare D1 게시판 API가 아직 배포되지 않아 글을 저장할 수 없습니다.';
       return;
     }
-    window.open('post-write.html', '_blank');
+    formError.textContent = '';
+    postDialog.showModal();
+    document.getElementById('postCategory').focus();
+  });
+  document.getElementById('closePostDialog').addEventListener('click', () => postDialog.close());
+  postDialog.addEventListener('click', event => {
+    if (event.target === postDialog) postDialog.close();
+  });
+
+  postForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submit = postForm.querySelector('[type="submit"]');
+    submit.disabled = true;
+    formError.textContent = '';
+    const formData = new FormData(postForm);
+    try {
+      const response = await fetch(`${apiBase}/api/posts`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData.entries())),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || '게시글을 저장하지 못했습니다.');
+      postDialog.close();
+      postForm.reset();
+      query = '';
+      searchInput.value = '';
+      selectedCategory = '';
+      categoryButtons.forEach((item, index) => {
+        const selected = index === 0;
+        item.classList.toggle('active', selected);
+        item.setAttribute('aria-pressed', String(selected));
+      });
+      status.textContent = '게시글을 저장했습니다.';
+      await loadPosts();
+    } catch (error) {
+      formError.textContent = error.message || '게시글을 저장하지 못했습니다.';
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   loadPosts();

@@ -1,5 +1,5 @@
 function initializeArcade() {
-    const games = [
+  const games = [
       { id: 'valorant', title: '발로란트', english: 'VALORANT', genre: '액션', tag: '전술 슈팅', reviewScore: null, steamRank: null, ratingSource: null, emoji: '🎯', cover: 'valorant', url: 'https://playvalorant.com/ko-kr/', image: 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/9167b57d3c081d04e75abe28387d87a27bb83953-3440x1020.jpg?accountingTag=VAL', imagePosition: 'center 43%', description: '요원마다 고유한 능력을 활용해 공격과 수비를 펼치는 5대5 전술 슈팅 게임입니다. 정확한 사격과 팀 전략으로 라운드를 승리로 이끄세요.', screenshots: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b7e3f4fddaad9797eff1541359ed6c7ec4222f17-1920x1080.jpg?accountingTag=VAL', 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/afb2198aaba170268feaaf799511a56ee40192be-1920x1080.jpg?accountingTag=VAL'] },
       { id: 'hades-2', title: '하데스 II', english: 'HADES II', genre: '액션', tag: '로그라이크 RPG', reviewScore: 93, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🔥', cover: 'hades', url: 'https://www.supergiantgames.com/games/hades-ii/', image: 'https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=900&q=80', imagePosition: 'center 38%', description: '시간의 타이탄에 맞서 지하 세계 너머를 탐험하는 로그라이크 액션 게임입니다. 어둠의 마법과 다양한 무기를 조합해 매번 새로운 전투에 도전하세요.', screenshots: ['https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=1200&q=80'] },
       { id: 'stardew-valley', title: '스타듀 밸리', english: 'STARDEW VALLEY', genre: '인디', tag: '농장 시뮬레이션', reviewScore: 98, steamRank: 23, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🌻', cover: 'stardew', url: 'https://www.stardewvalley.net/', image: 'https://www.stardewvalley.net/wp-content/uploads/2017/12/stardewbackground.png', imagePosition: 'center 48%', description: '할아버지에게 물려받은 농장을 가꾸며 나만의 새로운 삶을 시작하세요. 작물을 기르고, 낚시와 채집을 즐기고, 마을 주민들과 관계를 쌓을 수 있습니다.', screenshots: ['https://www.stardewvalley.net/wp-content/uploads/2018/12/1_1screenshot15.png'] },
@@ -25,33 +25,6 @@ function initializeArcade() {
       { id: 'efootball', title: 'eFootball', english: 'eFOOTBALL', genre: '스포츠', source: 'steam', tag: '축구', reviewScore: 64, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '⚽', cover: 'efootball', url: 'https://store.steampowered.com/app/1665460/eFootball/', image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/86619d0fb7126b3d5276004175f9a62181223c0f/header.jpg?t=1792635226', description: '전 세계 이용자와 겨루는 무료 축구 게임입니다. 팀과 선수를 구성하고 온라인 경기에서 패스와 전술을 활용해 승리를 노려보세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/3b0db0c05317dec6063cfcdbc1ed7d079a33c87d/ss_3b0db0c05317dec6063cfcdbc1ed7d079a33c87d.1920x1080.jpg?t=1792635226', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/6c864a19497fbad11d70fd3078819e341b53e710/ss_6c864a19497fbad11d70fd3078819e341b53e710.1920x1080.jpg?t=1792635226'] },
       { id: 'farming-simulator-25', title: '파밍 시뮬레이터 25', english: 'FARMING SIMULATOR 25', genre: '시뮬레이션', source: 'steam', tag: '농업', reviewScore: 91, steamRank: 87, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🚜', cover: 'farming-simulator-25', url: 'https://store.steampowered.com/app/2300320/Farming_Simulator_25/', image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/c2a205133d23cd24faf3c152d972a1d0177661b8/header.jpg?t=1793106374', description: '농장을 운영하며 작물을 재배하고 수확하는 농업 시뮬레이션입니다. 다양한 농기계를 운전하고 혼자 또는 멀티플레이로 농장을 키워보세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/0bd36a1bd96d3c4a428bfd56f8697d045011e23c/ss_0bd36a1bd96d3c4a428bfd56f8697d045011e23c.1920x1080.jpg?t=1793106374', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/4fa589ab4b102a4b346d03295b5d26c6a14726be/ss_4fa589ab4b102a4b346d03295b5d26c6a14726be.1920x1080.jpg?t=1793106374'] }
     ];
-    const recommendedOrder = ['hades-2', 'valorant', 'stardew-valley', 'elden-ring', 'zelda-totk', 'cyberpunk-2077', 'persona-5-royal', 'ori-will-of-wisps', 'team-fortress-2', 'apex-legends', 'overwatch', 'rainbow-six-siege', 'valheim', 'warframe', 'rocket-league', 'project-zomboid', 'no-mans-sky', 'lethal-company', 'cities-skylines', 'euro-truck-simulator-2', 'the-sims-4', 'ea-sports-fc-26', 'efootball', 'farming-simulator-25'];
-    const extraScreenshots = {
-      valorant: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/7a9fef9c2e67d0dc32e555a6bf3f75a6879bad5d-1920x1080.jpg?accountingTag=VAL'],
-      'hades-2': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_ef0f63061d0a0a9a7e46f3b84f125d25330e8f19.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_f28befd916e59b8bf0a8a801b8a498b8adaa01eb.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_b88cb7b48a86f07a7288bf37141f6558279f9bfc.1920x1080.jpg?t=1779901265'],
-      'stardew-valley': ['https://www.stardewvalley.net/wp-content/uploads/2018/12/NightMarket-1-1.png', 'https://www.stardewvalley.net/wp-content/uploads/2018/12/Multiplayer_Screenshot2-1.png', 'https://www.stardewvalley.net/wp-content/uploads/2018/12/StardewValley_12-1.png'],
-      'elden-ring': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_dcdac9e4b26ac0ee5248bfd2967d764fd00cdb42.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_3c41384a24d86dddd58a8f61db77f9dc0bfda8b5.1920x1080.jpg?t=1790290043'],
-      'zelda-totk': ['https://assets.nintendo.com/image/fetch/q_auto/f_auto/c_scale,w_1200/https://atum-img-lp1.cdn.nintendo.net/i/c/0952102200e5413eab2f6c67b3911513_1024', 'https://assets.nintendo.com/image/fetch/q_auto/f_auto/c_scale,w_1200/https://atum-img-lp1.cdn.nintendo.net/i/c/0a96263fa56749fabfbe5509144cbabc_1024', 'https://assets.nintendo.com/image/fetch/q_auto/f_auto/c_scale,w_1200/https://atum-img-lp1.cdn.nintendo.net/i/c/0e68efbc6e8d40d68d926c0f4d40caa7_1024'],
-      'cyberpunk-2077': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/ss_2f649b68d579bf87011487d29bc4ccbfdd97d34f.1920x1080.jpg?t=1792682505', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/900f9bda156599fcd235f08ffb64667f9baa1afe/ss_900f9bda156599fcd235f08ffb64667f9baa1afe.1920x1080.jpg?t=1792682505', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/f678ed77c2fe7060ac9c64e32e1472e3ec3ab7dc/ss_f678ed77c2fe7060ac9c64e32e1472e3ec3ab7dc.1920x1080.jpg?t=1792682505'],
-      'persona-5-royal': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_0d70c3b765f8b769153ac69541753745ec023a6f.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_7b253f91a62895af594c84370194f4a3f9b6166d.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_b65a28e459b886feef348c8e16f8b9ca721a56e9.1920x1080.jpg'],
-      'ori-will-of-wisps': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_8f7f5c0d10fb9bca99a8a449c9a22c941e978fe6.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_4dd5c9a4e8bc4033ad4f1f72d86e9500b60c2dcf.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_f65eae01a42a09776e237dd7797f2aa0b5a69b53.1920x1080.jpg'],
-      'team-fortress-2': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/440/ss_ea21f7bbf4f79bada4554df5108d04b6889d3453.1920x1080.jpg?t=1757348372', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/440/ss_e3aedb2ab36bba8cfe611b1e0eaa807e4bb2d742.1920x1080.jpg?t=1757348372', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/440/ss_ee24a769dc1d81dcbd7b250d16530394adee4264.1920x1080.jpg?t=1757348372'],
-      'apex-legends': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172470/61bab081f3fdc1373da42fa962497ed2ea760890/ss_61bab081f3fdc1373da42fa962497ed2ea760890.1920x1080.jpg?t=1793909605'],
-      overwatch: ['https://cdn.cloudflare.steamstatic.com/steam/apps/2357570/ss_1f4a12d12a4bc9b476a507ca4e22d9adf2938112.1920x1080.jpg'],
-      'rainbow-six-siege': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/359550/ss_21b13eef2a6e8e8b8b4025a477b8f8c1c0ee2f74.1920x1080.jpg'],
-      valheim: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/892970/ss_9b2c14db463ed85a174c3468b8f9bf9bf6d5f37c.1920x1080.jpg'],
-      warframe: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/230410/ss_2e4077f215eccde84171a4b8e0f2bc8a3264c776.1920x1080.jpg?t=1792613117', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/230410/ss_0a541a8bf59e212870ea8d82260ac1b3ae2d0354.1920x1080.jpg?t=1792613117', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/230410/ss_ce00a212a29e9a6c1fc37b16dbd802b2844a901d.1920x1080.jpg?t=1793987416'],
-      'rocket-league': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/252950/4fa01c320d22f31d78fd9fcb27dbd3bd8871b903/ss_4fa01c320d22f31d78fd9fcb27dbd3bd8871b903.1920x1080.jpg?t=1791210513', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/252950/23e7d4fcf10475923be9078e55b449b7fc9792d9/ss_23e7d4fcf10475923be9078e55b449b7fc9792d9.1920x1080.jpg?t=1791210513', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/252950/41bd974bde088dc623fae68db333f5b8bb42700e/ss_41bd974bde088dc623fae68db333f5b8bb42700e.1920x1080.jpg?t=1791210513'],
-      'project-zomboid': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/108600/e0dd37d69051f7da85896d11027ab018d23893fa/ss_e0dd37d69051f7da85896d11027ab018d23893fa.1920x1080.jpg?t=1793224893', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/108600/d9df2102dd12526700b15660bc5ec8f039dc8742/ss_d9df2102dd12526700b15660bc5ec8f039dc8742.1920x1080.jpg?t=1793224893', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/108600/4c8860818ac52c685bbe0988aa137d52bad4aac5/ss_4c8860818ac52c685bbe0988aa137d52bad4aac5.1920x1080.jpg?t=1793224893'],
-      'no-mans-sky': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/7d45478fbac8b1a41172adf8e598784a7d04b41d/ss_7d45478fbac8b1a41172adf8e598784a7d04b41d.1920x1080.jpg?t=1793196605', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/53afb343452e839000d5eab38d0656fcdad9547b/ss_53afb343452e839000d5eab38d0656fcdad9547b.1920x1080.jpg?t=1793196605', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/1c56a91d19399fc1fac11b9d1d5437d143ae707d/ss_1c56a91d19399fc1fac11b9d1d5437d143ae707d.1920x1080.jpg?t=1793196605'],
-      'lethal-company': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_78075e9a94675823024f12fce9d69b243cca94f8.1920x1080.jpg?t=1775380053', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_51860be59845771c01a3a4d9ab1ebf773f16fef5.1920x1080.jpg?t=1775380053', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_0efb5b9a0fa14cc4c3e69eaa.1920x1080.jpg?t=1775380053'],
-      'cities-skylines': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/255710/ss_8efc29a6fcecd2ea5d0740e99bc8135d6f0671c6.1920x1080.jpg'],
-      'euro-truck-simulator-2': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/227300/ss_178725de0a79ccce8be5f9c1d6fa7f059b05d4d2.1920x1080.jpg'],
-      'the-sims-4': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222670/ss_537683e5e29c2d6d02c64aa7321dcb26166f7d82.1920x1080.jpg?t=1793293287', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222670/ss_2fc938d99a1e87893852cb2d2113478190607941.1920x1080.jpg?t=1793293287', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222670/ss_9b3d2c580798512963fa64801b42820f168eab09.1920x1080.jpg?t=1793293287'],
-      'ea-sports-fc-26': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3405690/1d3064a6f7b0f8e1c00fa8a70307a67e95c090ea/ss_1d3064a6f7b0f8e1c00fa8a70307a67e95c090ea.1920x1080.jpg?t=1789751159', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3405690/b61caa1b54537a4e5ba6ca186ed661a0d03debee/ss_b61caa1b54537a4e5ba6ca186ed661a0d03debee.1920x1080.jpg?t=1789751159', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3405690/725a1067d83dba8514b5ecae4f39d59b4bd73bb2/ss_725a1067d83dba8514b5ecae4f39d59b4bd73bb2.1920x1080.jpg?t=1789751159'],
-      efootball: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/3b0db0c05317dec6063cfcdbc1ed7d079a33c87d/ss_3b0db0c05317dec6063cfcdbc1ed7d079a33c87d.1920x1080.jpg?t=1792635226', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/6c864a19497fbad11d70fd3078819e341b53e710/ss_6c864a19497fbad11d70fd3078819e341b53e710.1920x1080.jpg?t=1792635226', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1665460/19198cc1acc851a60c4f29f5b906b1e1890eaa8a/ss_19198cc1acc851a60c4f29f5b906b1e1890eaa8a.1920x1080.jpg?t=1792635226'],
-      'farming-simulator-25': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/0bd36a1bd96d3c4a428bfd56f8697d045011e23c/ss_0bd36a1bd96d3c4a428bfd56f8697d045011e23c.1920x1080.jpg?t=1793106374', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/4fa589ab4b102a4b346d03295b5d26c6a14726be/ss_4fa589ab4b102a4b346d03295b5d26c6a14726be.1920x1080.jpg?t=1793106374', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2300320/a91040d614c5f319b0fa5d02dde31e9835d0cc4e/ss_a91040d614c5f319b0fa5d02dde31e9835d0cc4e.1920x1080.jpg?t=1793106374']
-    };
 
     const detailPage = document.getElementById('gameDetail');
     const currentGameId = new URLSearchParams(window.location.search).get('game');
@@ -64,7 +37,7 @@ function initializeArcade() {
       } else {
         document.title = `${game.title} — 게임 정보 | ARCADE`;
         document.querySelector('meta[name="description"]')?.setAttribute('content', `${game.title}: ${game.description}`);
-        const screenshots = [...new Set([game.image, ...(game.screenshots || []), ...(extraScreenshots[game.id] || [])].filter(Boolean))].slice(0, 4);
+        const screenshots = [...new Set([game.image, ...(game.screenshots || [])].filter(Boolean))];
         detailPage.innerHTML = `
           <p class="detail-breadcrumb"><a href="index.html">홈</a>　/　<a href="index.html#games">게임 둘러보기</a>　/　${game.title}</p>
           <article class="detail-hero">
@@ -91,11 +64,10 @@ function initializeArcade() {
 
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('gameSort');
-    const sortDirection = document.getElementById('sortDirection');
     const filters = [...document.querySelectorAll('.filter')];
     let activeFilter = '전체';
     let activeSort = 'recommended';
-    let sortDirectionActive = false;
+    let sortDirection = 'asc';
     let favorites = new Set();
     try {
       const stored = JSON.parse(localStorage.getItem('arcade-favorites') || '[]');
@@ -112,20 +84,30 @@ function initializeArcade() {
         const matchesSearch = `${game.title} ${game.english} ${game.genre} ${game.tag}`.toLocaleLowerCase('ko').includes(query);
         return matchesFilter && matchesSearch;
       }).sort((left, right) => {
-        const direction = sortDirectionActive ? -1 : 1;
         if (activeSort === 'rating-desc') {
           if (left.reviewScore === null) return right.reviewScore === null ? 0 : 1;
           if (right.reviewScore === null) return -1;
-          return (right.reviewScore - left.reviewScore) * direction;
+          const difference = right.reviewScore - left.reviewScore;
+          return sortDirection === 'asc' ? difference : -difference;
         }
         if (activeSort === 'steam-rank') {
           if (left.steamRank === null) return right.steamRank === null ? 0 : 1;
           if (right.steamRank === null) return -1;
-          return (left.steamRank - right.steamRank) * direction;
+          const difference = left.steamRank - right.steamRank;
+          return sortDirection === 'asc' ? difference : -difference;
         }
-        if (activeSort === 'name') return left.title.localeCompare(right.title, 'ko') * direction;
-        return (recommendedOrder.indexOf(left.id) - recommendedOrder.indexOf(right.id)) * direction;
+        if (activeSort === 'name') {
+          const difference = left.title.localeCompare(right.title, 'ko');
+          return sortDirection === 'asc' ? difference : -difference;
+        }
+        const difference = recommendedOrder.indexOf(left.id) - recommendedOrder.indexOf(right.id);
+        return sortDirection === 'asc' ? difference : -difference;
       });
+
+      if (!visibleGames.length) {
+        grid.innerHTML = '<div class="empty-state">표시할 게임이 없어요. 다른 검색어나 필터를 선택해 보세요.</div>';
+        return;
+      }
 
       grid.innerHTML = visibleGames.map(game => `
         <article class="game-card">
@@ -159,15 +141,17 @@ function initializeArcade() {
     searchInput.addEventListener('input', renderGames);
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
-      sortDirection.setAttribute('aria-label', sortDirectionActive ? '내림차순 정렬' : '오름차순 정렬');
+      const sortButton = document.getElementById('sortDirection');
+      sortButton.disabled = false;
+      sortButton.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      sortButton.setAttribute('aria-label', sortDirection === 'asc' ? '오름차순으로 정렬' : '내림차순으로 정렬');
       renderGames();
     });
-    sortDirection.addEventListener('click', () => {
-      sortDirection.setAttribute('aria-label', sortDirectionActive ? '내림차순 정렬' : '오름차순 정렬');
-      sortDirectionActive = !sortDirectionActive;
-      sortDirection.textContent = sortDirectionActive ? '▼' : '▲';
-      sortDirection.setAttribute('aria-label', sortDirectionActive ? '내림차순 정렬' : '오름차순 정렬');
-      sortDirection.setAttribute('aria-pressed', String(sortDirectionActive));
+    document.getElementById('sortDirection').addEventListener('click', event => {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      event.currentTarget.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      event.currentTarget.setAttribute('aria-label', sortDirection === 'asc' ? '오름차순으로 정렬' : '내림차순으로 정렬');
+      event.currentTarget.setAttribute('aria-pressed', String(sortDirection === 'desc'));
       renderGames();
     });
     filters.forEach(button => button.addEventListener('click', () => {
@@ -180,12 +164,7 @@ function initializeArcade() {
       renderGames();
     }));
 
-    let rouletteReturnScrollY = 0;
     document.getElementById('randomButton').addEventListener('click', () => {
-      rouletteReturnScrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${rouletteReturnScrollY}px`;
-      document.body.style.width = '100%';
       const rouletteDialog = document.getElementById('rouletteDialog');
       const result = document.getElementById('rouletteResult');
       const gameLink = document.getElementById('rouletteGameLink');
@@ -193,7 +172,6 @@ function initializeArcade() {
       result.textContent = '버튼을 눌러 룰렛을 시작하세요.';
       gameLink.hidden = true;
       rouletteDialog.showModal();
-      window.scrollTo({ top: rouletteReturnScrollY, behavior: 'instant' });
       document.getElementById('spinRouletteButton').focus();
     });
     const rouletteDialog = document.getElementById('rouletteDialog');
@@ -217,10 +195,6 @@ function initializeArcade() {
       document.getElementById('spinRouletteButton').disabled = false;
       document.getElementById('spinRouletteButton').textContent = '🎰 룰렛 돌리기';
       document.getElementById('randomButton').focus();
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo({ top: rouletteReturnScrollY, behavior: 'instant' });
     });
 
     document.getElementById('spinRouletteButton').addEventListener('click', () => {

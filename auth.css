@@ -1,7 +1,7 @@
 .auth-page { display: grid; min-height: calc(100vh - 150px); place-items: center; padding-top: 35px; padding-bottom: 65px; }
 .auth-shell { width: min(100%, 510px); overflow: hidden; border: 1px solid #ffffff18; border-radius: 21px; background: linear-gradient(180deg, #191725, #11101a); box-shadow: 0 24px 75px #0005; }
 .auth-heading { padding: 30px 34px 22px; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 90% 0, #9c76ff20, transparent 48%); }
-.auth-heading h1 { margin: 7px 0 8px; font-family: 'Noto Sans KR', sans-serif; font-weight: 650; font-size: 29px; letter-spacing: -.055em; word-break: keep-all; }
+.auth-heading h1 { margin: 7px 0 8px; font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif; font-size: 29px; }
 .auth-heading p:last-child { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .auth-form { display: grid; gap: 13px; padding: 25px 34px 30px; }
 .auth-form label, .auth-label { display: block; margin-bottom: 6px; color: #d8d3e2; font-size: 11px; font-weight: 600; }
