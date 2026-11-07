@@ -19,7 +19,7 @@
   <header class="topbar">
     <div class="shell nav">
       <a class="logo" href="#home" aria-label="ARCADE 홈"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 8.5h10a4 4 0 0 1 3.8 5.2l-.7 2.3a2.5 2.5 0 0 1-4 1.2l-2.2-1.7h-3.8l-2.2 1.7a2.5 2.5 0 0 1-4-1.2l-.7-2.3A4 4 0 0 1 7 8.5Z" stroke="white" stroke-width="1.8"/><path d="M8 11v4m-2-2h4m7-1h.01M18 14h.01" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></span>ARCADE</a>
-      <nav class="nav-links" aria-label="메인 메뉴"><a class="active" href="#games">게임 탐색</a><a href="board.html">게시판</a><a href="#daily">오늘의 게임</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
+      <nav class="nav-links" aria-label="메인 메뉴"><a class="active" href="#games">게임 탐색</a><a href="#daily">오늘의 게임</a><a href="board.html">게시판</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
       <div class="nav-actions">
         <label class="search"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="searchInput" type="search" placeholder="게임 검색..." aria-label="게임 검색"></label>
         <button class="avatar" type="button" aria-label="프로필" id="profileButton">👾</button>
@@ -31,16 +31,16 @@
     <section class="hero" aria-labelledby="heroTitle">
       <div class="hero-copy">
         <span class="eyebrow"><span class="eyebrow-dot"></span> YOUR NEXT ADVENTURE</span>
-        <h1 id="heroTitle">다음 플레이,<br /><span>여기서 찾아봐.</span></h1>
-        <p>인기 PC·콘솔 게임을 한곳에서 살펴보세요. 장르를 고르고, 마음에 드는 게임의 공식 홈페이지에서 자세한 정보를 확인할 수 있어요.</p>
+        <h1 class="hero-title" id="heroTitle">다음 플레이,<br /><span>여기서 찾아봐.</span></h1>
+        <p class="hero-description"><span>인기 PC·콘솔 게임을 한곳에서 살펴보세요.</span><span>마음에 드는 게임의 공식 홈페이지에서 자세한 정보를 확인할 수 있어요.</span></p>
         <div class="hero-actions"><a class="button" href="#games"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>게임 둘러보기</a><a class="button secondary" href="#about">추천·안내</a></div>
       </div>
       <div class="hero-art" aria-hidden="true"><span class="spark one">✦</span><div class="hero-orb"><span class="orb-icon">🎮</span></div><span class="spark two">✧</span></div>
     </section>
 
     <section class="section" id="games" aria-labelledby="gamesTitle">
-      <div class="section-heading"><div><p class="section-kicker">PICK YOUR PLAY</p><h2 id="gamesTitle">게임 둘러보기</h2><p class="section-note">장르와 취향에 맞는 게임을 찾아보세요.</p></div><a class="text-link" href="#games" id="showAllLink">필터 초기화 <span aria-hidden="true">↺</span></a></div>
-      <div class="filters" role="group" aria-label="게임 분류 필터"><button class="filter active" data-filter="전체" aria-pressed="true">전체</button><button class="filter" data-filter="액션" aria-pressed="false">⚔ 액션</button><button class="filter" data-filter="RPG" aria-pressed="false">🧙 RPG</button><button class="filter" data-filter="인디" aria-pressed="false">🌱 인디</button><button class="filter" data-filter="어드벤처" aria-pressed="false">🗺 어드벤처</button><button class="filter" data-filter="스포츠" aria-pressed="false">⚽ 스포츠</button><button class="filter" data-filter="Steam" aria-pressed="false">♨ Steam</button><button class="filter" data-filter="즐겨찾기" aria-pressed="false">♥ 즐겨찾기</button></div>
+      <div class="games-header"><p class="section-kicker">PICK YOUR PLAY</p><div class="games-header-row"><h2 id="gamesTitle">게임 둘러보기</h2><p class="games-header-note">장르와 취향에 맞는 게임을 찾아보세요.</p></div><p class="games-header-sub">평가 순은 Steam 최근 30일 긍정 리뷰 비율, 인기 순은 2026-11-01 확인 당시 Steam 동시 접속자 차트 순위입니다. Steam 미지원/조회 불가 게임은 평가 정보 없음으로 표시됩니다.</p></div>
+      <div class="game-toolbar"><div class="filters" role="group" aria-label="게임 분류 필터"><button class="filter active" data-filter="전체" aria-pressed="true">전체</button><button class="filter" data-filter="액션" aria-pressed="false">⚔ 액션</button><button class="filter" data-filter="RPG" aria-pressed="false">🧙 RPG</button><button class="filter" data-filter="인디" aria-pressed="false">🌱 인디</button><button class="filter" data-filter="어드벤처" aria-pressed="false">🗺 어드벤처</button><button class="filter" data-filter="스포츠" aria-pressed="false">⚽ 스포츠</button><button class="filter" data-filter="Steam" aria-pressed="false"><svg class="steam-filter-icon" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M11.979 0C5.678 0 .564 4.82.03 10.94l6.17 2.548a3.28 3.28 0 0 1 1.86-.577c.066 0 .13.003.195.006l2.745-3.98v-.056a4.494 4.494 0 1 1 4.494 4.495h-.104l-3.916 2.79c.002.05.004.1.004.15a3.37 3.37 0 0 1-6.665.65l-4.41-1.82A11.98 11.98 0 1 0 11.979 0ZM7.56 18.19l-1.414-.584a2.53 2.53 0 0 0 4.786-1.18 2.53 2.53 0 0 0-2.528-2.528c-.43 0-.837.108-1.193.3l1.46.604a1.875 1.875 0 1 1-1.11 3.388ZM16.5 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0-.75a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Z"/></svg>Steam</button><button class="filter" data-filter="즐겨찾기" aria-pressed="false">♥ 즐겨찾기</button></div><div class="game-list-actions"><label class="sort-control" for="gameSort"><span class="sort-label">정렬</span><select id="gameSort" aria-label="게임 정렬 기준"><option value="name">이름순</option><option value="recommended" selected>추천순</option><option value="rating-desc">Steam 긍정 리뷰순</option><option value="steam-rank">Steam 인기순</option></select><button class="sort-direction" id="sortDirection" type="button" aria-label="오름차순 정렬">↑</button></label><a class="text-link" href="#games" id="showAllLink">필터 초기화 <span aria-hidden="true">↺</span></a></div></div>
       <div class="game-grid" id="gameGrid" aria-live="polite"></div>
     </section>
 
