@@ -35,7 +35,7 @@
 
   function renderPosts(posts, total) {
     if (!posts.length) {
-      rows.innerHTML = '<tr><td class="board-empty" colspan="5">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
+      rows.innerHTML = '<tr><td class="board-empty" colspan="6">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
     } else {
       rows.innerHTML = posts.map(post => {
         const category = categoryLabels[post.category] || '자유';
@@ -45,6 +45,7 @@
           <td class="post-author">${escapeHtml(post.author)}</td>
           <td class="post-date">${escapeHtml(formatDate(post.created_at))}</td>
           <td class="post-views">—</td>
+          <td class="post-actions"><span class="post-reaction-count" aria-label="좋아요 ${Number(post.likes_count) || 0}개">♥ <span>${Number(post.likes_count) || 0}</span></span><span class="post-reaction-count" aria-label="북마크 ${Number(post.bookmarks_count) || 0}개">▣ <span>${Number(post.bookmarks_count) || 0}</span></span></td>
         </tr>`;
       }).join('');
     }
