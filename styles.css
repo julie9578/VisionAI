@@ -104,8 +104,9 @@
     .cover-ori { background: radial-gradient(circle at 50% 38%, #b7f4ef, #5c99c9 45%, #26335f); }
     .cover-label { position: absolute; top: 10px; left: 10px; padding: 5px 8px; border: 1px solid #ffffff2b; border-radius: 6px; background: #11101cb8; color: #fff; font-size: 9px; font-weight: 700; backdrop-filter: blur(8px); }
     .favorite { position: absolute; z-index: 4; top: 9px; right: 9px; display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #ffffff55; border-radius: 50%; background: #11101cdb; color: #f5f1fa; cursor: pointer; font-size: 16px; box-shadow: 0 2px 9px #0007; transition: transform .18s, border-color .18s, background-color .18s, color .18s; }
-    .favorite:hover { transform: scale(1.12); border-color: #ff9ec7; color: #ff9ec7; }
-    .favorite.saved { border-color: #ff79b8; background: #ff79b833; color: #ff9fc6; }
+    .favorite:hover { transform: scale(1.12); border-color: #ff4658; color: #ff4658; }
+    .favorite.saved { border-color: #ff3b4f; background: #ff263b30; color: #ff4658; }
+    .favorite.saved:hover { border-color: #ff172f; background: #ff263b48; color: #ff172f; }
     .game-info { padding: 14px 15px 16px; }
     .game-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .game-title { overflow: hidden; margin: 0; font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }

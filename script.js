@@ -165,7 +165,12 @@ function initializeArcade() {
       renderGames();
     }));
 
+    let rouletteReturnScrollY = 0;
     document.getElementById('randomButton').addEventListener('click', () => {
+      rouletteReturnScrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${rouletteReturnScrollY}px`;
+      document.body.style.width = '100%';
       const rouletteDialog = document.getElementById('rouletteDialog');
       const result = document.getElementById('rouletteResult');
       const gameLink = document.getElementById('rouletteGameLink');
@@ -173,6 +178,7 @@ function initializeArcade() {
       result.textContent = '버튼을 눌러 룰렛을 시작하세요.';
       gameLink.hidden = true;
       rouletteDialog.showModal();
+      window.scrollTo(0, rouletteReturnScrollY);
       document.getElementById('spinRouletteButton').focus();
     });
     const rouletteDialog = document.getElementById('rouletteDialog');
@@ -196,6 +202,10 @@ function initializeArcade() {
       document.getElementById('spinRouletteButton').disabled = false;
       document.getElementById('spinRouletteButton').textContent = '🎰 룰렛 돌리기';
       document.getElementById('randomButton').focus();
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, rouletteReturnScrollY);
     });
 
     document.getElementById('spinRouletteButton').addEventListener('click', () => {
