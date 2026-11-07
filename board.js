@@ -9,6 +9,8 @@
   const postForm = document.getElementById('postForm');
   const formError = document.getElementById('postFormError');
   const writeButton = document.querySelector('.board-write');
+  const tokenKey = 'arcade-session-token';
+  const sessionToken = () => sessionStorage.getItem(tokenKey);
   let selectedCategory = '';
   let query = new URLSearchParams(window.location.search).get('q') || '';
   let apiAvailable = true;
@@ -88,12 +90,25 @@
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();
+    if (!sessionToken()) {
+      window.location.assign('login.html');
+      return;
+    }
     if (!apiAvailable) {
       status.textContent = 'Cloudflare D1 게시판 API가 아직 배포되지 않아 글을 저장할 수 없습니다.';
       return;
     }
     formError.textContent = '';
     postDialog.showModal();
+    document.getElementById('postAuthor').readOnly = true;
+    fetch(`${apiBase}/api/auth/me`, { headers: { authorization: `Bearer ${sessionToken()}`, accept: 'application/json' } })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('로그인 정보를 확인할 수 없습니다.')))
+      .then(data => { document.getElementById('postAuthor').value = data.user.nickname; })
+      .catch(() => {
+        postDialog.close();
+        sessionStorage.removeItem(tokenKey);
+        window.location.assign('login.html');
+      });
     document.getElementById('postCategory').focus();
   });
   document.getElementById('closePostDialog').addEventListener('click', () => postDialog.close());
@@ -110,8 +125,8 @@
     try {
       const response = await fetch(`${apiBase}/api/posts`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(Object.fromEntries(formData.entries())),
+        headers: { 'content-type': 'application/json', accept: 'application/json', authorization: `Bearer ${sessionToken()}` },
+        body: JSON.stringify({ category: formData.get('category'), title: formData.get('title'), content: formData.get('content') }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || '게시글을 저장하지 못했습니다.');

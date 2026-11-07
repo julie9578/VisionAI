@@ -210,6 +210,13 @@ async function handleApi(request, env, url) {
     return user ? json({ user }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
+  if (url.pathname === "/api/users/me/posts" && request.method === "GET") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+    const result = await env.DB.prepare("SELECT id, category, title, author, created_at FROM posts WHERE author_id = ? AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 100").bind(userId).all();
+    return json({ posts: result.results }, 200, headers);
+  }
+
   if (url.pathname === "/api/posts" && request.method === "GET") {
     const page = Math.max(1, Math.min(10000, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1));
     const category = url.searchParams.get("category") || "";
