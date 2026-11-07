@@ -52,6 +52,8 @@ signup.html  회원가입 페이지
 login.html   로그인 페이지
 auth.css     회원 페이지 스타일
 auth.js      회원가입·로그인 API 클라이언트
+profile.html 로그인한 사용자의 프로필 편집 페이지
+profile.css  프로필 편집 페이지 스타일
 wrangler.jsonc Cloudflare Worker와 D1 설정
 | `migrations/`  | D1 게시글·사용자 테이블 스키마 변경 |
 src/worker.js 게시판·회원 REST API
