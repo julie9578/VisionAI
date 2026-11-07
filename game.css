@@ -10,7 +10,7 @@
 .detail-art-label { position: absolute; bottom: 18px; left: 20px; padding: 6px 10px; border: 1px solid #ffffff2b; border-radius: 7px; background: #11101cc7; color: white; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
 .detail-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 34px; }
 .detail-kicker { margin: 0 0 10px; color: #d1bbff; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
-.detail-title { margin: 0; font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif; font-size: clamp(28px, 4vw, 42px); line-height: 1.15; }
+.detail-title { margin: 0; font-family: 'Noto Sans KR', sans-serif; font-size: clamp(28px, 4vw, 42px); font-weight: 650; letter-spacing: -.055em; line-height: 1.2; word-break: keep-all; }
 .detail-english { margin: 9px 0 0; color: var(--muted); font-size: 11px; letter-spacing: 1.2px; }
 .detail-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .detail-badge { padding: 6px 10px; border: 1px solid var(--line); border-radius: 99px; color: #d8d2e6; font-size: 10px; }

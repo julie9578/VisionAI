@@ -155,7 +155,9 @@ function initializeArcade() {
       renderGames();
     }));
 
+    let rouletteReturnScrollY = 0;
     document.getElementById('randomButton').addEventListener('click', () => {
+      rouletteReturnScrollY = window.scrollY;
       const rouletteDialog = document.getElementById('rouletteDialog');
       const result = document.getElementById('rouletteResult');
       const gameLink = document.getElementById('rouletteGameLink');
@@ -186,6 +188,7 @@ function initializeArcade() {
       document.getElementById('spinRouletteButton').disabled = false;
       document.getElementById('spinRouletteButton').textContent = '🎰 룰렛 돌리기';
       document.getElementById('randomButton').focus();
+      window.scrollTo({ top: rouletteReturnScrollY, behavior: 'instant' });
     });
 
     document.getElementById('spinRouletteButton').addEventListener('click', () => {
