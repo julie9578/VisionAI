@@ -1,0 +1,20 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "arcade-board-api",
+	"main": "src/worker.js",
+	"compatibility_date": "2026-11-01",
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "arcade-board",
+      "database_id": "ac8b118a-5665-4032-8771-448ceedfd5f5",
+      "migrations_dir": "migrations"
+		}
+	],
+  "secrets": {
+    "required": ["SESSION_SECRET", "ADDRESS_ENCRYPTION_KEY"]
+  },
+	"vars": {
+		"ALLOWED_ORIGINS": "https://arcade.nextarcade.workers.dev,https://julie9578.github.io"
+	}
+}
