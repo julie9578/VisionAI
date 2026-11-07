@@ -156,6 +156,7 @@ async function handleAuth(request, env, url, headers) {
 
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
@@ -207,6 +208,13 @@ async function handleApi(request, env, url) {
     if (!nickname) return json({ error: "닉네임이 필요합니다." }, 400, headers);
     const user = await env.DB.prepare("SELECT id, nickname, bio, avatar_color, created_at FROM users WHERE nickname = ? COLLATE NOCASE").bind(nickname).first();
     return user ? json({ user }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
+  }
+
+  if (url.pathname === "/api/users/me/posts" && request.method === "GET") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+    const result = await env.DB.prepare("SELECT id, category, title, author, created_at FROM posts WHERE author_id = ? AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 100").bind(userId).all();
+    return json({ posts: result.results }, 200, headers);
   }
 
   if (url.pathname === "/api/posts" && request.method === "GET") {

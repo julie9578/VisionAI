@@ -25,6 +25,37 @@
     element.classList.toggle('success', success);
   }
 
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[character]);
+  }
+
+  async function loadProfilePosts() {
+    const list = document.getElementById('profilePostList');
+    const status = document.getElementById('profilePostsStatus');
+    if (!list || !status) return;
+    try {
+      const data = await request('/api/users/me/posts');
+      const posts = Array.isArray(data.posts) ? data.posts : [];
+      if (!posts.length) {
+        status.textContent = '아직 작성한 게시글이 없습니다.';
+        return;
+      }
+      status.textContent = `${posts.length}개의 게시글`;
+      list.innerHTML = posts.map(post => {
+        const date = new Date(post.created_at);
+        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+        const title = escapeHtml(post.title);
+        const category = escapeHtml(({ free: '자유', recommend: '게임 추천', guide: '공략·팁', recruit: '모집', notice: '공지' })[post.category] || '게시글');
+        return `<li class="profile-post-item"><a href="post.html?id=${encodeURIComponent(post.id)}"><span class="profile-post-category">${category}</span><strong>${title}</strong><time datetime="${escapeHtml(post.created_at)}">${escapeHtml(dateLabel)}</time></a></li>`;
+      }).join('');
+    } catch (error) {
+      status.textContent = error.message || '게시글을 불러오지 못했습니다.';
+    }
+  }
+
+
   if (signupForm) {
     signupForm.addEventListener('submit', async event => {
       event.preventDefault();
@@ -150,7 +181,10 @@
       showLoggedOutProfile();
     } else {
       request('/api/auth/me')
-        .then(data => showProfile(data.user))
+        .then(data => {
+          showProfile(data.user);
+          loadProfilePosts();
+        })
         .catch(() => {
           sessionStorage.removeItem(tokenKey);
           showLoggedOutProfile();

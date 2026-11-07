@@ -61,6 +61,11 @@
             <div class="profile-form-actions"><button class="button" type="submit">변경사항 저장</button></div>
           </form>
         </section>
+        <section class="profile-panel" id="my-posts" aria-labelledby="myPostsTitle">
+          <div class="profile-panel-heading"><div><h2 id="myPostsTitle">내가 작성한 게시글</h2><p>게시판에 작성한 글이 최신순으로 표시됩니다.</p></div><span class="profile-section-icon" aria-hidden="true">✎</span></div>
+          <p class="profile-post-status" id="profilePostsStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
+          <ul class="profile-post-list" id="profilePostList" aria-label="내가 작성한 게시글 목록"></ul>
+        </section>
         <section class="profile-panel" id="account-info" aria-labelledby="accountInfoTitle">
           <div class="profile-panel-heading"><div><h2 id="accountInfoTitle">계정 정보</h2><p>이메일과 가입 시 선택한 정보를 확인합니다.</p></div><span class="profile-section-icon" aria-hidden="true">♧</span></div>
           <div class="profile-member-since">가입일 <time id="memberSince">—</time></div>
