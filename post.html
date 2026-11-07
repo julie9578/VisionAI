@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c0b14" />
+  <meta name="description" content="ARCADE 게시판 글과 댓글을 확인하세요." />
+  <title>게시글 — ARCADE</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="board.css" />
+  <link rel="stylesheet" href="community.css" />
+</head>
+<body>
+  <header class="topbar"><div class="shell nav"><a class="logo" href="index.html" aria-label="ARCADE 홈"><span class="logo-mark">🎮</span>ARCADE</a><a class="back-link" href="board.html">← 게시판으로</a></div></header>
+  <main class="shell community-page post-detail-page">
+    <p class="profile-breadcrumb"><a href="index.html">홈</a>　/　<a href="board.html">게시판</a>　/　글 보기</p>
+    <p class="community-message" id="postStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
+    <article class="post-detail-card" id="postContent" hidden></article>
+    <section class="post-comments-panel" id="commentsPanel" hidden>
+      <h2 class="post-comments-heading">댓글 <span id="commentCount">0</span></h2>
+      <div class="comment-list" id="commentList"></div>
+      <form class="comment-form" id="commentForm">
+        <label class="visually-hidden" for="commentContent">댓글 입력</label>
+        <textarea id="commentContent" name="content" maxlength="2000" rows="3" required placeholder="로그인 후 댓글을 작성할 수 있습니다."></textarea>
+        <div class="comment-form-actions"><button class="button" type="submit">댓글 등록</button></div>
+        <p class="community-message" id="commentMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <footer><div class="shell"><a class="footer-logo" href="index.html">ARCADE</a><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
+  <script src="community.js"></script>
+</body>
+</html>

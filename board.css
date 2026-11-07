@@ -2,7 +2,7 @@
 .board-hero { position: relative; display: flex; min-height: 235px; align-items: center; justify-content: space-between; overflow: hidden; padding: 38px 52px; border: 1px solid #ffffff16; border-radius: 22px; background: radial-gradient(ellipse at 82% 50%, #8652d14a, transparent 36%), linear-gradient(115deg, #211c35, #171522 62%, #211a30); box-shadow: 0 22px 60px #0003; }
 .board-hero::before { position: absolute; inset: 0; background-image: linear-gradient(#ffffff0b 1px, transparent 1px), linear-gradient(90deg, #ffffff0b 1px, transparent 1px); background-size: 32px 32px; content: ""; mask-image: linear-gradient(90deg, transparent, #000); }
 .board-hero > div:first-child { position: relative; z-index: 1; }
-.board-hero h1 { margin: 12px 0 10px; font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif; font-size: clamp(34px, 5vw, 52px); line-height: 1.2; }
+.board-hero h1 { margin: 12px 0 10px; font-family: 'Noto Sans KR', sans-serif; font-weight: 650; font-size: clamp(34px, 5vw, 52px); line-height: 1.2; letter-spacing: -.055em; word-break: keep-all; }
 .board-hero h1 span { color: #bd9cff; }
 .board-hero p:last-child { margin: 0; color: #bbb5ca; font-size: 13px; line-height: 1.7; }
 .board-hero-mark { position: relative; z-index: 1; display: grid; width: 122px; height: 122px; flex: 0 0 auto; place-items: center; border: 1px solid #ffffff2b; border-radius: 36px; background: linear-gradient(145deg, #a477ff39, #ff70bb2b); box-shadow: 0 0 54px #9c76ff24, inset 0 1px 0 #ffffff30; font-size: 58px; transform: rotate(7deg); }
@@ -42,6 +42,13 @@
 .post-title:hover { color: #d3beff; }
 .reply-count { margin-left: 3px; color: #b59aff; font-size: 10px; }
 .post-author { color: #8f8a9d !important; }
+.post-author a { color: inherit; }
+.post-author a:hover { color: #d3beff; }
+.post-actions { white-space: nowrap; text-align: right; padding-right: 10px; }
+.post-actions-col { width: 125px; text-align: right; padding-right: 10px; }
+.post-reaction { min-width: 42px; min-height: 28px; margin-left: 4px; padding: 0 7px; border: 1px solid #ffffff18; border-radius: 99px; background: #ffffff05; color: #aaa5b6; font: inherit; font-size: 10px; cursor: pointer; }
+.post-reaction:hover, .post-reaction.active { border-color: #f093bf75; background: #ff79b817; color: #ff9fc6; }
+.post-reaction:disabled { opacity: .55; cursor: wait; }
 .post-date, .post-views { color: #777386 !important; font-size: 10px !important; }
 .post-views { text-align: right; padding-right: 13px; }
 .notice-row { background: #ff70bb06; }
