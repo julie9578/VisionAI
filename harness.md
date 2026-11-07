@@ -25,6 +25,8 @@
    git -C C:\Users\user\Documents\VisionAI remote -v
    git -C C:\Users\user\Documents\VisionAI worktree list --porcelain
    git -C C:\Users\user\Documents\VisionAI branch -vv
+
+   사용자가 다른 절대 경로를 지정하면 해당 경로를 우선하며, 수정·체크아웃 전에 실제 대상 저장소와 브랜치를 확인합니다.
    ```
 
 2. **각 폴더의 remote URL, 현재 브랜치, HEAD와 작업 트리 상태를 따로 확인합니다.** 폴더 이름이 `main`이나 `merge`를 포함한다고 최신 또는 안전한 폴더라고 가정하지 않습니다.
