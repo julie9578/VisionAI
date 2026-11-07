@@ -22,7 +22,7 @@
       <nav class="nav-links" aria-label="메인 메뉴"><a class="active" href="#games">게임 탐색</a><a href="#daily">오늘의 게임</a><a href="board.html">게시판</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
       <div class="nav-actions">
         <label class="search"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="searchInput" type="search" placeholder="게임 검색..." aria-label="게임 검색"></label>
-        <button class="avatar" type="button" aria-label="프로필" id="profileButton">👾</button>
+        <a class="avatar" href="login.html" aria-label="로그인 후 프로필 보기" id="profileButton">👾</a>
       </div>
     </div>
   </header>
@@ -52,21 +52,7 @@
   <footer><div class="shell"><a class="footer-logo" href="#home">ARCADE</a><span>게임을 발견하고, 공식 사이트에서 더 알아보세요.</span><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <dialog class="profile-dialog" id="profileDialog" aria-labelledby="profileTitle">
-    <div class="profile-dialog-header">
-      <div><p class="section-kicker">PLAYER CARD</p><h2 id="profileTitle">나의 프로필</h2></div>
-      <button class="profile-close" id="closeProfileButton" type="button" aria-label="프로필 닫기">×</button>
-    </div>
-    <div class="profile-card">
-      <div class="profile-avatar" aria-hidden="true">👾</div>
-      <div class="profile-identity"><strong id="profileName">아케이드 게이머</strong><span>오늘도 즐겁게 플레이 중</span></div>
-      <button class="profile-edit" id="editProfileButton" type="button">이름 변경</button>
-    </div>
-    <div class="profile-level-row"><span>LEVEL 08</span><span>640 / 1,000 XP</span></div>
-    <div class="profile-progress" role="progressbar" aria-label="레벨 진행도" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="640"><span></span></div>
-    <div class="profile-stats"><div><strong id="favoriteCount">0</strong><span>즐겨찾기</span></div><div><strong>12</strong><span>이번 주 플레이</span></div><div><strong>8</strong><span>수집 배지</span></div></div>
-    <p class="profile-hint">즐겨찾기한 게임은 이 기기에 저장됩니다.</p>
-  </dialog>
+
 
   <dialog class="roulette-dialog" id="rouletteDialog" aria-labelledby="rouletteTitle">
     <button class="roulette-close" id="closeRouletteButton" type="button" aria-label="팝업 닫기">×</button>

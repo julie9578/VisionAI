@@ -21,7 +21,7 @@ function corsHeaders(request, env) {
   if (origin && allowed.has(origin)) {
     return {
       "access-control-allow-origin": origin,
-      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-methods": "GET, POST, PUT, OPTIONS",
       "access-control-allow-headers": "content-type, authorization",
       "access-control-max-age": "86400",
       vary: "Origin",
@@ -103,7 +103,7 @@ async function readSession(request, secret) {
 }
 
 function publicUser(user) {
-  return { id: user.id, nickname: user.nickname, email: user.email, gender: user.gender, created_at: user.created_at };
+  return { id: user.id, nickname: user.nickname, email: user.email, gender: user.gender, bio: user.bio || "", avatar_color: user.avatar_color || "violet", created_at: user.created_at };
 }
 
 async function handleAuth(request, env, url, headers) {
@@ -128,7 +128,7 @@ async function handleAuth(request, env, url, headers) {
     try {
       const inserted = await env.DB.prepare("INSERT INTO users (nickname, email, gender, address_ciphertext, address_iv, password_hash, password_salt) VALUES (?, ?, ?, ?, ?, ?, ?)")
         .bind(nickname, email, gender, encryptedAddress.ciphertext, encryptedAddress.iv, toBase64Url(passwordHash), toBase64Url(salt)).run();
-      const user = await env.DB.prepare("SELECT id, nickname, email, gender, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
+      const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
       const token = await signSession(user.id, env.SESSION_SECRET);
       return json({ user, token }, 201, headers);
     } catch (error) {
@@ -143,7 +143,7 @@ async function handleAuth(request, env, url, headers) {
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
     if (!user || !password) return json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, 401, headers);
     const candidate = await hashPassword(password, fromBase64Url(user.password_salt));
     const expected = fromBase64Url(user.password_hash);
@@ -156,8 +156,27 @@ async function handleAuth(request, env, url, headers) {
 
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const userId = await readSession(request, env.SESSION_SECRET);
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
+    return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
+  }
+
+  if (url.pathname === "/api/auth/me" && request.method === "PUT") {
+    const userId = await readSession(request, env.SESSION_SECRET);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, created_at FROM users WHERE id = ?").bind(userId).first();
+    let body;
+    try { body = await request.json(); }
+    catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+    const nickname = typeof body.nickname === "string" ? body.nickname.trim() : "";
+    const gender = typeof body.gender === "string" ? body.gender : "";
+    const bio = typeof body.bio === "string" ? body.bio.trim() : "";
+    const avatarColor = typeof body.avatar_color === "string" ? body.avatar_color : "violet";
+    if (nickname.length < 2 || nickname.length > 30) return json({ error: "닉네임은 2~30자로 입력해 주세요." }, 400, headers);
+    if (!["female", "male", "nonbinary", "prefer_not_to_say"].includes(gender)) return json({ error: "성별 항목을 선택해 주세요." }, 400, headers);
+    if (bio.length > 240) return json({ error: "소개는 240자 이내로 입력해 주세요." }, 400, headers);
+    if (!["violet", "cyan", "rose", "amber"].includes(avatarColor)) return json({ error: "올바르지 않은 아바타 색상입니다." }, 400, headers);
+
+    await env.DB.prepare("UPDATE users SET nickname = ?, gender = ?, bio = ?, avatar_color = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?").bind(nickname, gender, bio, avatarColor, userId).run();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
@@ -178,9 +197,16 @@ async function handleApi(request, env, url) {
     if (authResponse) return authResponse;
   }
 
-  if (url.pathname.startsWith("/api/auth/")) {
-    const authResponse = await handleAuth(request, env, url, headers);
-    if (authResponse) return authResponse;
+  const publicUserMatch = url.pathname.match(/^\/api\/users\/(\d+)$/);
+  if (publicUserMatch && request.method === "GET") {
+    const user = await env.DB.prepare("SELECT id, nickname, bio, avatar_color, created_at FROM users WHERE id = ?").bind(Number(publicUserMatch[1])).first();
+    return user ? json({ user }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
+  }
+  if (url.pathname === "/api/users" && request.method === "GET") {
+    const nickname = (url.searchParams.get("nickname") || "").trim().slice(0, 30);
+    if (!nickname) return json({ error: "닉네임이 필요합니다." }, 400, headers);
+    const user = await env.DB.prepare("SELECT id, nickname, bio, avatar_color, created_at FROM users WHERE nickname = ? COLLATE NOCASE").bind(nickname).first();
+    return user ? json({ user }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
   if (url.pathname === "/api/posts" && request.method === "GET") {
@@ -195,34 +221,89 @@ async function handleApi(request, env, url) {
     if (query) { conditions.push("(title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')"); const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`; values.push(escaped, escaped); }
     const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
     const offset = (page - 1) * PAGE_SIZE;
+    const viewerId = await readSession(request, env.SESSION_SECRET);
     const [count, result] = await Promise.all([
       env.DB.prepare(`SELECT COUNT(*) AS total FROM posts ${where}`).bind(...values).first(),
-      env.DB.prepare(`SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`).bind(...values, PAGE_SIZE, offset).all(),
+      env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'bookmark') AS bookmarks_count,
+        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
+        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
+        FROM posts p ${where} ORDER BY p.created_at DESC, p.id DESC LIMIT ? OFFSET ?`).bind(viewerId, viewerId, viewerId, viewerId, ...values, PAGE_SIZE, offset).all(),
     ]);
     return json({ posts: result.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
   }
 
+  const commentsMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/comments$/);
+  if (commentsMatch && request.method === "GET") {
+    const postId = Number(commentsMatch[1]);
+    const post = await env.DB.prepare("SELECT id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+    if (!post) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+    const comments = await env.DB.prepare("SELECT i.id, i.content, i.created_at, u.id AS author_id, u.nickname AS author FROM post_interactions i JOIN users u ON u.id = i.user_id WHERE i.post_id = ? AND i.interaction_type = 'comment' ORDER BY i.created_at ASC, i.id ASC").bind(postId).all();
+    return json({ comments: comments.results }, 200, headers);
+  }
+
+  if (commentsMatch && request.method === "POST") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "댓글 작성은 로그인 후 이용할 수 있습니다." }, 401, headers);
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+    const content = typeof body.content === "string" ? body.content.trim() : "";
+    if (!content || content.length > 2000) return json({ error: "댓글은 1~2,000자로 입력해 주세요." }, 400, headers);
+    const postId = Number(commentsMatch[1]);
+    const result = await env.DB.prepare("INSERT INTO post_interactions (post_id, user_id, interaction_type, content) SELECT id, ?, 'comment', ? FROM posts WHERE id = ? AND deleted_at IS NULL").bind(userId, content, postId).run();
+    if (!result.meta.changes) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+    return json({ ok: true, id: result.meta.last_row_id }, 201, headers);
+  }
+
+  const reactionMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/(like|bookmark)$/);
+  if (reactionMatch && ["PUT", "DELETE"].includes(request.method)) {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "좋아요와 북마크는 로그인 후 이용할 수 있습니다." }, 401, headers);
+    const postId = Number(reactionMatch[1]);
+    const interactionType = reactionMatch[2];
+    const post = await env.DB.prepare("SELECT id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+    if (!post) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+    if (request.method === "PUT") {
+      await env.DB.prepare("INSERT OR IGNORE INTO post_interactions (post_id, user_id, interaction_type) VALUES (?, ?, ?)").bind(postId, userId, interactionType).run();
+    } else {
+      await env.DB.prepare("DELETE FROM post_interactions WHERE post_id = ? AND user_id = ? AND interaction_type = ?").bind(postId, userId, interactionType).run();
+    }
+    return json({ ok: true, active: request.method === "PUT" }, 200, headers);
+  }
+
   const singleMatch = url.pathname.match(/^\/api\/posts\/(\d+)$/);
   if (singleMatch && request.method === "GET") {
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NULL").bind(Number(singleMatch[1])).first();
+    const postId = Number(singleMatch[1]);
+    const viewerId = await readSession(request, env.SESSION_SECRET);
+    const post = await env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
+      (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
+      (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
+      (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'bookmark') AS bookmarks_count,
+      CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
+      CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
+      FROM posts p WHERE p.id = ? AND p.deleted_at IS NULL`).bind(viewerId, viewerId, viewerId, viewerId, postId).first();
     return post ? json({ post }, 200, headers) : json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
   }
 
   if (url.pathname === "/api/posts" && request.method === "POST") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "게시글 작성은 로그인 후 이용할 수 있습니다." }, 401, headers);
     let body;
     try { body = await request.json(); }
     catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const category = typeof body.category === "string" ? body.category.trim() : "";
     const title = typeof body.title === "string" ? body.title.trim() : "";
     const content = typeof body.content === "string" ? body.content.trim() : "";
-    const author = typeof body.author === "string" ? body.author.trim() : "";
     if (!ALLOWED_CATEGORIES.has(category)) return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
     if (!title || title.length > 160) return json({ error: "제목은 1~160자로 입력해 주세요." }, 400, headers);
     if (!content || content.length > 10000) return json({ error: "내용은 1~10,000자로 입력해 주세요." }, 400, headers);
-    if (!author || author.length > 40) return json({ error: "작성자 이름은 1~40자로 입력해 주세요." }, 400, headers);
+    const authorUser = await env.DB.prepare("SELECT nickname FROM users WHERE id = ?").bind(userId).first();
+    if (!authorUser) return json({ error: "사용자 계정을 찾을 수 없습니다." }, 401, headers);
 
-    const result = await env.DB.prepare("INSERT INTO posts (category, title, content, author) VALUES (?, ?, ?, ?)").bind(category, title, content, author).run();
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, created_at, updated_at, deleted_at FROM posts WHERE id = ?").bind(result.meta.last_row_id).first();
+    const result = await env.DB.prepare("INSERT INTO posts (category, title, content, author, author_id) VALUES (?, ?, ?, ?, ?)").bind(category, title, content, authorUser.nickname, userId).run();
+    const post = await env.DB.prepare("SELECT id, category, title, content, author, author_id, created_at, updated_at, deleted_at FROM posts WHERE id = ?").bind(result.meta.last_row_id).first();
     return json({ post }, 201, headers);
   }
 
