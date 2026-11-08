@@ -21,6 +21,15 @@
 .detail-section-heading { margin-bottom: 16px; }
 .detail-section-heading .section-kicker { margin-bottom: 7px; }
 .detail-section-heading h2 { margin: 0; font-size: 20px; }
+.latest-news { margin-top: 42px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, #1b1a29, #151421); }
+.latest-news .detail-section-heading { margin-bottom: 12px; }
+.latest-news-item { display: grid; gap: 7px; padding: 15px 16px; border: 1px solid #ffffff12; border-radius: 12px; background: #ffffff05; }
+.latest-news-item time, .latest-news-source { color: var(--muted); font-size: 11px; }
+.latest-news-item a { color: #eee9fa; font-size: 14px; font-weight: 600; line-height: 1.55; }
+.latest-news-item a:hover, .latest-news-hub:hover { color: #d5c2ff; }
+.latest-news-source { font-size: 10px; }
+.latest-news-empty { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.latest-news-hub { display: inline-flex; gap: 5px; margin-top: 13px; color: #c8b5ff; font-size: 11px; font-weight: 600; }
 .screenshot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .screenshot-card { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
 .screenshot-card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #171522; }
