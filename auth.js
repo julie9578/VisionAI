@@ -1,4 +1,22 @@
 (() => {
+  window.dataLayer = window.dataLayer || [];
+  if (!window.__arcadeGtmLoaded) {
+    window.__arcadeGtmLoaded = true;
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+    const gtmScript = document.createElement('script');
+    gtmScript.async = true;
+    gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-W6VF6X92';
+    document.head.append(gtmScript);
+  }
+  window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', 'G-TZTL3TCNB5');
+
+  function trackAuthEvent(event) {
+    window.dataLayer.push({ event });
+    window.gtag('event', event);
+  }
+
   const apiBase = 'https://arcade-board-api.nextarcade.workers.dev';
   const tokenKey = 'arcade-session-token';
   const signupForm = document.getElementById('signupForm');
@@ -306,6 +324,7 @@
           }),
         });
         saveToken(data.token);
+        trackAuthEvent('sign_up');
         setMessage(message, '가입이 완료됐습니다. 프로필 페이지로 이동합니다.', true);
         window.location.assign('profile.html');
       } catch (error) {
@@ -464,6 +483,7 @@
           body: JSON.stringify({ email: form.get('email'), password: form.get('password') }),
         });
         saveToken(data.token);
+        trackAuthEvent('login');
         setMessage(message, '로그인됐습니다. 내 프로필 페이지로 이동합니다.', true);
         window.location.assign(loginDestination);
       } catch (error) {
