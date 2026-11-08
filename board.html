@@ -34,7 +34,6 @@
           <p class="section-kicker">COMMUNITY BOARD</p>
           <h2 id="postListTitle">전체 게시글 <span>24</span></h2>
         </div>
-        <a class="button board-write" href="post-write.html" target="_blank" aria-label="새 탭에서 글쓰기 페이지 열기">✎ 글쓰기</a>
       </div>
 
       <div class="board-toolbar">
@@ -44,8 +43,24 @@
           <button class="category-chip" type="button" data-category="recommend" aria-pressed="false">게임 추천</button>
           <button class="category-chip" type="button" data-category="guide" aria-pressed="false">공략·팁</button>
           <button class="category-chip" type="button" data-category="recruit" aria-pressed="false">모집</button>
+          <button class="category-chip" type="button" data-category="notice" aria-pressed="false">공지</button>
         </nav>
         <form class="board-search" id="boardSearchForm" role="search">
+          <label class="visually-hidden" for="boardSearchCategory">검색할 게시판 분류</label>
+          <select id="boardSearchCategory" name="category" aria-label="검색할 게시판 분류">
+            <option value="">전체 분류</option>
+            <option value="free">자유</option>
+            <option value="recommend">게임 추천</option>
+            <option value="guide">공략·팁</option>
+            <option value="recruit">모집</option>
+            <option value="notice">공지</option>
+          </select>
+          <label class="visually-hidden" for="boardSearchScope">검색 범위</label>
+          <select id="boardSearchScope" name="scope" aria-label="검색 범위">
+            <option value="all">글+댓글</option>
+            <option value="title">제목만</option>
+            <option value="author">글작성자</option>
+          </select>
           <label class="visually-hidden" for="boardQuery">게시글 검색어</label>
           <input id="boardQuery" name="q" type="search" placeholder="게시글 검색" />
           <button type="submit" aria-label="검색">⌕</button>
@@ -61,12 +76,9 @@
         </table>
       </div>
 
-      <nav class="board-pagination" aria-label="게시글 페이지">
-        <button class="page-arrow disabled" type="button" aria-label="이전 페이지" disabled>‹</button>
-        <button class="page-number active" type="button" aria-current="page">1</button>
-        <button class="page-arrow" type="button" aria-label="다음 페이지" disabled>›</button>
-      </nav>
+      <nav class="board-pagination" id="boardPagination" aria-label="게시글 페이지"></nav>
       <p class="board-note" id="write-info">글 작성, 댓글, 좋아요와 북마크는 로그인한 회원만 이용할 수 있습니다.</p>
+      <div class="board-bottom-actions"><a class="button board-write" href="post-write.html" target="_blank" aria-label="새 탭에서 글쓰기 페이지 열기">✎ 글쓰기</a></div>
     </section>
   </main>
 

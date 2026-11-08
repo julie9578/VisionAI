@@ -1,5 +1,5 @@
 const ALLOWED_CATEGORIES = new Set(["free", "recommend", "guide", "recruit", "notice"]);
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 // Cloudflare Workers Web Crypto currently rejects PBKDF2 counts above 100,000.
 const PASSWORD_ITERATIONS = 100000;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -217,21 +217,76 @@ async function handleApi(request, env, url) {
     return json({ posts: result.results }, 200, headers);
   }
 
+  if (url.pathname === "/api/users/me/comments" && request.method === "GET") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+    const result = await env.DB.prepare("SELECT i.id, i.post_id, i.content, i.created_at, p.title AS post_title, p.deleted_at AS post_deleted_at FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = 'comment' ORDER BY i.created_at DESC, i.id DESC LIMIT 100").bind(userId).all();
+    return json({ comments: result.results }, 200, headers);
+  }
+
+  if (url.pathname === "/api/users/me/commented-posts" && request.method === "GET") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+    const result = await env.DB.prepare("SELECT p.id, p.category, p.title, p.author, p.created_at, MAX(i.created_at) AS activity_at, COUNT(i.id) AS my_comment_count FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = 'comment' AND p.deleted_at IS NULL GROUP BY p.id ORDER BY activity_at DESC, p.id DESC LIMIT 100").bind(userId).all();
+    return json({ posts: result.results }, 200, headers);
+  }
+
+  for (const [route, interactionType] of [["liked-posts", "like"], ["bookmarked-posts", "bookmark"]]) {
+    if (url.pathname === `/api/users/me/${route}` && request.method === "GET") {
+      const userId = await readSession(request, env.SESSION_SECRET);
+      if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+      const result = await env.DB.prepare("SELECT p.id, p.category, p.title, p.author, p.created_at, i.created_at AS activity_at FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = ? AND p.deleted_at IS NULL ORDER BY i.created_at DESC, p.id DESC LIMIT 100").bind(userId, interactionType).all();
+      return json({ posts: result.results }, 200, headers);
+    }
+  }
+
   if (url.pathname === "/api/posts" && request.method === "GET") {
     const page = Math.max(1, Math.min(10000, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1));
     const category = url.searchParams.get("category") || "";
     const query = (url.searchParams.get("q") || "").trim().slice(0, 100);
+    const searchScope = url.searchParams.get("scope") || "all";
     if (category && !ALLOWED_CATEGORIES.has(category)) return json({ error: "올바르지 않은 분류입니다." }, 400, headers);
+    if (!["all", "title", "author"].includes(searchScope)) return json({ error: "올바르지 않은 검색 범위입니다." }, 400, headers);
 
-    const conditions = ["deleted_at IS NULL"];
+    const conditions = ["p.deleted_at IS NULL", "p.category != 'notice'"];
     const values = [];
-    if (category) { conditions.push("category = ?"); values.push(category); }
-    if (query) { conditions.push("(title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')"); const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`; values.push(escaped, escaped); }
-    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    if (category === "notice") conditions.push("1 = 0");
+    else if (category) { conditions.push("p.category = ?"); values.push(category); }
+    if (query) {
+      const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+      if (searchScope === "title") {
+        conditions.push("p.title LIKE ? ESCAPE '\\'");
+        values.push(escaped);
+      } else if (searchScope === "author") {
+        conditions.push("p.author LIKE ? ESCAPE '\\'");
+        values.push(escaped);
+      } else {
+        conditions.push("(p.title LIKE ? ESCAPE '\\' OR p.content LIKE ? ESCAPE '\\' OR EXISTS (SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment' AND i.content LIKE ? ESCAPE '\\'))");
+        values.push(escaped, escaped, escaped);
+      }
+    }
+    const where = `WHERE ${conditions.join(" AND ")}`;
     const offset = (page - 1) * PAGE_SIZE;
     const viewerId = await readSession(request, env.SESSION_SECRET);
-    const [count, result] = await Promise.all([
-      env.DB.prepare(`SELECT COUNT(*) AS total FROM posts ${where}`).bind(...values).first(),
+    const noticeConditions = ["p.deleted_at IS NULL", "p.category = 'notice'"];
+    const noticeValues = [];
+    if (category && category !== "notice") noticeConditions.push("1 = 0");
+    if (query) {
+      const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+      if (searchScope === "title") {
+        noticeConditions.push("p.title LIKE ? ESCAPE '\\'");
+        noticeValues.push(escaped);
+      } else if (searchScope === "author") {
+        noticeConditions.push("p.author LIKE ? ESCAPE '\\'");
+        noticeValues.push(escaped);
+      } else {
+        noticeConditions.push("(p.title LIKE ? ESCAPE '\\' OR p.content LIKE ? ESCAPE '\\' OR EXISTS (SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment' AND i.content LIKE ? ESCAPE '\\'))");
+        noticeValues.push(escaped, escaped, escaped);
+      }
+    }
+    const noticeWhere = `WHERE ${noticeConditions.join(" AND ")}`;
+    const [count, result, notices] = await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) AS total FROM posts p ${where}`).bind(...values).first(),
       env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
         (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
         (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
@@ -239,8 +294,15 @@ async function handleApi(request, env, url) {
         CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
         CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
         FROM posts p ${where} ORDER BY p.created_at DESC, p.id DESC LIMIT ? OFFSET ?`).bind(viewerId, viewerId, viewerId, viewerId, ...values, PAGE_SIZE, offset).all(),
+      env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
+        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'bookmark') AS bookmarks_count,
+        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
+        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
+        FROM posts p ${noticeWhere} ORDER BY p.created_at DESC, p.id DESC`).bind(viewerId, viewerId, viewerId, viewerId, ...noticeValues).all(),
     ]);
-    return json({ posts: result.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
+    return json({ posts: result.results, notices: notices.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
   }
 
   const commentsMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/comments$/);
@@ -282,6 +344,38 @@ async function handleApi(request, env, url) {
   }
 
   const singleMatch = url.pathname.match(/^\/api\/posts\/(\d+)$/);
+  if (singleMatch && request.method === "GET" && url.searchParams.get("include_deleted") === "1") {
+    const postId = Number(singleMatch[1]);
+    const post = await env.DB.prepare("SELECT id, category, title, content, author, author_id, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NOT NULL").bind(postId).first();
+    return post ? json({ post, deleted: true }, 200, headers) : json({ error: "삭제된 게시글을 찾을 수 없습니다." }, 404, headers);
+  }
+  if (singleMatch && ["PUT", "DELETE"].includes(request.method)) {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "게시글 수정과 삭제는 로그인 후 이용할 수 있습니다." }, 401, headers);
+    const postId = Number(singleMatch[1]);
+    const existing = await env.DB.prepare("SELECT id, author_id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+    if (!existing) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+    if (Number(existing.author_id) !== userId) return json({ error: "본인이 작성한 게시글만 수정하거나 삭제할 수 있습니다." }, 403, headers);
+
+    if (request.method === "DELETE") {
+      await env.DB.prepare("UPDATE posts SET deleted_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND author_id = ? AND deleted_at IS NULL").bind(postId, userId).run();
+      return json({ ok: true, deleted: true }, 200, headers);
+    }
+
+    let body;
+    try { body = await request.json(); }
+    catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+    const category = typeof body.category === "string" ? body.category.trim() : "";
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const content = typeof body.content === "string" ? body.content.trim() : "";
+    if (!ALLOWED_CATEGORIES.has(category) || category === "notice") return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
+    if (!title || title.length > 160) return json({ error: "제목은 1~160자로 입력해 주세요." }, 400, headers);
+    if (!content || content.length > 10000) return json({ error: "내용은 1~10,000자로 입력해 주세요." }, 400, headers);
+    await env.DB.prepare("UPDATE posts SET category = ?, title = ?, content = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND author_id = ? AND deleted_at IS NULL").bind(category, title, content, postId, userId).run();
+    const post = await env.DB.prepare("SELECT id, category, title, content, author, author_id, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+    return json({ post }, 200, headers);
+  }
+
   if (singleMatch && request.method === "GET") {
     const postId = Number(singleMatch[1]);
     const viewerId = await readSession(request, env.SESSION_SECRET);

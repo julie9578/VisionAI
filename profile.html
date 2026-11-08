@@ -63,8 +63,33 @@
         </section>
         <section class="profile-panel" id="my-posts" aria-labelledby="myPostsTitle">
           <div class="profile-panel-heading"><div><h2 id="myPostsTitle">내가 작성한 게시글</h2><p>게시판에 작성한 글이 최신순으로 표시됩니다.</p></div><span class="profile-section-icon" aria-hidden="true">✎</span></div>
-          <p class="profile-post-status" id="profilePostsStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
-          <ul class="profile-post-list" id="profilePostList" aria-label="내가 작성한 게시글 목록"></ul>
+          <div class="profile-activity-tabs" role="tablist" aria-label="내 게시판 활동">
+            <button class="profile-activity-tab active" id="profilePostsTab" type="button" role="tab" aria-selected="true" aria-controls="profilePostsPanel" data-activity-tab="posts">작성한 게시글</button>
+            <button class="profile-activity-tab" id="profileCommentsTab" type="button" role="tab" aria-selected="false" aria-controls="profileCommentsPanel" data-activity-tab="comments">작성한 댓글</button>
+            <button class="profile-activity-tab" id="profileCommentedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileCommentedPostsPanel" data-activity-tab="commented-posts">댓글 단 글</button>
+            <button class="profile-activity-tab" id="profileLikedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileLikedPostsPanel" data-activity-tab="liked-posts">좋아요한 글</button>
+            <button class="profile-activity-tab" id="profileBookmarkedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileBookmarkedPostsPanel" data-activity-tab="bookmarked-posts">북마크한 글</button>
+          </div>
+          <div class="profile-activity-panel" id="profilePostsPanel" role="tabpanel" aria-labelledby="profilePostsTab">
+            <p class="profile-post-status" id="profilePostsStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
+            <ul class="profile-post-list" id="profilePostList" aria-label="내가 작성한 게시글 목록"></ul>
+          </div>
+          <div class="profile-activity-panel" id="profileCommentsPanel" role="tabpanel" aria-labelledby="profileCommentsTab" hidden>
+            <p class="profile-post-status" id="profileCommentsStatus" role="status" aria-live="polite">댓글을 불러오는 중…</p>
+            <ul class="profile-post-list profile-comment-list" id="profileCommentList" aria-label="내가 작성한 댓글 목록"></ul>
+          </div>
+          <div class="profile-activity-panel" id="profileCommentedPostsPanel" role="tabpanel" aria-labelledby="profileCommentedPostsTab" hidden>
+            <p class="profile-post-status" id="profileCommentedPostsStatus" role="status" aria-live="polite">댓글 단 게시글을 불러오는 중…</p>
+            <ul class="profile-post-list" id="profileCommentedPostsList" aria-label="내가 댓글을 단 게시글 목록"></ul>
+          </div>
+          <div class="profile-activity-panel" id="profileLikedPostsPanel" role="tabpanel" aria-labelledby="profileLikedPostsTab" hidden>
+            <p class="profile-post-status" id="profileLikedPostsStatus" role="status" aria-live="polite">좋아요한 게시글을 불러오는 중…</p>
+            <ul class="profile-post-list" id="profileLikedPostsList" aria-label="내가 좋아요한 게시글 목록"></ul>
+          </div>
+          <div class="profile-activity-panel" id="profileBookmarkedPostsPanel" role="tabpanel" aria-labelledby="profileBookmarkedPostsTab" hidden>
+            <p class="profile-post-status" id="profileBookmarkedPostsStatus" role="status" aria-live="polite">북마크한 게시글을 불러오는 중…</p>
+            <ul class="profile-post-list" id="profileBookmarkedPostsList" aria-label="내가 북마크한 게시글 목록"></ul>
+          </div>
         </section>
         <section class="profile-panel" id="account-info" aria-labelledby="accountInfoTitle">
           <div class="profile-panel-heading"><div><h2 id="accountInfoTitle">계정 정보</h2><p>이메일과 가입 시 선택한 정보를 확인합니다.</p></div><span class="profile-section-icon" aria-hidden="true">♧</span></div>

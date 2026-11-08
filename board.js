@@ -5,10 +5,16 @@
   const status = document.getElementById('boardStatus');
   const searchForm = document.getElementById('boardSearchForm');
   const searchInput = document.getElementById('boardQuery');
+  const searchCategory = document.getElementById('boardSearchCategory');
+  const searchScope = document.getElementById('boardSearchScope');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
   const writeButton = document.querySelector('.board-write');
+  const pagination = document.getElementById('boardPagination');
   let selectedCategory = '';
+  let selectedPage = 1;
   let query = new URLSearchParams(window.location.search).get('q') || '';
+  let selectedSearchScope = new URLSearchParams(window.location.search).get('scope') || 'all';
+  let selectedCategoryFromUrl = new URLSearchParams(window.location.search).get('category') || '';
   let apiAvailable = true;
 
   const categoryLabels = {
@@ -38,48 +44,49 @@
       rows.innerHTML = posts.map(post => {
         const category = categoryLabels[post.category] || '자유';
         const authorHref = post.author_id ? `user.html?id=${encodeURIComponent(post.author_id)}` : `user.html?name=${encodeURIComponent(post.author || '운영팀')}`;
-        return `<tr>
+        const noticeClass = post.category === 'notice' ? 'notice-row' : '';
+        return `<tr class="${noticeClass}">
           <td><span class="post-badge ${escapeHtml(post.category)}">${escapeHtml(category)}</span></td>
-          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)} <span class="reply-count">[${Number(post.comments_count) || 0}]</span></a></td>
+          <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${post.category === 'notice' ? '<span class="notice-pin" aria-label="고정 공지">📌</span>' : ''}${escapeHtml(post.title)} <span class="reply-count">[${Number(post.comments_count) || 0}]</span></a></td>
           <td class="post-author"><a href="${authorHref}">${escapeHtml(post.author)}</a></td>
           <td class="post-date">${escapeHtml(formatDate(post.created_at))}</td>
           <td class="post-views">—</td>
-          <td class="post-actions"><button class="post-reaction ${post.liked_by_me ? 'active' : ''}" type="button" data-reaction="like" data-post-id="${post.id}" aria-pressed="${Boolean(post.liked_by_me)}" aria-label="좋아요">♥ <span>${Number(post.likes_count) || 0}</span></button><button class="post-reaction ${post.bookmarked_by_me ? 'active' : ''}" type="button" data-reaction="bookmark" data-post-id="${post.id}" aria-pressed="${Boolean(post.bookmarked_by_me)}" aria-label="북마크">▣ <span>${Number(post.bookmarks_count) || 0}</span></button></td>
+          <td class="post-actions"><span class="post-reaction-count" aria-label="좋아요 ${Number(post.likes_count) || 0}개">♥ <span>${Number(post.likes_count) || 0}</span></span><span class="post-reaction-count" aria-label="북마크 ${Number(post.bookmarks_count) || 0}개">▣ <span>${Number(post.bookmarks_count) || 0}</span></span></td>
         </tr>`;
       }).join('');
     }
     document.getElementById('postListTitle').innerHTML = `전체 게시글 <span>${Number(total) || 0}</span>`;
-    rows.querySelectorAll('.post-reaction').forEach(button => button.addEventListener('click', () => toggleReaction(button)));
   }
 
-  async function toggleReaction(button) {
-    const authToken = sessionStorage.getItem(tokenKey);
-    if (!authToken) {
-      window.location.assign(`login.html?next=${encodeURIComponent('board.html')}`);
+  function renderPagination(page, total, pageSize) {
+    const pageCount = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
+    if (pageCount <= 1) {
+      pagination.innerHTML = '';
+      pagination.hidden = true;
       return;
     }
-    const postId = button.dataset.postId;
-    const method = button.getAttribute('aria-pressed') === 'true' ? 'DELETE' : 'PUT';
-    button.disabled = true;
-    try {
-      const response = await fetch(`${apiBase}/api/posts/${postId}/${button.dataset.reaction}`, {
-        method,
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || '반응을 저장하지 못했습니다.');
-      await loadPosts();
-    } catch (error) {
-      status.textContent = error.message;
-    } finally {
-      button.disabled = false;
+    pagination.hidden = false;
+    const items = [];
+    items.push(`<button class="page-arrow ${page <= 1 ? 'disabled' : ''}" type="button" data-page="${page - 1}" aria-label="이전 페이지" ${page <= 1 ? 'disabled' : ''}>‹</button>`);
+    for (let number = 1; number <= pageCount; number += 1) {
+      items.push(`<button class="page-number ${number === page ? 'active' : ''}" type="button" data-page="${number}" ${number === page ? 'aria-current="page"' : ''}>${number}</button>`);
     }
+    items.push(`<button class="page-arrow ${page >= pageCount ? 'disabled' : ''}" type="button" data-page="${page + 1}" aria-label="다음 페이지" ${page >= pageCount ? 'disabled' : ''}>›</button>`);
+    pagination.innerHTML = items.join('');
+    pagination.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => {
+      if (button.disabled) return;
+      selectedPage = Number(button.dataset.page);
+      loadPosts();
+      document.getElementById('all-posts').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
   }
 
   async function loadPosts() {
     const params = new URLSearchParams();
     if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedSearchScope) params.set('scope', selectedSearchScope);
     if (query) params.set('q', query);
+    params.set('page', String(selectedPage));
     status.textContent = '게시글을 불러오는 중…';
     try {
       const requestHeaders = { accept: 'application/json' };
@@ -88,7 +95,10 @@
       const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: requestHeaders });
       if (!response.ok) throw new Error(`API ${response.status}`);
       const data = await response.json();
-      renderPosts(data.posts || [], data.total);
+      const notices = data.notices || [];
+      const posts = data.posts || [];
+      renderPosts([...notices, ...posts], Number(data.total) + notices.length);
+      renderPagination(data.page || selectedPage, data.total, data.pageSize || 10);
       status.textContent = '';
       apiAvailable = true;
     } catch {
@@ -98,14 +108,36 @@
   }
 
   searchInput.value = query;
+  searchCategory.value = selectedCategoryFromUrl;
+  searchScope.value = selectedSearchScope;
+  if (selectedCategoryFromUrl) {
+    selectedCategory = selectedCategoryFromUrl;
+    categoryButtons.forEach(button => {
+      const selected = button.dataset.category === selectedCategory;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  }
   searchForm.addEventListener('submit', event => {
     event.preventDefault();
     query = searchInput.value.trim();
+    selectedCategory = searchCategory.value;
+    selectedCategoryFromUrl = selectedCategory;
+    selectedSearchScope = searchScope.value || 'all';
+    categoryButtons.forEach(button => {
+      const selected = button.dataset.category === selectedCategory;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    selectedPage = 1;
     loadPosts();
   });
 
   categoryButtons.forEach(button => button.addEventListener('click', () => {
     selectedCategory = button.dataset.category;
+    selectedCategoryFromUrl = selectedCategory;
+    searchCategory.value = selectedCategory;
+    selectedPage = 1;
     categoryButtons.forEach(item => {
       const selected = item === button;
       item.classList.toggle('active', selected);
@@ -113,6 +145,18 @@
     });
     loadPosts();
   }));
+
+  searchCategory.addEventListener('change', () => {
+    selectedCategory = searchCategory.value;
+    selectedCategoryFromUrl = selectedCategory;
+    categoryButtons.forEach(button => {
+      const selected = button.dataset.category === selectedCategory;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    selectedPage = 1;
+    loadPosts();
+  });
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();

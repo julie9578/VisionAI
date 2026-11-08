@@ -55,6 +55,91 @@
     }
   }
 
+  async function loadProfileComments() {
+    const list = document.getElementById('profileCommentList');
+    const status = document.getElementById('profileCommentsStatus');
+    if (!list || !status) return;
+    status.textContent = '댓글을 불러오는 중…';
+    try {
+      const data = await request('/api/users/me/comments');
+      const comments = Array.isArray(data.comments) ? data.comments : [];
+      if (!comments.length) {
+        status.textContent = '아직 작성한 댓글이 없습니다.';
+        return;
+      }
+      status.textContent = `${comments.length}개의 댓글`;
+      list.innerHTML = comments.map(comment => {
+        const date = new Date(comment.created_at);
+        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+        const postTitle = escapeHtml(comment.post_title || '삭제된 게시글');
+        const body = escapeHtml(comment.content);
+        const deletedLabel = comment.post_deleted_at ? '<span class="profile-deleted-post-label">삭제된 게시글</span>' : '';
+        const postLink = `post.html?id=${encodeURIComponent(comment.post_id)}${comment.post_deleted_at ? '&deleted=1' : ''}`;
+        const content = `<span class="profile-post-category">댓글</span><span class="profile-comment-copy"><strong>${postTitle}${deletedLabel}</strong><span>${body}</span></span><time datetime="${escapeHtml(comment.created_at)}">${escapeHtml(dateLabel)}</time>`;
+        return `<li class="profile-post-item profile-comment-item"><a href="${postLink}">${content}</a></li>`;
+      }).join('');
+    } catch (error) {
+      status.textContent = error.message || '댓글을 불러오지 못했습니다.';
+    }
+  }
+
+  async function loadProfilePostCollection(path, listId, statusId, emptyMessage, marker) {
+    const list = document.getElementById(listId);
+    const status = document.getElementById(statusId);
+    if (!list || !status) return;
+    status.textContent = '목록을 불러오는 중…';
+    try {
+      const data = await request(path);
+      const posts = Array.isArray(data.posts) ? data.posts : [];
+      if (!posts.length) {
+        status.textContent = emptyMessage;
+        list.innerHTML = '';
+        return;
+      }
+      status.textContent = `${posts.length}개의 게시글`;
+      list.innerHTML = posts.map(post => {
+        const date = new Date(post.activity_at || post.created_at);
+        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+        const category = escapeHtml(({ free: '자유', recommend: '게임 추천', guide: '공략·팁', recruit: '모집', notice: '공지' })[post.category] || '게시글');
+        const title = escapeHtml(post.title);
+        const detail = post.my_comment_count ? `<span class="profile-post-activity-count">댓글 ${Number(post.my_comment_count)}개</span>` : '';
+        return `<li class="profile-post-item"><a href="post.html?id=${encodeURIComponent(post.id)}"><span class="profile-post-category">${escapeHtml(marker || category)}</span><span class="profile-post-copy"><strong>${title}</strong>${detail}</span><time datetime="${escapeHtml(post.activity_at || post.created_at)}">${escapeHtml(dateLabel)}</time></a></li>`;
+      }).join('');
+    } catch (error) {
+      status.textContent = error.message || '목록을 불러오지 못했습니다.';
+    }
+  }
+
+  function initializeProfileActivityTabs() {
+    const tabs = [...document.querySelectorAll('[data-activity-tab]')];
+    const panels = {
+      posts: document.getElementById('profilePostsPanel'),
+      comments: document.getElementById('profileCommentsPanel'),
+      'commented-posts': document.getElementById('profileCommentedPostsPanel'),
+      'liked-posts': document.getElementById('profileLikedPostsPanel'),
+      'bookmarked-posts': document.getElementById('profileBookmarkedPostsPanel'),
+    };
+    const loaders = {
+      posts: loadProfilePosts,
+      comments: loadProfileComments,
+      'commented-posts': () => loadProfilePostCollection('/api/users/me/commented-posts', 'profileCommentedPostsList', 'profileCommentedPostsStatus', '아직 댓글 단 게시글이 없습니다.', '내 댓글'),
+      'liked-posts': () => loadProfilePostCollection('/api/users/me/liked-posts', 'profileLikedPostsList', 'profileLikedPostsStatus', '아직 좋아요한 게시글이 없습니다.', '♥ 좋아요'),
+      'bookmarked-posts': () => loadProfilePostCollection('/api/users/me/bookmarked-posts', 'profileBookmarkedPostsList', 'profileBookmarkedPostsStatus', '아직 북마크한 게시글이 없습니다.', '▣ 북마크'),
+    };
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      const selected = tab.dataset.activityTab;
+      tabs.forEach(item => {
+        const active = item === tab;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', String(active));
+        item.tabIndex = active ? 0 : -1;
+      });
+      for (const [name, panel] of Object.entries(panels)) panel.hidden = name !== selected;
+      if (token() && loaders[selected]) loaders[selected]();
+    }));
+    tabs.forEach((tab, index) => { tab.tabIndex = index === 0 ? 0 : -1; });
+  }
+
 
   if (signupForm) {
     signupForm.addEventListener('submit', async event => {
@@ -177,6 +262,7 @@
     const message = document.getElementById('profileMessage');
     const logoutButton = document.getElementById('profileLogout');
     const colorInputs = [...profileForm.querySelectorAll('input[name="avatar_color"]')];
+    initializeProfileActivityTabs();
     if (!token()) {
       showLoggedOutProfile();
     } else {
