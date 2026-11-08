@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://julie9578.github.io/VisionAI/sitemap.xml
+Sitemap: https://visionai-arcade.pages.dev/sitemap.xml

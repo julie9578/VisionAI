@@ -6,7 +6,8 @@
 
 - GitHub: <https://github.com/julie9578/VisionAI>
 - 로컬 기본 저장소: `C:\Users\user\Documents\VisionAI`
-- 정적 홈페이지: GitHub Pages, <https://julie9578.github.io/VisionAI/>
+- 공식 정적 홈페이지: Cloudflare Pages, <https://visionai-arcade.pages.dev/>
+- 레거시 GitHub Pages 미러: <https://julie9578.github.io/VisionAI/> (임의 HTTP 보안 헤더를 설정할 수 없어 공식 링크로 사용하지 않음)
 - API: Cloudflare Worker `arcade-board-api`, <https://arcade-board-api.nextarcade.workers.dev/>
 - D1 데이터베이스: `arcade-board` (`wrangler.jsonc`의 `DB` 바인딩)
 - 주요 프런트엔드 파일: `index.html`, `styles.css`, `script.js`, `game.html`, `game.css`
@@ -92,12 +93,14 @@ git diff --check
 - 스키마 변경은 새 migration 파일을 추가합니다. 원격 DB에 migration을 적용하거나 Worker를 배포하기 전에 대상 데이터베이스·프로젝트를 확인합니다.
 - 게시글 API와 회원 API를 따로 확인하고, HTTP 상태·CORS·응답 구조를 검증합니다. 비밀 키나 사용자 실데이터를 테스트 결과로 출력하지 않습니다.
 
-### GitHub Pages와 Worker 배포 구분
+### Cloudflare Pages, GitHub Pages 및 Worker 배포 구분
 
-- GitHub Pages는 `main` 루트의 정적 파일을 게시합니다. 사이트 파일 변경은 Pages 빌드 및 공개 URL의 실제 파일 내용까지 확인합니다.
+- Cloudflare Pages 프로젝트 `visionai-arcade`가 공식 정적 사이트입니다. `cloudflare-pages/_headers`의 HTTP 보안 헤더를 포함해 `scripts/deploy-cloudflare-pages.ps1`로 정적 파일만 올립니다.
+- GitHub Pages(`julie9578.github.io`)는 보안 헤더를 설정할 수 없는 레거시 미러입니다. 보안 헤더 수정을 GitHub Pages 응답에 적용됐다고 보고하지 않습니다.
+- 정적 사이트 변경은 Cloudflare Pages 배포와 공개 URL의 실제 파일 및 HTTP 응답 헤더를 확인합니다.
 - `wrangler.jsonc`는 `arcade-board-api` Worker와 D1 API를 설정합니다. 이 Worker는 정적 사이트와 별개입니다. Worker 루트 URL의 404만으로 API 배포 실패라고 판단하지 말고 `/api/...` 경로를 확인합니다.
-- README에 적힌 `https://arcade.nextarcade.workers.dev/`는 별도 확인 전까지 정상적인 정적 사이트 주소라고 가정하지 않습니다. 현재 확인된 GitHub Pages 주소를 기준 URL로 사용합니다.
-- “푸시”와 “배포”를 구분합니다. Git 푸시 성공, Pages 빌드 성공, Worker 배포 성공을 각각 독립적으로 검증해 보고합니다.
+- `https://arcade.nextarcade.workers.dev/`는 API Worker일 수 있으므로 홈페이지로 가정하지 않습니다. 확인된 공식 정적 사이트 주소를 사용합니다.
+- “푸시”와 “배포”를 구분합니다. Git 푸시, Cloudflare Pages 배포 및 Worker 배포를 각각 독립적으로 검증해 보고합니다.
 
 ## 5. 보안 및 데이터 보호
 
@@ -132,11 +135,11 @@ git diff --check
 
 ## 8. 배포와 최종 보고
 
-- GitHub Pages는 `main` 루트의 정적 파일을 게시합니다. 사이트 파일 변경 후 Pages build의 commit과 `built` 상태를 확인하고, 공개 URL에서 해당 HTML/CSS/JS의 새 내용을 읽어 검증합니다.
+- Cloudflare Pages는 `scripts/deploy-cloudflare-pages.ps1`로 `main`의 공개 정적 파일과 `cloudflare-pages/_headers`를 직접 업로드합니다. 배포 후 공식 URL에서 HTML/CSS/JS 및 네 보안 응답 헤더를 확인합니다.
 - `wrangler.jsonc`는 `arcade-board-api` Worker와 D1 API를 설정합니다. 이 Worker는 정적 사이트와 별개입니다. Worker 루트 URL의 404만으로 API 배포 실패라고 판단하지 말고 `/api/...` 경로를 확인합니다.
-- README에 적힌 `https://arcade.nextarcade.workers.dev/`는 별도 확인 전까지 정상적인 정적 사이트 주소라고 가정하지 않습니다. 현재 확인된 GitHub Pages 주소는 `https://julie9578.github.io/VisionAI/`입니다.
-- “로컬 파일 작성”, “GitHub 푸시”, “GitHub Pages 배포”, “Cloudflare Worker 배포”는 별개의 결과입니다. 사용자가 요청한 대상만 수행하며 각 결과를 독립적으로 검증합니다.
-- `building`은 진행 중일 뿐 성공이 아닙니다. `built`와 새 commit 파일의 공개 응답을 확인하기 전에는 완료라고 보고하지 않습니다.
+- 공식 정적 사이트는 `https://visionai-arcade.pages.dev/`이며 `julie9578.github.io`는 보안 응답 헤더를 제공하지 못하는 레거시 미러입니다.
+- “로컬 파일 작성”, “GitHub 푸시”, “Cloudflare Pages 배포”, “Cloudflare Worker 배포”는 별개의 결과입니다. 사용자가 요청한 대상을 수행하고 각각 검증합니다.
+- Cloudflare Pages 직접 배포 상태는 Wrangler의 완료 결과와 공개 URL의 실제 응답으로 확인합니다. `building`은 진행 중일 뿐 성공이 아닙니다.
 - 마지막 응답에는 변경 파일, 실제 검증, 커밋 SHA, 푸시/배포 상태, 공개 URL, 미완료 항목을 사실대로 요약합니다. 혼선이 있으면 잘못된 경로·명령과 복구 여부를 분명하게 설명하고 불필요한 내부 세부정보는 줄입니다.
 
 ## 7. 오류 및 보고

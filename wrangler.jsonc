@@ -15,6 +15,6 @@
     "required": ["SESSION_SECRET", "ADDRESS_ENCRYPTION_KEY"]
   },
 	"vars": {
-		"ALLOWED_ORIGINS": "https://arcade.nextarcade.workers.dev,https://julie9578.github.io"
+		"ALLOWED_ORIGINS": "https://arcade.nextarcade.workers.dev,https://julie9578.github.io,https://visionai-arcade.pages.dev"
 	}
 }

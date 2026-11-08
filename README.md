@@ -2,8 +2,9 @@
 
 인기 게임을 둘러보고, 취향에 맞는 다음 플레이를 발견할 수 있는 한국어 게임 큐레이션 홈페이지입니다.
 
-**라이브 홈페이지:** https://arcade.nextarcade.workers.dev/
-**현재 GitHub Pages 배포:** https://julie9578.github.io/VisionAI/
+**공식 홈페이지 (Cloudflare Pages, 보안 헤더 적용):** https://visionai-arcade.pages.dev/
+**레거시 GitHub Pages 미러 (보안 응답 헤더 설정 불가):** https://julie9578.github.io/VisionAI/
+**게시판 API:** https://arcade-board-api.nextarcade.workers.dev/
 
 ## 주요 기능
 
@@ -67,7 +68,7 @@ src/worker.js 게시판·회원 REST API
 
 Cloudflare D1에는 `posts`와 `users` 테이블을 사용합니다. `posts.deleted_at`은 soft-delete 시각입니다. 회원 정보에는 닉네임, 이메일, 성별, 암호화된 주소, 비밀번호 해시와 시간 정보가 저장됩니다.
 
-GitHub Pages는 정적 호스팅이며 Cloudflare D1은 별도 Worker API를 통해 접근합니다. 게시판 API Worker `https://arcade-board-api.nextarcade.workers.dev`와 D1 데이터베이스 `arcade-board`가 배포되어 있습니다. 회원 API는 같은 Worker에서 `/api/auth/signup`, `/api/auth/login`, `/api/auth/me` 경로로 제공됩니다. 회원가입·로그인 페이지는 `/signup.html`, `/login.html`입니다.
+Cloudflare Pages에서 정적 사이트를 제공하며 Cloudflare D1은 별도 Worker API를 통해 접근합니다. 게시판 API Worker `https://arcade-board-api.nextarcade.workers.dev`와 D1 데이터베이스 `arcade-board`가 배포되어 있습니다. 회원 API는 같은 Worker에서 `/api/auth/signup`, `/api/auth/login`, `/api/auth/me` 경로로 제공됩니다. 회원가입·로그인 페이지는 `/signup`, `/login`입니다.
 
 필요 조건: Node.js, Cloudflare 계정, Wrangler 인증. 실제 secret 값은 저장소에 커밋하지 말고 Wrangler secret으로 관리합니다.
 
@@ -118,7 +119,15 @@ GitHub Pages는 정적 호스팅이며 Cloudflare D1은 별도 Worker API를 통
 
 ## 배포
 
-- 라이브 홈페이지: <https://arcade.nextarcade.workers.dev/>
+- 정적 홈페이지는 Cloudflare Pages `visionai-arcade` 프로젝트로 배포합니다. GitHub Pages는 기존 링크 호환용 미러이며, GitHub Pages에서는 임의의 HTTP 보안 응답 헤더를 설정할 수 없으므로 공식 링크로 안내하지 않습니다.
+- 저장소의 `cloudflare-pages/_headers`가 정적 응답에 보안 헤더를 적용합니다. 배포 전에 main을 최신으로 맞추고 깨끗한 작업 트리에서 실행합니다.
+
+  ```powershell
+  .\scripts\deploy-cloudflare-pages.ps1
+  ```
+
+- GitHub Pages 미러는 저장소 GitHub Pages 설정에서 계속 빌드될 수 있지만, 보안 헤더가 필요한 배포에는 Cloudflare Pages URL을 사용합니다.
+- Worker API는 별도 배포입니다. `wrangler.jsonc`의 `ALLOWED_ORIGINS`에는 공식 Cloudflare Pages origin이 포함돼 있습니다.
 
 ## 기술
 

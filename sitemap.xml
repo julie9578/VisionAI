@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://julie9578.github.io/VisionAI/</loc></url>
-  <url><loc>https://julie9578.github.io/VisionAI/board.html</loc></url>
-  <url><loc>https://julie9578.github.io/VisionAI/game.html</loc></url>
-  <url><loc>https://julie9578.github.io/VisionAI/signup.html</loc></url>
-  <url><loc>https://julie9578.github.io/VisionAI/login.html</loc></url>
-  <url><loc>https://julie9578.github.io/VisionAI/user.html</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/board</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/game</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/signup</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/login</loc></url>
+  <url><loc>https://visionai-arcade.pages.dev/user</loc></url>
 </urlset>
