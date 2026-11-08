@@ -60,19 +60,18 @@
 
   function renderPagination(page, total, pageSize) {
     const pageCount = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
-    if (pageCount <= 1) {
-      pagination.innerHTML = '';
-      pagination.hidden = true;
-      return;
-    }
-    pagination.hidden = false;
     const items = [];
-    items.push(`<button class="page-arrow ${page <= 1 ? 'disabled' : ''}" type="button" data-page="${page - 1}" aria-label="이전 페이지" ${page <= 1 ? 'disabled' : ''}>‹</button>`);
+    if (pageCount > 1) {
+      items.push(`<button class="page-arrow ${page <= 1 ? 'disabled' : ''}" type="button" data-page="${page - 1}" aria-label="이전 페이지" ${page <= 1 ? 'disabled' : ''}>‹</button>`);
+    }
     for (let number = 1; number <= pageCount; number += 1) {
       items.push(`<button class="page-number ${number === page ? 'active' : ''}" type="button" data-page="${number}" ${number === page ? 'aria-current="page"' : ''}>${number}</button>`);
     }
-    items.push(`<button class="page-arrow ${page >= pageCount ? 'disabled' : ''}" type="button" data-page="${page + 1}" aria-label="다음 페이지" ${page >= pageCount ? 'disabled' : ''}>›</button>`);
+    if (pageCount > 1) {
+      items.push(`<button class="page-arrow ${page >= pageCount ? 'disabled' : ''}" type="button" data-page="${page + 1}" aria-label="다음 페이지" ${page >= pageCount ? 'disabled' : ''}>›</button>`);
+    }
     pagination.innerHTML = items.join('');
+    pagination.hidden = false;
     pagination.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => {
       if (button.disabled) return;
       selectedPage = Number(button.dataset.page);
