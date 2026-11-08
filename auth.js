@@ -8,13 +8,8 @@
     gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-W6VF6X92';
     document.head.append(gtmScript);
   }
-  window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
-  window.gtag('js', new Date());
-  window.gtag('config', 'G-TZTL3TCNB5');
-
   function trackAuthEvent(event) {
     window.dataLayer.push({ event });
-    window.gtag('event', event);
   }
 
   const apiBase = 'https://arcade-board-api.nextarcade.workers.dev';
