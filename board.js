@@ -53,7 +53,14 @@
         </tr>`;
       }).join('');
     }
-    document.getElementById('postListTitle').innerHTML = `전체 게시글 <span>${Number(total) || 0}</span>`;
+    const heading = selectedCategory ? {
+      free: '자유 게시글',
+      recommend: '게임 추천글',
+      guide: '공략·팁 게시글',
+      recruit: '모집 게시글',
+      notice: '공지사항',
+    }[selectedCategory] || '전체 게시글' : '전체 게시글';
+    document.getElementById('postListTitle').innerHTML = `${heading} <span>${Number(total) || 0}</span>`;
   }
 
   function renderPagination(page, total, pageSize) {
