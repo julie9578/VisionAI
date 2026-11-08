@@ -1,7 +1,7 @@
 (() => {
   const API = 'https://arcade-board-api.nextarcade.workers.dev';
   const TOKEN_KEY = 'arcade-session-token';
-  const token = () => sessionStorage.getItem(TOKEN_KEY);
+  const token = () => localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
   const headers = (withJson = false) => ({
     accept: 'application/json',
     ...(withJson ? { 'content-type': 'application/json' } : {}),
@@ -43,6 +43,7 @@
       editor.hidden = false;
       editor.querySelector('.editor-hint').textContent = `작성자: ${me.user.nickname} · 최대 10,000자`;
     } catch {
+      localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
       loginRequired.hidden = false;
       return;
