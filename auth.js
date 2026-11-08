@@ -5,6 +5,17 @@
   const loginForm = document.getElementById('loginForm');
   const profileForm = document.getElementById('profileForm');
   const homeProfileButton = document.getElementById('profileButton');
+  const passwordResetForm = document.getElementById('passwordResetForm');
+  const showPasswordResetButton = document.getElementById('showPasswordReset');
+  if (showPasswordResetButton && passwordResetForm) {
+    showPasswordResetButton.addEventListener('click', () => {
+      const expanded = showPasswordResetButton.getAttribute('aria-expanded') === 'true';
+      showPasswordResetButton.setAttribute('aria-expanded', String(!expanded));
+      passwordResetForm.hidden = expanded;
+      showPasswordResetButton.textContent = expanded ? '비밀번호 재설정' : '비밀번호 재설정 취소';
+      if (!expanded) document.getElementById('currentPassword').focus();
+    });
+  }
   const token = () => localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
   function saveToken(value) {
     localStorage.setItem(tokenKey, value);
@@ -14,6 +25,10 @@
     localStorage.removeItem(tokenKey);
     sessionStorage.removeItem(tokenKey);
   }
+  document.getElementById('profileLogout')?.addEventListener('click', () => {
+    clearToken();
+    window.location.replace('login.html');
+  });
   const requestedNext = new URLSearchParams(window.location.search).get('next') || '';
   const allowedNext = ['post-write.html', 'board.html', 'profile.html', 'profile-edit.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
   const loginDestination = allowedNext ? requestedNext : 'profile.html';
@@ -388,6 +403,49 @@
     }
   }
 
+  if (passwordResetForm) {
+    const currentPassword = document.getElementById('currentPassword');
+    const newPassword = document.getElementById('newPassword');
+    const confirmNewPassword = document.getElementById('confirmNewPassword');
+    const message = document.getElementById('passwordResetMessage');
+    const submit = document.getElementById('submitPasswordReset');
+
+    passwordResetForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (newPassword.value !== confirmNewPassword.value) {
+        setMessage(message, '새 비밀번호와 확인이 일치하지 않습니다.');
+        confirmNewPassword.focus();
+        return;
+      }
+      if (newPassword.value.length < 10 || newPassword.value.length > 128) {
+        setMessage(message, '새 비밀번호는 10~128자로 입력해 주세요.');
+        newPassword.focus();
+        return;
+      }
+
+      submit.disabled = true;
+      setMessage(message, '비밀번호를 변경하는 중…');
+      try {
+        await request('/api/auth/change-password', {
+          method: 'POST',
+          body: JSON.stringify({
+            current_password: currentPassword.value,
+            new_password: newPassword.value,
+          }),
+        });
+        passwordResetForm.reset();
+        passwordResetForm.hidden = true;
+        showPasswordResetButton.setAttribute('aria-expanded', 'false');
+        showPasswordResetButton.textContent = '비밀번호 재설정';
+        setMessage(message, '비밀번호를 안전하게 변경했습니다.', true);
+      } catch (error) {
+        setMessage(message, error.message || '비밀번호를 변경하지 못했습니다.');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+
   if (loginForm) {
     const message = document.getElementById('loginMessage');
     if (token()) {
@@ -423,7 +481,6 @@
 
   if (profileForm) {
     const message = document.getElementById('profileMessage');
-    const logoutButton = document.getElementById('profileLogout');
     const colorInputs = [...profileForm.querySelectorAll('input[name="avatar_color"]')];
     const avatarFileInput = document.getElementById('profileAvatarFile');
     const clearAvatarButton = document.getElementById('clearProfileAvatar');
@@ -509,10 +566,6 @@
       } finally {
         submit.disabled = false;
       }
-    });
-    logoutButton.addEventListener('click', () => {
-      clearToken();
-      window.location.assign('login.html');
     });
   }
 

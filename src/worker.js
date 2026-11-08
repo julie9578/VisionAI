@@ -199,6 +199,38 @@ async function handleAuth(request, env, url, headers) {
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
+  if (url.pathname === "/api/auth/change-password" && request.method === "POST") {
+    const userId = await readSession(request, env.SESSION_SECRET);
+    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
+    let body;
+    try { body = await request.json(); }
+    catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+
+    const currentPassword = typeof body.current_password === "string" ? body.current_password : "";
+    const newPassword = typeof body.new_password === "string" ? body.new_password : "";
+    if (!currentPassword) return json({ error: "현재 비밀번호를 입력해 주세요." }, 400, headers);
+    if (newPassword.length < 10 || newPassword.length > 128) {
+      return json({ error: "새 비밀번호는 10~128자로 입력해 주세요." }, 400, headers);
+    }
+    if (currentPassword === newPassword) {
+      return json({ error: "새 비밀번호는 현재 비밀번호와 달라야 합니다." }, 400, headers);
+    }
+
+    const user = await env.DB.prepare("SELECT password_hash, password_salt FROM users WHERE id = ?").bind(userId).first();
+    if (!user) return json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
+    const currentHash = await hashPassword(currentPassword, fromBase64Url(user.password_salt));
+    if (!constantTimeEqual(currentHash, fromBase64Url(user.password_hash))) {
+      return json({ error: "현재 비밀번호가 올바르지 않습니다." }, 403, headers);
+    }
+
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const passwordHash = await hashPassword(newPassword, salt);
+    await env.DB.prepare("UPDATE users SET password_hash = ?, password_salt = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?")
+      .bind(toBase64Url(passwordHash), toBase64Url(salt), userId)
+      .run();
+    return json({ ok: true }, 200, headers);
+  }
+
   return null;
 }
 
