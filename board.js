@@ -8,6 +8,7 @@
   const searchCategory = document.getElementById('boardSearchCategory');
   const searchScope = document.getElementById('boardSearchScope');
   const pagination = document.getElementById('boardPagination');
+  const skeleton = document.getElementById('boardSkeleton');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
   const writeButton = document.querySelector('.board-write');
   let selectedCategory = new URLSearchParams(location.search).get('category') || '';
@@ -69,7 +70,18 @@
     const pageCount = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
     const items = [];
     if (pageCount > 1) items.push('<button class="page-arrow" type="button" data-page="' + (page - 1) + '" aria-label="이전 페이지" ' + (page <= 1 ? 'disabled' : '') + '>‹</button>');
-    for (let number = 1; number <= pageCount; number += 1) items.push('<button class="page-number ' + (number === page ? 'active' : '') + '" type="button" data-page="' + number + '" ' + (number === page ? 'aria-current="page"' : '') + '>' + number + '</button>');
+    const windowSize = 5;
+    const firstPage = Math.max(1, Math.min(page - Math.floor(windowSize / 2), pageCount - windowSize + 1));
+    const lastPage = Math.min(pageCount, firstPage + windowSize - 1);
+    if (firstPage > 1) {
+      items.push('<button class="page-number" type="button" data-page="1">1</button>');
+      if (firstPage > 2) items.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
+    }
+    for (let number = firstPage; number <= lastPage; number += 1) items.push('<button class="page-number ' + (number === page ? 'active' : '') + '" type="button" data-page="' + number + '" ' + (number === page ? 'aria-current="page"' : '') + '>' + number + '</button>');
+    if (lastPage < pageCount) {
+      if (lastPage < pageCount - 1) items.push('<span class="page-ellipsis" aria-hidden="true">…</span>');
+      items.push('<button class="page-number" type="button" data-page="' + pageCount + '">' + pageCount + '</button>');
+    }
     if (pageCount > 1) items.push('<button class="page-arrow" type="button" data-page="' + (page + 1) + '" aria-label="다음 페이지" ' + (page >= pageCount ? 'disabled' : '') + '>›</button>');
     pagination.innerHTML = items.join('');
     pagination.hidden = false;
@@ -82,6 +94,8 @@
     if (selectedSearchScope) params.set('scope', selectedSearchScope);
     params.set('page', String(selectedPage));
     if (query) params.set('q', query);
+    if (skeleton) skeleton.hidden = false;
+    rows.setAttribute('aria-busy', 'true');
     status.textContent = '게시글을 불러오는 중…';
     try {
       const requestHeaders = { accept: 'application/json' };
@@ -102,6 +116,9 @@
     } catch {
       apiAvailable = false;
       status.textContent = '데이터베이스 연결을 기다리는 중입니다. Cloudflare D1 설정과 API 배포가 완료되면 게시글을 불러옵니다.';
+    } finally {
+      if (skeleton) skeleton.hidden = true;
+      rows.removeAttribute('aria-busy');
     }
   }
 
@@ -135,11 +152,10 @@
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();
-    if (!sessionStorage.getItem(tokenKey)) {
+    if (!sessionStorage.getItem(tokenKey) && !localStorage.getItem(tokenKey)) {
       window.open(`login.html?next=${encodeURIComponent('post-write.html')}`, '_blank');
       return;
     }
-    if (!sessionStorage.getItem(tokenKey)) { window.open('login.html?next=post-write.html', '_blank'); return; }
     if (!apiAvailable) {
       status.textContent = 'Cloudflare D1 게시판 API가 아직 배포되지 않아 글을 저장할 수 없습니다.';
       return;
