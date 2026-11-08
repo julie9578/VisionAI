@@ -53,7 +53,8 @@
               <label><input type="radio" name="avatar_color" value="rose" /><span class="avatar-color-swatch rose" aria-hidden="true"></span><span>로즈</span></label>
               <label><input type="radio" name="avatar_color" value="amber" /><span class="avatar-color-swatch amber" aria-hidden="true"></span><span>앰버</span></label>
             </div></div>
-            <div><label for="profileNickname">닉네임</label><input id="profileNickname" name="nickname" type="text" minlength="2" maxlength="30" autocomplete="nickname" required /><p class="field-hint">2~30자까지 설정할 수 있습니다.</p></div>
+            <div class="profile-image-control"><label for="profileAvatarFile">프로필 이미지</label><input id="profileAvatarFile" type="file" accept="image/jpeg,image/png,image/webp" /><p class="field-hint">JPG·PNG·WebP 이미지 · 256×256으로 조정해 저장합니다.</p><button class="button secondary profile-image-clear" id="clearProfileAvatar" type="button">이미지 제거</button></div>
+            <div><label for="profileNickname">닉네임</label><input id="profileNickname" name="nickname" type="text" minlength="2" maxlength="20" autocomplete="nickname" required /><p class="field-hint">한글·영문 대소문자만, 2~20바이트 · 다른 회원과 중복될 수 없습니다.</p></div>
             <div><label for="profileEmail">이메일 주소</label><input id="profileEmail" name="email" type="email" readonly aria-describedby="profileEmailHint" /><p class="field-hint" id="profileEmailHint">이메일 변경은 별도의 확인 절차가 필요해 현재 읽기 전용입니다.</p></div>
             <div><label for="profileGender">성별</label><select id="profileGender" name="gender" required><option value="female">여성</option><option value="male">남성</option><option value="nonbinary">논바이너리</option><option value="prefer_not_to_say">응답하지 않음</option></select></div>
             <div><label for="profileBio">한 줄 소개</label><textarea id="profileBio" name="bio" rows="3" maxlength="240" placeholder="좋아하는 게임이나 플레이 스타일을 소개해 주세요."></textarea><p class="field-hint">최대 240자</p></div>
@@ -63,33 +64,8 @@
         </section>
         <section class="profile-panel" id="my-posts" aria-labelledby="myPostsTitle">
           <div class="profile-panel-heading"><div><h2 id="myPostsTitle">내가 작성한 게시글</h2><p>게시판에 작성한 글이 최신순으로 표시됩니다.</p></div><span class="profile-section-icon" aria-hidden="true">✎</span></div>
-          <div class="profile-activity-tabs" role="tablist" aria-label="내 게시판 활동">
-            <button class="profile-activity-tab active" id="profilePostsTab" type="button" role="tab" aria-selected="true" aria-controls="profilePostsPanel" data-activity-tab="posts">작성한 게시글</button>
-            <button class="profile-activity-tab" id="profileCommentsTab" type="button" role="tab" aria-selected="false" aria-controls="profileCommentsPanel" data-activity-tab="comments">작성한 댓글</button>
-            <button class="profile-activity-tab" id="profileCommentedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileCommentedPostsPanel" data-activity-tab="commented-posts">댓글 단 글</button>
-            <button class="profile-activity-tab" id="profileLikedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileLikedPostsPanel" data-activity-tab="liked-posts">좋아요한 글</button>
-            <button class="profile-activity-tab" id="profileBookmarkedPostsTab" type="button" role="tab" aria-selected="false" aria-controls="profileBookmarkedPostsPanel" data-activity-tab="bookmarked-posts">북마크한 글</button>
-          </div>
-          <div class="profile-activity-panel" id="profilePostsPanel" role="tabpanel" aria-labelledby="profilePostsTab">
-            <p class="profile-post-status" id="profilePostsStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
-            <ul class="profile-post-list" id="profilePostList" aria-label="내가 작성한 게시글 목록"></ul>
-          </div>
-          <div class="profile-activity-panel" id="profileCommentsPanel" role="tabpanel" aria-labelledby="profileCommentsTab" hidden>
-            <p class="profile-post-status" id="profileCommentsStatus" role="status" aria-live="polite">댓글을 불러오는 중…</p>
-            <ul class="profile-post-list profile-comment-list" id="profileCommentList" aria-label="내가 작성한 댓글 목록"></ul>
-          </div>
-          <div class="profile-activity-panel" id="profileCommentedPostsPanel" role="tabpanel" aria-labelledby="profileCommentedPostsTab" hidden>
-            <p class="profile-post-status" id="profileCommentedPostsStatus" role="status" aria-live="polite">댓글 단 게시글을 불러오는 중…</p>
-            <ul class="profile-post-list" id="profileCommentedPostsList" aria-label="내가 댓글을 단 게시글 목록"></ul>
-          </div>
-          <div class="profile-activity-panel" id="profileLikedPostsPanel" role="tabpanel" aria-labelledby="profileLikedPostsTab" hidden>
-            <p class="profile-post-status" id="profileLikedPostsStatus" role="status" aria-live="polite">좋아요한 게시글을 불러오는 중…</p>
-            <ul class="profile-post-list" id="profileLikedPostsList" aria-label="내가 좋아요한 게시글 목록"></ul>
-          </div>
-          <div class="profile-activity-panel" id="profileBookmarkedPostsPanel" role="tabpanel" aria-labelledby="profileBookmarkedPostsTab" hidden>
-            <p class="profile-post-status" id="profileBookmarkedPostsStatus" role="status" aria-live="polite">북마크한 게시글을 불러오는 중…</p>
-            <ul class="profile-post-list" id="profileBookmarkedPostsList" aria-label="내가 북마크한 게시글 목록"></ul>
-          </div>
+          <p class="profile-post-status" id="profilePostsStatus" role="status" aria-live="polite">게시글을 불러오는 중…</p>
+          <ul class="profile-post-list" id="profilePostList" aria-label="내가 작성한 게시글 목록"></ul>
         </section>
         <section class="profile-panel" id="account-info" aria-labelledby="accountInfoTitle">
           <div class="profile-panel-heading"><div><h2 id="accountInfoTitle">계정 정보</h2><p>이메일과 가입 시 선택한 정보를 확인합니다.</p></div><span class="profile-section-icon" aria-hidden="true">♧</span></div>

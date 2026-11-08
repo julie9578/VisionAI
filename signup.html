@@ -25,15 +25,15 @@
         <p>가입 정보를 입력하고 ARCADE를 시작하세요.</p>
       </header>
       <form class="auth-form" id="signupForm" novalidate>
-        <div><label for="nickname">닉네임</label><input id="nickname" name="nickname" type="text" minlength="2" maxlength="30" autocomplete="nickname" required placeholder="사용할 닉네임" /><p class="field-hint">2~30자</p></div>
-        <div><label for="email">이메일 주소</label><input id="email" name="email" type="email" maxlength="254" autocomplete="email" required placeholder="name@example.com" /></div>
-        <div><label for="gender">성별</label><select id="gender" name="gender" required><option value="" selected disabled>성별 선택</option><option value="female">여성</option><option value="male">남성</option><option value="nonbinary">논바이너리</option><option value="prefer_not_to_say">응답하지 않음</option></select></div>
-        <div><label for="address">집 주소</label><input id="address" name="address" type="text" minlength="5" maxlength="500" autocomplete="street-address" required placeholder="시·도, 시·군·구, 도로명 주소" /><p class="field-hint">가입 정보로 저장되며, Worker에서 암호화합니다.</p></div>
-        <div><label for="password">비밀번호</label><input id="password" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required placeholder="10자 이상" /><p class="field-hint">10~128자</p></div>
-        <div><label for="passwordConfirm">비밀번호 확인</label><input id="passwordConfirm" name="passwordConfirm" type="password" minlength="10" maxlength="128" autocomplete="new-password" required placeholder="비밀번호 다시 입력" /></div>
-        <div class="auth-privacy">계정 정보는 데이터베이스에 저장됩니다. 비밀번호는 해시 처리하고, 집 주소는 암호화해 보관합니다.</div>
+        <p class="required-note"><span aria-hidden="true">*</span> 표시는 필수 입력 항목입니다.</p>
+        <div class="signup-field"><label for="nickname">닉네임 <span class="required-mark" aria-hidden="true">*</span><span class="visually-hidden">(필수)</span></label><input id="nickname" name="nickname" type="text" minlength="2" maxlength="20" autocomplete="nickname" required aria-describedby="nicknameHint" placeholder="사용할 닉네임" /><p class="field-hint" id="nicknameHint">한글·영문 대소문자만 · 2~20바이트</p></div>
+        <div class="signup-field"><label for="email">이메일 주소 <span class="required-mark" aria-hidden="true">*</span><span class="visually-hidden">(필수)</span></label><input id="email" name="email" type="email" maxlength="254" autocomplete="email" required aria-describedby="emailHint" placeholder="name@example.com" /><p class="field-hint" id="emailHint" aria-live="polite">로그인에 사용할 이메일 주소를 입력해 주세요.</p></div>
+        <div class="signup-field"><label for="gender">성별 <span class="required-mark" aria-hidden="true">*</span><span class="visually-hidden">(필수)</span></label><select id="gender" name="gender" required><option value="" selected disabled>성별 선택</option><option value="female">여성</option><option value="male">남성</option><option value="nonbinary">논바이너리</option><option value="prefer_not_to_say">응답하지 않음</option></select></div>
+        <div class="signup-field"><label for="password">비밀번호 <span class="required-mark" aria-hidden="true">*</span><span class="visually-hidden">(필수)</span></label><input id="password" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required aria-describedby="passwordHint" placeholder="10자 이상" /><p class="field-hint" id="passwordHint">10~128자</p></div>
+        <div class="signup-field"><label for="passwordConfirm">비밀번호 확인 <span class="required-mark" aria-hidden="true">*</span><span class="visually-hidden">(필수)</span></label><input id="passwordConfirm" name="passwordConfirm" type="password" minlength="10" maxlength="128" autocomplete="new-password" required placeholder="비밀번호 다시 입력" /></div>
+        <div class="auth-privacy">계정 정보는 데이터베이스에 저장됩니다. 비밀번호는 해시 처리됩니다.</div>
         <p class="auth-message" id="signupMessage" role="status" aria-live="polite"></p>
-        <button class="button" type="submit">계정 만들기</button>
+        <button class="button" id="signupSubmit" type="submit" disabled>계정 만들기</button>
         <p class="auth-switch">이미 계정이 있나요? <a href="login.html">로그인</a></p>
       </form>
     </section>

@@ -3,6 +3,13 @@
 .auth-heading { padding: 30px 34px 22px; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 90% 0, #9c76ff20, transparent 48%); }
 .auth-heading h1 { margin: 7px 0 8px; font-family: 'Noto Sans KR', sans-serif; font-weight: 650; font-size: 29px; letter-spacing: -.055em; word-break: keep-all; }
 .auth-heading p:last-child { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.required-note { margin: 0; color: var(--muted); font-size: 11px; }
+.required-mark, .required-note > span { color: #ff6b7c; font-weight: 800; }
+.signup-field .field-hint.error { color: #ff7283; }
+.signup-field .field-hint.success { color: #73e3b2; }
+.signup-field input[aria-invalid="true"] { border-color: #ff6478; box-shadow: 0 0 0 3px #ff64781a; }
+.signup-field input[aria-invalid="false"] { border-color: #62dba2; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .auth-form { display: grid; gap: 13px; padding: 25px 34px 30px; }
 .auth-form label, .auth-label { display: block; margin-bottom: 6px; color: #d8d3e2; font-size: 11px; font-weight: 600; }
 .auth-form input, .auth-form select { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid #ffffff1c; border-radius: 9px; outline: none; background: #0d0c14; color: var(--text); font: inherit; font-size: 12px; }
