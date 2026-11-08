@@ -57,13 +57,13 @@
   }
 
   function renderPagination(page, total, pageSize) {
-    const count = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
-    if (count <= 1) { pagination.innerHTML = ''; pagination.hidden = true; return; }
-    pagination.hidden = false;
-    const items = ['<button class="page-arrow" type="button" data-page="' + (page - 1) + '" aria-label="이전 페이지" ' + (page <= 1 ? 'disabled' : '') + '>‹</button>'];
-    for (let n = 1; n <= count; n += 1) items.push('<button class="page-number ' + (n === page ? 'active' : '') + '" type="button" data-page="' + n + '" ' + (n === page ? 'aria-current="page"' : '') + '>' + n + '</button>');
-    items.push('<button class="page-arrow" type="button" data-page="' + (page + 1) + '" aria-label="다음 페이지" ' + (page >= count ? 'disabled' : '') + '>›</button>');
+    const pageCount = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
+    const items = [];
+    if (pageCount > 1) items.push('<button class="page-arrow" type="button" data-page="' + (page - 1) + '" aria-label="이전 페이지" ' + (page <= 1 ? 'disabled' : '') + '>‹</button>');
+    for (let number = 1; number <= pageCount; number += 1) items.push('<button class="page-number ' + (number === page ? 'active' : '') + '" type="button" data-page="' + number + '" ' + (number === page ? 'aria-current="page"' : '') + '>' + number + '</button>');
+    if (pageCount > 1) items.push('<button class="page-arrow" type="button" data-page="' + (page + 1) + '" aria-label="다음 페이지" ' + (page >= pageCount ? 'disabled' : '') + '>›</button>');
     pagination.innerHTML = items.join('');
+    pagination.hidden = false;
     pagination.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => { if (button.disabled) return; selectedPage = Number(button.dataset.page); loadPosts(); document.getElementById('all-posts').scrollIntoView({behavior:'smooth',block:'start'}); }));
   }
 
