@@ -293,10 +293,8 @@
   }
 
   function showProfile(user) {
-    const required = document.getElementById('profileAuthRequired');
     const content = document.getElementById('profilePage');
-    if (!required || !content) return;
-    required.hidden = true;
+    if (!content) return;
     content.hidden = false;
     document.getElementById('profileNickname').value = user.nickname || '';
     document.getElementById('profileEmail').value = user.email || '';
@@ -312,20 +310,6 @@
     document.getElementById('memberSince').textContent = Number.isNaN(createdAt.getTime())
       ? '정보 없음'
       : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(createdAt);
-  }
-
-  function showLoggedOutProfile() {
-    const required = document.getElementById('profileAuthRequired');
-    const content = document.getElementById('profilePage');
-    if (required) required.hidden = false;
-    if (content) content.hidden = true;
-  }
-
-  function showProfileLoading() {
-    const required = document.getElementById('profileAuthRequired');
-    const content = document.getElementById('profilePage');
-    if (required) required.hidden = true;
-    if (content) content.hidden = true;
   }
 
   if (loginForm) {
@@ -368,9 +352,9 @@
     const avatarFileInput = document.getElementById('profileAvatarFile');
     const clearAvatarButton = document.getElementById('clearProfileAvatar');
     let avatarImage = null;
-    showProfileLoading();
     if (!token()) {
-      showLoggedOutProfile();
+      const next = encodeURIComponent('profile.html');
+      window.location.replace(`login.html?next=${next}`);
     } else {
       request('/api/auth/me')
         .then(data => {
@@ -380,7 +364,8 @@
         })
         .catch(() => {
           clearToken();
-          showLoggedOutProfile();
+          const next = encodeURIComponent('profile.html');
+          window.location.replace(`login.html?next=${next}`);
         });
     }
 

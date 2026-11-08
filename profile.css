@@ -2,7 +2,7 @@
 .profile-breadcrumb { margin: 0 0 19px; color: var(--muted); font-size: 11px; }
 .profile-breadcrumb a { color: #d4c1ff; }
 .profile-layout { display: grid; grid-template-columns: 225px minmax(0, 1fr); align-items: start; gap: 24px; }
-.profile-sidebar, .profile-panel, .profile-card-header, .profile-auth-required { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, #191825, #14131e); }
+.profile-sidebar, .profile-panel, .profile-card-header { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, #191825, #14131e); }
 .profile-sidebar { position: sticky; top: 92px; overflow: hidden; padding: 20px 15px 15px; }
 .profile-sidebar-user { display: grid; justify-items: center; gap: 7px; padding: 7px 0 20px; border-bottom: 1px solid var(--line); text-align: center; }
 .profile-avatar-large { display: grid; width: 74px; height: 74px; place-items: center; border: 1px solid #ffffff35; border-radius: 25px; background: linear-gradient(145deg, #a477ff, #714ad1); color: white; font-size: 24px; font-weight: 800; letter-spacing: -.04em; box-shadow: 0 8px 24px #8d69e33d; }
@@ -60,10 +60,6 @@
 .profile-image-control { display: grid; gap: 7px; }
 .profile-image-control input[type="file"] { width: 100%; padding: 10px; border: 1px solid #ffffff18; border-radius: 10px; background: #ffffff06; color: var(--muted); font: inherit; font-size: 11px; }
 .profile-image-clear { justify-self: start; min-height: 34px; padding: 0 12px; font-size: 10px; }
-.profile-auth-required { display: grid; justify-items: center; gap: 10px; max-width: 500px; margin: 80px auto; padding: 38px 28px; text-align: center; }
-.profile-auth-icon { display: grid; width: 66px; height: 66px; place-items: center; border: 1px solid #ffffff25; border-radius: 22px; background: #a477ff1a; font-size: 31px; }
-.profile-auth-required h1 { margin: 0; font-family: 'Noto Sans KR', sans-serif; font-size: 22px; font-weight: 700; }
-.profile-auth-required p:not(.section-kicker) { margin: 0 0 8px; color: var(--muted); font-size: 11px; }
 @media (max-width: 760px) {
   .profile-layout { grid-template-columns: 1fr; gap: 14px; }
   .profile-sidebar { position: static; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 13px; }
