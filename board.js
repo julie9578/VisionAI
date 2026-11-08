@@ -5,9 +5,14 @@
   const status = document.getElementById('boardStatus');
   const searchForm = document.getElementById('boardSearchForm');
   const searchInput = document.getElementById('boardQuery');
+  const searchCategory = document.getElementById('boardSearchCategory');
+  const searchScope = document.getElementById('boardSearchScope');
+  const pagination = document.getElementById('boardPagination');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
   const writeButton = document.querySelector('.board-write');
-  let selectedCategory = '';
+  let selectedCategory = new URLSearchParams(location.search).get('category') || '';
+  let selectedPage = 1;
+  let selectedSearchScope = new URLSearchParams(location.search).get('scope') || 'all';
   let query = new URLSearchParams(window.location.search).get('q') || '';
   let apiAvailable = true;
 
@@ -51,9 +56,22 @@
     document.getElementById('postListTitle').innerHTML = `전체 게시글 <span>${Number(total) || 0}</span>`;
   }
 
+  function renderPagination(page, total, pageSize) {
+    const count = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
+    if (count <= 1) { pagination.innerHTML = ''; pagination.hidden = true; return; }
+    pagination.hidden = false;
+    const items = ['<button class="page-arrow" type="button" data-page="' + (page - 1) + '" aria-label="이전 페이지" ' + (page <= 1 ? 'disabled' : '') + '>‹</button>'];
+    for (let n = 1; n <= count; n += 1) items.push('<button class="page-number ' + (n === page ? 'active' : '') + '" type="button" data-page="' + n + '" ' + (n === page ? 'aria-current="page"' : '') + '>' + n + '</button>');
+    items.push('<button class="page-arrow" type="button" data-page="' + (page + 1) + '" aria-label="다음 페이지" ' + (page >= count ? 'disabled' : '') + '>›</button>');
+    pagination.innerHTML = items.join('');
+    pagination.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => { if (button.disabled) return; selectedPage = Number(button.dataset.page); loadPosts(); document.getElementById('all-posts').scrollIntoView({behavior:'smooth',block:'start'}); }));
+  }
+
   async function loadPosts() {
     const params = new URLSearchParams();
     if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedSearchScope) params.set('scope', selectedSearchScope);
+    params.set('page', String(selectedPage));
     if (query) params.set('q', query);
     status.textContent = '게시글을 불러오는 중…';
     try {
@@ -63,7 +81,10 @@
       const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: requestHeaders });
       if (!response.ok) throw new Error(`API ${response.status}`);
       const data = await response.json();
-      renderPosts(data.posts || [], data.total);
+      const notices = data.notices || [];
+      const posts = data.posts || [];
+      renderPosts([...notices, ...posts], Number(data.total) + notices.length);
+      renderPagination(data.page || selectedPage, data.total, data.pageSize || 10);
       status.textContent = '';
       apiAvailable = true;
     } catch {
@@ -73,14 +94,23 @@
   }
 
   searchInput.value = query;
+  searchCategory.value = selectedCategory;
+  searchScope.value = selectedSearchScope;
+  categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
   searchForm.addEventListener('submit', event => {
     event.preventDefault();
     query = searchInput.value.trim();
+    selectedCategory = searchCategory.value;
+    selectedSearchScope = searchScope.value || 'all';
+    selectedPage = 1;
+    categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
     loadPosts();
   });
 
   categoryButtons.forEach(button => button.addEventListener('click', () => {
     selectedCategory = button.dataset.category;
+    searchCategory.value = selectedCategory;
+    selectedPage = 1;
     categoryButtons.forEach(item => {
       const selected = item === button;
       item.classList.toggle('active', selected);
@@ -89,12 +119,15 @@
     loadPosts();
   }));
 
+  searchCategory.addEventListener('change', () => { selectedCategory = searchCategory.value; selectedPage = 1; categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); }); loadPosts(); });
+
   writeButton.addEventListener('click', event => {
     event.preventDefault();
     if (!sessionStorage.getItem(tokenKey)) {
       window.open(`login.html?next=${encodeURIComponent('post-write.html')}`, '_blank');
       return;
     }
+    if (!sessionStorage.getItem(tokenKey)) { window.open('login.html?next=post-write.html', '_blank'); return; }
     if (!apiAvailable) {
       status.textContent = 'Cloudflare D1 게시판 API가 아직 배포되지 않아 글을 저장할 수 없습니다.';
       return;

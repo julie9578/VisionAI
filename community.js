@@ -75,7 +75,9 @@
     const commentsPanel = document.getElementById('commentsPanel');
     const commentList = document.getElementById('commentList');
     const commentMessage = document.getElementById('commentMessage');
-    const postId = new URLSearchParams(window.location.search).get('id');
+    const postParams = new URLSearchParams(window.location.search);
+    const postId = postParams.get('id');
+    const showDeletedPost = postParams.get('deleted') === '1';
     if (!/^\d+$/.test(postId || '')) {
       setMessage(status, '올바르지 않은 게시글 주소입니다.');
       return;
@@ -92,16 +94,72 @@
     }
 
     try {
-      const data = await api(`/api/posts/${postId}`);
+      const [data, currentUser] = await Promise.all([
+        api(`/api/posts/${postId}${showDeletedPost ? '?include_deleted=1' : ''}`),
+        token() ? api('/api/auth/me').catch(() => null) : Promise.resolve(null),
+      ]);
       const post = data.post;
       if (!post) throw new Error('게시글을 찾을 수 없습니다.');
       document.title = `${post.title} — 게시판 | ARCADE`;
       status.textContent = '';
+      if (data.deleted || post.deleted_at) {
+        document.getElementById('postDeletedNotice').hidden = false;
+        document.getElementById('postDeletedNotice').querySelector('h1').textContent = '삭제된 게시글입니다.';
+        document.getElementById('postDeletedNotice').querySelector('p:not(.section-kicker)').textContent = `“${post.title}” 게시글은 작성자가 삭제했습니다.`;
+        content.hidden = true;
+        commentsPanel.hidden = true;
+        return;
+      }
       content.hidden = false;
       commentsPanel.hidden = false;
       const authorLink = post.author_id ? `user.html?id=${encodeURIComponent(post.author_id)}` : `user.html?name=${encodeURIComponent(post.author)}`;
-      content.innerHTML = `<span class="post-detail-category">${escapeHtml(({ notice: '공지', free: '자유', recommend: '게임 추천', guide: '공략·팁', recruit: '모집' })[post.category] || post.category)}</span><h1 class="post-detail-title">${escapeHtml(post.title)}</h1><div class="post-detail-meta"><a href="${authorLink}">${escapeHtml(post.author)}</a><time>${escapeHtml(formatDate(post.created_at))}</time><span>댓글 ${Number(post.comments_count) || 0}</span></div><div class="post-detail-content">${escapeHtml(post.content)}</div><div class="post-action-row"><button class="post-action-button ${post.liked_by_me ? 'active' : ''}" type="button" id="likePostButton" aria-pressed="${Boolean(post.liked_by_me)}">♥ 좋아요 <span>${Number(post.likes_count) || 0}</span></button><button class="post-action-button ${post.bookmarked_by_me ? 'active' : ''}" type="button" id="bookmarkPostButton" aria-pressed="${Boolean(post.bookmarked_by_me)}">▣ 북마크 <span>${Number(post.bookmarks_count) || 0}</span></button></div>`;
+      const isAuthor = Boolean(currentUser?.user?.id && post.author_id && Number(currentUser.user.id) === Number(post.author_id));
+      content.innerHTML = `<span class="post-detail-category">${escapeHtml(({ notice: '공지', free: '자유', recommend: '게임 추천', guide: '공략·팁', recruit: '모집' })[post.category] || post.category)}</span><h1 class="post-detail-title">${escapeHtml(post.title)}</h1><div class="post-detail-meta"><a href="${authorLink}">${escapeHtml(post.author)}</a><time>${escapeHtml(formatDate(post.created_at))}</time><span>댓글 ${Number(post.comments_count) || 0}</span>${post.updated_at && post.updated_at !== post.created_at ? '<span class="post-edited-label">수정됨</span>' : ''}</div><div class="post-detail-content">${escapeHtml(post.content)}</div>${isAuthor ? '<div class="post-owner-actions"><button class="post-action-button" type="button" id="editPostButton">✎ 수정</button><button class="post-action-button danger" type="button" id="deletePostButton">삭제</button></div>' : ''}<div class="post-action-row"><button class="post-action-button ${post.liked_by_me ? 'active' : ''}" type="button" id="likePostButton" aria-pressed="${Boolean(post.liked_by_me)}">♥ 좋아요 <span>${Number(post.likes_count) || 0}</span></button><button class="post-action-button ${post.bookmarked_by_me ? 'active' : ''}" type="button" id="bookmarkPostButton" aria-pressed="${Boolean(post.bookmarked_by_me)}">▣ 북마크 <span>${Number(post.bookmarks_count) || 0}</span></button></div><section class="post-edit-panel" id="postEditPanel" hidden><h2>게시글 수정</h2><form id="editPostForm" class="post-edit-form"><label for="editPostCategory">분류</label><select id="editPostCategory" name="category" required><option value="free">자유</option><option value="recommend">게임 추천</option><option value="guide">공략·팁</option><option value="recruit">모집</option></select><label for="editPostTitle">제목</label><input id="editPostTitle" name="title" maxlength="160" required /><label for="editPostContent">내용</label><textarea id="editPostContent" name="content" rows="10" maxlength="10000" required></textarea><p class="community-message" id="editPostMessage" role="status" aria-live="polite"></p><div class="post-edit-actions"><button class="button secondary" type="button" id="cancelEditPost">취소</button><button class="button" type="submit">수정 저장</button></div></form></section>`;
       await loadComments();
+
+      if (isAuthor) {
+        const editPanel = document.getElementById('postEditPanel');
+        const editForm = document.getElementById('editPostForm');
+        document.getElementById('editPostButton').addEventListener('click', () => {
+          document.getElementById('editPostCategory').value = post.category;
+          document.getElementById('editPostTitle').value = post.title;
+          document.getElementById('editPostContent').value = post.content;
+          editPanel.hidden = false;
+          editPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          document.getElementById('editPostTitle').focus();
+        });
+        document.getElementById('cancelEditPost').addEventListener('click', () => { editPanel.hidden = true; });
+        document.getElementById('deletePostButton').addEventListener('click', async event => {
+          if (!window.confirm('이 게시글을 삭제할까요? 삭제한 글은 목록에서 보이지 않습니다.')) return;
+          const button = event.currentTarget;
+          button.disabled = true;
+          setMessage(status, '게시글을 삭제하는 중…');
+          try {
+            await api(`/api/posts/${postId}`, { method: 'DELETE' });
+            window.location.assign('board.html');
+          } catch (error) {
+            setMessage(status, error.message);
+            button.disabled = false;
+          }
+        });
+        editForm.addEventListener('submit', async event => {
+          event.preventDefault();
+          const button = editForm.querySelector('[type="submit"]');
+          const values = new FormData(editForm);
+          button.disabled = true;
+          setMessage(document.getElementById('editPostMessage'), '수정 내용을 저장하는 중…');
+          try {
+            await api(`/api/posts/${postId}`, {
+              method: 'PUT',
+              body: JSON.stringify({ category: values.get('category'), title: values.get('title'), content: values.get('content') }),
+            });
+            window.location.reload();
+          } catch (error) {
+            setMessage(document.getElementById('editPostMessage'), error.message);
+            button.disabled = false;
+          }
+        });
+      }
 
       for (const [buttonId, kind] of [['likePostButton', 'like'], ['bookmarkPostButton', 'bookmark']]) {
         document.getElementById(buttonId).addEventListener('click', async event => {
