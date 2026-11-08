@@ -5,7 +5,15 @@
   const loginForm = document.getElementById('loginForm');
   const profileForm = document.getElementById('profileForm');
   const homeProfileButton = document.getElementById('profileButton');
-  const token = () => sessionStorage.getItem(tokenKey);
+  const token = () => localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
+  function saveToken(value) {
+    localStorage.setItem(tokenKey, value);
+    sessionStorage.removeItem(tokenKey);
+  }
+  function clearToken() {
+    localStorage.removeItem(tokenKey);
+    sessionStorage.removeItem(tokenKey);
+  }
   const requestedNext = new URLSearchParams(window.location.search).get('next') || '';
   const allowedNext = ['post-write.html', 'board.html', 'profile.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
   const loginDestination = allowedNext ? requestedNext : 'profile.html';
@@ -62,7 +70,7 @@
         const data = await request('/api/auth/me');
         window.location.assign('profile.html');
       } catch {
-        sessionStorage.removeItem(tokenKey);
+        clearToken();
         window.location.assign('login.html');
       } finally {
         homeProfileButton.disabled = false;
@@ -72,7 +80,7 @@
     if (token()) {
       request('/api/auth/me')
         .then(data => showHomeProfile(data.user))
-        .catch(() => sessionStorage.removeItem(tokenKey));
+        .catch(() => clearToken());
     }
   }
 
@@ -233,7 +241,7 @@
             password: form.get('password'),
           }),
         });
-        sessionStorage.setItem(tokenKey, data.token);
+        saveToken(data.token);
         setMessage(message, '가입이 완료됐습니다. 프로필 페이지로 이동합니다.', true);
         window.location.assign('profile.html');
       } catch (error) {
@@ -323,7 +331,7 @@
   if (loginForm) {
     const message = document.getElementById('loginMessage');
     if (token()) {
-      request('/api/auth/me').then(() => window.location.replace(loginDestination)).catch(() => sessionStorage.removeItem(tokenKey));
+      request('/api/auth/me').then(() => window.location.replace(loginDestination)).catch(() => clearToken());
     }
 
     loginForm.addEventListener('submit', async event => {
@@ -337,7 +345,7 @@
           method: 'POST',
           body: JSON.stringify({ email: form.get('email'), password: form.get('password') }),
         });
-        sessionStorage.setItem(tokenKey, data.token);
+        saveToken(data.token);
         setMessage(message, '로그인됐습니다. 내 프로필 페이지로 이동합니다.', true);
         window.location.assign(loginDestination);
       } catch (error) {
@@ -348,7 +356,7 @@
     });
 
     document.getElementById('logoutButton')?.addEventListener('click', () => {
-      sessionStorage.removeItem(tokenKey);
+      clearToken();
       window.location.reload();
     });
   }
@@ -371,7 +379,7 @@
           loadProfilePosts();
         })
         .catch(() => {
-          sessionStorage.removeItem(tokenKey);
+          clearToken();
           showLoggedOutProfile();
         });
     }
@@ -442,7 +450,7 @@
       }
     });
     logoutButton.addEventListener('click', () => {
-      sessionStorage.removeItem(tokenKey);
+      clearToken();
       window.location.assign('login.html');
     });
   }
