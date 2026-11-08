@@ -50,9 +50,16 @@ try {
   }
 
   Write-Output "Deploying commit $commit ($commitMessage) to Cloudflare Pages project visionai-arcade..."
-  & $wrangler.Source pages deploy $deploymentDirectory --project-name visionai-arcade --branch main --commit-hash $commit --commit-message $commitMessage
-  if ($LASTEXITCODE -ne 0) {
-    throw "Wrangler deploy failed with exit code $LASTEXITCODE."
+  Push-Location $repoRoot
+  try {
+    & $wrangler.Source pages deploy $deploymentDirectory --project-name visionai-arcade --branch main --commit-hash $commit --commit-message $commitMessage
+    $deployExitCode = $LASTEXITCODE
+  }
+  finally {
+    Pop-Location
+  }
+  if ($deployExitCode -ne 0) {
+    throw "Wrangler deploy failed with exit code $deployExitCode."
   }
 }
 finally {
