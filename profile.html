@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0c0b14" />
-  <meta name="description" content="ARCADE 게이머 프로필을 확인하고 편집하세요." />
+  <meta name="description" content="내 ARCADE 회원 정보와 프로필을 확인하세요." />
   <title>내 프로필 — ARCADE</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="auth.css" />
@@ -20,39 +20,26 @@
 
   <main class="shell profile-page">
     <p class="profile-breadcrumb"><a href="index.html">홈</a>　/　내 프로필</p>
-    <section class="profile-layout" id="profilePage" hidden>
+    <section class="profile-layout" id="profileViewPage" hidden>
       <aside class="profile-sidebar">
         <div class="profile-sidebar-user">
           <div class="profile-avatar-large" id="profileAvatar" data-color="violet" aria-hidden="true">AR</div>
           <strong id="sidebarNickname">플레이어</strong>
           <span>ARCADE 게이머</span>
         </div>
-        <nav class="profile-menu" aria-label="프로필 메뉴"><a class="active" href="#public-profile" aria-current="page">공개 프로필</a><a href="#account-info">계정 정보</a></nav>
+        <nav class="profile-menu" aria-label="프로필 메뉴"><a class="active" href="#public-profile" aria-current="page">기본 정보</a><a href="#my-posts">내 게시글</a></nav>
         <button class="profile-logout" id="profileLogout" type="button">로그아웃</button>
       </aside>
 
-      <div class="profile-main">
-        <section class="profile-card-header">
-          <div><p class="section-kicker">PLAYER PROFILE</p><h1>내 프로필</h1><p>내 계정 정보와 공개 프로필을 확인합니다.</p></div>
-          <div class="profile-avatar-large profile-avatar-preview" id="profileAvatarPreview" data-color="violet" aria-hidden="true">AR</div>
-        </section>
         <section class="profile-panel" id="public-profile" aria-labelledby="publicProfileTitle">
-          <div class="profile-panel-heading"><div><h2 id="publicProfileTitle">공개 프로필</h2><p>게임 커뮤니티에 표시되는 기본 정보입니다.</p></div><span class="profile-section-icon" aria-hidden="true">✦</span></div>
-          <form class="auth-form profile-form" id="profileForm" novalidate>
-            <div><span class="auth-label">프로필 색상</span><div class="avatar-color-options" role="group" aria-label="프로필 색상 선택">
-              <label><input type="radio" name="avatar_color" value="violet" checked /><span class="avatar-color-swatch violet" aria-hidden="true"></span><span>바이올렛</span></label>
-              <label><input type="radio" name="avatar_color" value="cyan" /><span class="avatar-color-swatch cyan" aria-hidden="true"></span><span>시안</span></label>
-              <label><input type="radio" name="avatar_color" value="rose" /><span class="avatar-color-swatch rose" aria-hidden="true"></span><span>로즈</span></label>
-              <label><input type="radio" name="avatar_color" value="amber" /><span class="avatar-color-swatch amber" aria-hidden="true"></span><span>앰버</span></label>
-            </div></div>
-            <div class="profile-image-control"><label for="profileAvatarFile">프로필 이미지</label><input id="profileAvatarFile" type="file" accept="image/jpeg,image/png,image/webp" /><p class="field-hint">JPG·PNG·WebP 이미지 · 256×256으로 조정해 저장합니다.</p><button class="button secondary profile-image-clear" id="clearProfileAvatar" type="button">이미지 제거</button></div>
-            <div><label for="profileNickname">닉네임</label><input id="profileNickname" name="nickname" type="text" minlength="2" maxlength="20" autocomplete="nickname" required /><p class="field-hint">한글·영문 대소문자만, 2~20바이트 · 다른 회원과 중복될 수 없습니다.</p></div>
-            <div><label for="profileEmail">이메일 주소</label><input id="profileEmail" name="email" type="email" readonly aria-describedby="profileEmailHint" /><p class="field-hint" id="profileEmailHint">이메일 변경은 별도의 확인 절차가 필요해 현재 읽기 전용입니다.</p></div>
-            <div><label for="profileGender">성별</label><select id="profileGender" name="gender" required><option value="female">여성</option><option value="male">남성</option><option value="nonbinary">논바이너리</option><option value="prefer_not_to_say">응답하지 않음</option></select></div>
-            <div><label for="profileBio">한 줄 소개</label><textarea id="profileBio" name="bio" rows="3" maxlength="240" placeholder="좋아하는 게임이나 플레이 스타일을 소개해 주세요."></textarea><p class="field-hint">최대 240자</p></div>
-            <p class="auth-message" id="profileMessage" role="status" aria-live="polite"></p>
-            <div class="profile-form-actions"><button class="button" type="submit">변경사항 저장</button></div>
-          </form>
+          <div class="profile-panel-heading"><div><h2 id="publicProfileTitle">기본 정보</h2><p>내 계정과 공개 프로필 정보입니다.</p></div><span class="profile-section-icon" aria-hidden="true">✦</span></div>
+          <dl class="profile-details">
+            <div><dt>닉네임</dt><dd id="profileViewNickname">불러오는 중…</dd></div>
+            <div><dt>이메일 주소</dt><dd id="profileViewEmail">—</dd></div>
+            <div><dt>프로필 소개</dt><dd id="profileViewBio">—</dd></div>
+            <div><dt>가입일</dt><dd><time id="memberSince">—</time></dd></div>
+          </dl>
+          <a class="button profile-edit-link" href="profile-edit.html">프로필 수정</a>
         </section>
         <section class="profile-panel" id="my-posts" aria-labelledby="myPostsTitle">
           <div class="profile-panel-heading"><div><h2 id="myPostsTitle">내가 작성한 게시글</h2><p>게시판에 작성한 글이 최신순으로 표시됩니다.</p></div><span class="profile-section-icon" aria-hidden="true">✎</span></div>

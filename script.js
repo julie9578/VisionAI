@@ -128,6 +128,20 @@ function initializeArcade() {
 
     function renderGames() {
       const query = searchInput.value.trim().toLocaleLowerCase('ko');
+      const favoriteGames = games.filter(game => favorites.has(game.title));
+      const tagsByGame = new Map(games.map(game => [game.id, new Set(`${game.genre} ${game.tag}`
+        .toLocaleLowerCase('ko')
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter(tag => tag.length > 1))]));
+      const similarity = game => {
+        if (favorites.has(game.title)) return 0;
+        const tags = tagsByGame.get(game.id);
+        return favoriteGames.reduce((score, favorite) => {
+          let shared = 0;
+          tags.forEach(tag => { if (tagsByGame.get(favorite.id).has(tag)) shared += 1; });
+          return score + shared;
+        }, 0);
+      };
       const visibleGames = games.filter(game => {
         const matchesFilter = activeFilter === '전체'
           || (activeFilter === '즐겨찾기' ? favorites.has(game.title)
@@ -152,8 +166,15 @@ function initializeArcade() {
           const difference = left.title.localeCompare(right.title, 'ko');
           return sortDirection === 'asc' ? difference : -difference;
         }
+        const leftFavorite = favorites.has(left.title);
+        const rightFavorite = favorites.has(right.title);
+        if (favoriteGames.length > 0) {
+          if (leftFavorite !== rightFavorite) return leftFavorite ? -1 : 1;
+          const sharedTags = similarity(right) - similarity(left);
+          if (sharedTags !== 0) return sharedTags;
+        }
         const difference = recommendedOrder.indexOf(left.id) - recommendedOrder.indexOf(right.id);
-        return sortDirection === 'asc' ? difference : -difference;
+        return difference;
       });
 
       if (!visibleGames.length) {
@@ -191,12 +212,14 @@ function initializeArcade() {
     }
 
     searchInput.addEventListener('input', renderGames);
+    sortDirection.disabled = activeSort === 'recommended';
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
-      const sortButton = document.getElementById('sortDirection');
-      sortButton.disabled = false;
-      sortButton.textContent = sortDirection === 'asc' ? '↑' : '↓';
-      sortButton.setAttribute('aria-label', sortDirection === 'asc' ? '오름차순으로 정렬' : '내림차순으로 정렬');
+      sortDirection.disabled = activeSort === 'recommended';
+      sortDirection.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      sortDirection.setAttribute('aria-label', activeSort === 'recommended'
+        ? '추천순은 즐겨찾기 게임과 비슷한 태그 순으로 정렬합니다'
+        : sortDirection === 'asc' ? '오름차순으로 정렬' : '내림차순으로 정렬');
       renderGames();
     });
     document.getElementById('sortDirection').addEventListener('click', event => {

@@ -14,7 +14,13 @@
     <div class="shell nav">
       <a class="logo" href="index.html" aria-label="ARCADE 홈"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 8.5h10a4 4 0 0 1 3.8 5.2l-.7 2.3a2.5 2.5 0 0 1-4 1.2l-2.2-1.7h-3.8l-2.2 1.7a2.5 2.5 0 0 1-4-1.2l-.7-2.3A4 4 0 0 1 7 8.5Z" stroke="white" stroke-width="1.8"/><path d="M8 11v4m-2-2h4m7-1h.01M18 14h.01" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></span>ARCADE</a>
       <nav class="nav-links" aria-label="메인 메뉴"><a href="index.html#games">게임 둘러보기</a><a href="index.html#daily">오늘의 게임</a><a class="active" href="board.html" aria-current="page">게시판</a><a href="login.html">로그인</a><a href="signup.html">회원가입</a></nav>
-      <div class="nav-actions"><a class="avatar" href="login.html" aria-label="로그인 후 프로필 보기" id="profileButton">👾</a></div>
+      <div class="nav-actions"><div class="profile-control" id="profileControl">
+        <button class="avatar" type="button" aria-label="로그인" id="profileButton" aria-haspopup="true" aria-expanded="false"><span class="avatar-initials" id="profileButtonInitials" aria-hidden="true">👾</span></button>
+        <section class="profile-popover" id="profilePopover" aria-label="내 프로필 정보" hidden>
+          <div class="profile-popover-identity"><span class="profile-popover-avatar" id="profilePopoverAvatar" aria-hidden="true">👾</span><div><strong id="profilePopoverNickname">로그인이 필요합니다</strong><span id="profilePopoverEmail">프로필 정보를 확인하려면 로그인하세요.</span></div></div>
+          <a class="profile-popover-action" id="profilePopoverAction" href="login.html">로그인</a>
+        </section>
+      </div></div>
     </div>
   </header>
 
@@ -86,6 +92,7 @@
 
   <script src="board.js"></script>
   <script src="community.js"></script>
+  <script src="auth.js"></script>
 
   <footer><div class="shell"><a class="footer-logo" href="index.html">ARCADE</a><span>게임을 발견하고, 공식 사이트에서 더 알아보세요.</span><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
 </body>

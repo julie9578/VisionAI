@@ -15,7 +15,7 @@
     sessionStorage.removeItem(tokenKey);
   }
   const requestedNext = new URLSearchParams(window.location.search).get('next') || '';
-  const allowedNext = ['post-write.html', 'board.html', 'profile.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
+  const allowedNext = ['post-write.html', 'board.html', 'profile.html', 'profile-edit.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
   const loginDestination = allowedNext ? requestedNext : 'profile.html';
 
   async function request(path, options = {}) {
@@ -57,6 +57,55 @@
     homeProfileButton.dataset.color = user.avatar_color || 'violet';
     homeProfileButton.setAttribute('aria-label', `${user.nickname} 프로필 보기`);
     homeProfileButton.classList.add('is-signed-in');
+
+    const profileControl = document.getElementById('profileControl');
+    const profilePopover = document.getElementById('profilePopover');
+    const profilePopoverAvatar = document.getElementById('profilePopoverAvatar');
+    const profilePopoverNickname = document.getElementById('profilePopoverNickname');
+    const profilePopoverEmail = document.getElementById('profilePopoverEmail');
+    const profilePopoverAction = document.getElementById('profilePopoverAction');
+    const nickname = user.nickname || 'ARCADE 회원';
+    if (profilePopoverNickname) profilePopoverNickname.textContent = nickname;
+    if (profilePopoverEmail) profilePopoverEmail.textContent = user.email || '이메일 정보 없음';
+    if (profilePopoverAction) {
+      profilePopoverAction.href = 'profile-edit.html';
+      profilePopoverAction.textContent = '프로필 편집';
+    }
+    if (profilePopoverAvatar) {
+      profilePopoverAvatar.dataset.color = user.avatar_color || 'violet';
+      profilePopoverAvatar.textContent = user.avatar_image ? '' : nickname.slice(0, 2).toUpperCase();
+      profilePopoverAvatar.replaceChildren();
+      if (user.avatar_image) {
+        const image = document.createElement('img');
+        image.src = user.avatar_image;
+        image.alt = `${nickname} 프로필 사진`;
+        image.addEventListener('error', () => {
+          image.remove();
+          profilePopoverAvatar.textContent = nickname.slice(0, 2).toUpperCase();
+        }, { once: true });
+        profilePopoverAvatar.append(image);
+      }
+    }
+    if (profilePopover) profilePopover.dataset.signedIn = 'true';
+  }
+
+  const profileControl = document.getElementById('profileControl');
+  const profilePopover = document.getElementById('profilePopover');
+  if (profileControl && profilePopover) {
+    const profileButton = profileControl.querySelector('#profileButton');
+    const openPopover = () => {
+      profilePopover.hidden = false;
+      profileButton?.setAttribute('aria-expanded', 'true');
+    };
+    const closePopover = event => {
+      if (event?.relatedTarget && profileControl.contains(event.relatedTarget)) return;
+      profilePopover.hidden = true;
+      profileButton?.setAttribute('aria-expanded', 'false');
+    };
+    profileControl.addEventListener('pointerenter', openPopover);
+    profileControl.addEventListener('pointerleave', closePopover);
+    profileControl.addEventListener('focusin', openPopover);
+    profileControl.addEventListener('focusout', closePopover);
   }
 
   if (homeProfileButton) {
@@ -67,7 +116,7 @@
       }
       homeProfileButton.disabled = true;
       try {
-        const data = await request('/api/auth/me');
+        await request('/api/auth/me');
         window.location.assign('profile.html');
       } catch {
         clearToken();
@@ -294,22 +343,49 @@
 
   function showProfile(user) {
     const content = document.getElementById('profilePage');
-    if (!content) return;
-    content.hidden = false;
-    document.getElementById('profileNickname').value = user.nickname || '';
-    document.getElementById('profileEmail').value = user.email || '';
-    document.getElementById('profileGender').value = user.gender || 'prefer_not_to_say';
-    document.getElementById('profileBio').value = user.bio || '';
+    if (content) content.hidden = false;
+    const profileView = document.getElementById('profileViewPage');
+    if (profileView) profileView.hidden = false;
+    const nicknameInput = document.getElementById('profileNickname');
+    const emailInput = document.getElementById('profileEmail');
+    const genderInput = document.getElementById('profileGender');
+    const bioInput = document.getElementById('profileBio');
+    if (nicknameInput) nicknameInput.value = user.nickname || '';
+    if (emailInput) emailInput.value = user.email || '';
+    if (genderInput) genderInput.value = user.gender || 'prefer_not_to_say';
+    if (bioInput) bioInput.value = user.bio || '';
+    const viewNickname = document.getElementById('profileViewNickname');
+    const viewEmail = document.getElementById('profileViewEmail');
+    const viewBio = document.getElementById('profileViewBio');
+    if (viewNickname) viewNickname.textContent = user.nickname || '이름 없음';
+    if (viewEmail) viewEmail.textContent = user.email || '이메일 정보 없음';
+    if (viewBio) viewBio.textContent = user.bio || '소개가 없습니다.';
     const color = user.avatar_color || 'violet';
-    const radio = profileForm.querySelector(`input[name="avatar_color"][value="${color}"]`);
+    const radio = profileForm?.querySelector(`input[name="avatar_color"][value="${color}"]`);
     if (radio) radio.checked = true;
     setAvatarColor(color);
-    document.getElementById('sidebarNickname').textContent = user.nickname;
+    const sidebarNickname = document.getElementById('sidebarNickname');
+    if (sidebarNickname) sidebarNickname.textContent = user.nickname || '플레이어';
     setProfileAvatarImage(user.avatar_image, user.nickname);
     const createdAt = new Date(user.created_at);
-    document.getElementById('memberSince').textContent = Number.isNaN(createdAt.getTime())
+    const memberSince = document.getElementById('memberSince');
+    if (memberSince) memberSince.textContent = Number.isNaN(createdAt.getTime())
       ? '정보 없음'
       : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(createdAt);
+  }
+
+  const profileViewPage = document.getElementById('profileViewPage');
+  if (profileViewPage) {
+    if (!token()) {
+      window.location.replace(`login.html?next=${encodeURIComponent('profile.html')}`);
+    } else {
+      request('/api/auth/me')
+        .then(data => showProfile(data.user))
+        .catch(() => {
+          clearToken();
+          window.location.replace(`login.html?next=${encodeURIComponent('profile.html')}`);
+        });
+    }
   }
 
   if (loginForm) {
@@ -353,7 +429,7 @@
     const clearAvatarButton = document.getElementById('clearProfileAvatar');
     let avatarImage = null;
     if (!token()) {
-      const next = encodeURIComponent('profile.html');
+      const next = encodeURIComponent('profile-edit.html');
       window.location.replace(`login.html?next=${next}`);
     } else {
       request('/api/auth/me')
@@ -364,7 +440,7 @@
         })
         .catch(() => {
           clearToken();
-          const next = encodeURIComponent('profile.html');
+          const next = encodeURIComponent('profile-edit.html');
           window.location.replace(`login.html?next=${next}`);
         });
     }
