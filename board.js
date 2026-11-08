@@ -36,14 +36,16 @@
     return new Intl.DateTimeFormat('ko-KR', { month: '2-digit', day: '2-digit' }).format(date).replace('. ', '.').replace('.', '');
   }
 
-  function renderPosts(posts, total) {
+  function renderPosts(posts, total, page, pageSize) {
     if (!posts.length) {
-      rows.innerHTML = '<tr><td class="board-empty" colspan="6">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
+      rows.innerHTML = '<tr><td class="board-empty" colspan="7">게시글이 없습니다. 첫 글을 작성해 보세요.</td></tr>';
     } else {
-      rows.innerHTML = posts.map(post => {
+      rows.innerHTML = posts.map((post, index) => {
         const category = categoryLabels[post.category] || '자유';
         const authorHref = post.author_id ? `user.html?id=${encodeURIComponent(post.author_id)}` : `user.html?name=${encodeURIComponent(post.author || '운영팀')}`;
+        const postNumber = Math.max(1, Number(total) - ((Number(page) - 1) * Number(pageSize)) - index);
         return `<tr>
+          <td class="post-number">${postNumber}</td>
           <td><span class="post-badge ${escapeHtml(post.category)}">${escapeHtml(category)}</span></td>
           <td><a class="post-title" href="post.html?id=${encodeURIComponent(post.id)}">${escapeHtml(post.title)} <span class="reply-count">[${Number(post.comments_count) || 0}]</span></a></td>
           <td class="post-author"><a href="${authorHref}">${escapeHtml(post.author)}</a></td>
@@ -90,8 +92,11 @@
       const data = await response.json();
       const notices = data.notices || [];
       const posts = data.posts || [];
-      renderPosts([...notices, ...posts], Number(data.total) + notices.length);
-      renderPagination(data.page || selectedPage, data.total, data.pageSize || 10);
+      const page = Number(data.page) || selectedPage;
+      const pageSize = Number(data.pageSize) || 20;
+      const total = Number(data.total) + notices.length;
+      renderPosts([...notices, ...posts], total, page, pageSize);
+      renderPagination(page, data.total, pageSize);
       status.textContent = '';
       apiAvailable = true;
     } catch {

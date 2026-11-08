@@ -77,14 +77,16 @@
       <div class="post-table-wrap" id="all-posts">
         <table class="post-table">
           <caption class="visually-hidden">ARCADE 게시판 게시글 목록</caption>
-          <thead><tr><th scope="col" class="post-category-col">분류</th><th scope="col">제목</th><th scope="col" class="post-author-col">작성자</th><th scope="col" class="post-date-col">날짜</th><th scope="col" class="post-views-col">조회</th><th scope="col" class="post-actions-col">반응</th></tr></thead>
+          <thead><tr><th scope="col" class="post-number-col">번호</th><th scope="col" class="post-category-col">분류</th><th scope="col">제목</th><th scope="col" class="post-author-col">작성자</th><th scope="col" class="post-date-col">날짜</th><th scope="col" class="post-views-col">조회</th><th scope="col" class="post-actions-col">반응</th></tr></thead>
           <tbody id="postRows"></tbody>
         </table>
       </div>
 
-      <nav class="board-pagination" id="boardPagination" aria-label="게시글 페이지"></nav>
+      <div class="board-pagination-row">
+        <nav class="board-pagination" id="boardPagination" aria-label="게시글 페이지"></nav>
+        <a class="button board-write" href="post-write.html" target="_blank" aria-label="새 탭에서 글쓰기 페이지 열기">✎ 글쓰기</a>
+      </div>
       <p class="board-note" id="write-info">글 작성, 댓글, 좋아요와 북마크는 로그인한 회원만 이용할 수 있습니다.</p>
-      <div class="board-bottom-actions"><a class="button board-write" href="post-write.html" target="_blank" aria-label="새 탭에서 글쓰기 페이지 열기">✎ 글쓰기</a></div>
     </section>
   </main>
 
