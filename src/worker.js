@@ -1,5 +1,5 @@
 const ALLOWED_CATEGORIES = new Set(["free", "recommend", "guide", "recruit", "notice"]);
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 // Cloudflare Workers Web Crypto currently rejects PBKDF2 counts above 100,000.
 const PASSWORD_ITERATIONS = 100000;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -103,36 +103,50 @@ async function readSession(request, secret) {
 }
 
 function publicUser(user) {
-  return { id: user.id, nickname: user.nickname, email: user.email, gender: user.gender, bio: user.bio || "", avatar_color: user.avatar_color || "violet", created_at: user.created_at };
+  return { id: user.id, nickname: user.nickname, email: user.email, gender: user.gender, bio: user.bio || "", avatar_color: user.avatar_color || "violet", avatar_image: user.avatar_image || null, created_at: user.created_at };
+}
+
+function isValidNickname(nickname) {
+  return /^[가-힣A-Za-z]+$/u.test(nickname) && new TextEncoder().encode(nickname).length >= 2 && new TextEncoder().encode(nickname).length <= 20;
 }
 
 async function handleAuth(request, env, url, headers) {
+  if (url.pathname === "/api/auth/nickname-availability" && request.method === "GET") {
+    const nickname = (url.searchParams.get("nickname") || "").trim();
+    if (!isValidNickname(nickname)) return json({ available: false, error: "닉네임은 한글과 영문 대소문자만 사용해 2~20바이트로 입력해 주세요." }, 400, headers);
+    const existing = await env.DB.prepare("SELECT 1 AS found FROM users WHERE nickname = ? COLLATE NOCASE LIMIT 1").bind(nickname).first();
+    return json({ available: !existing }, 200, headers);
+  }
+
   if (url.pathname === "/api/auth/signup" && request.method === "POST") {
-    if (!env.ADDRESS_ENCRYPTION_KEY || !env.SESSION_SECRET) return json({ error: "회원 API 보안 키가 설정되지 않았습니다." }, 503, headers);
+    if (!env.SESSION_SECRET) return json({ error: "회원 API 보안 키가 설정되지 않았습니다." }, 503, headers);
     let body;
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const nickname = typeof body.nickname === "string" ? body.nickname.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const gender = typeof body.gender === "string" ? body.gender : "";
-    const address = typeof body.address === "string" ? body.address.trim() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    if (nickname.length < 2 || nickname.length > 30) return json({ error: "닉네임은 2~30자로 입력해 주세요." }, 400, headers);
+    if (!isValidNickname(nickname)) return json({ error: "닉네임은 한글과 영문 대소문자만 사용해 2~20바이트로 입력해 주세요." }, 400, headers);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return json({ error: "올바른 이메일 주소를 입력해 주세요." }, 400, headers);
     if (!["female", "male", "nonbinary", "prefer_not_to_say"].includes(gender)) return json({ error: "성별 항목을 선택해 주세요." }, 400, headers);
-    if (address.length < 5 || address.length > 500) return json({ error: "집 주소는 5~500자로 입력해 주세요." }, 400, headers);
     if (password.length < 10 || password.length > 128) return json({ error: "비밀번호는 10~128자로 입력해 주세요." }, 400, headers);
+
+    const duplicate = await env.DB.prepare("SELECT 1 AS found FROM users WHERE nickname = ? COLLATE NOCASE LIMIT 1").bind(nickname).first();
+    if (duplicate) return json({ error: "이미 사용 중인 닉네임입니다." }, 409, headers);
 
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const passwordHash = await hashPassword(password, salt);
-    const encryptedAddress = await encryptAddress(address, env.ADDRESS_ENCRYPTION_KEY);
     try {
-      const inserted = await env.DB.prepare("INSERT INTO users (nickname, email, gender, address_ciphertext, address_iv, password_hash, password_salt) VALUES (?, ?, ?, ?, ?, ?, ?)")
-        .bind(nickname, email, gender, encryptedAddress.ciphertext, encryptedAddress.iv, toBase64Url(passwordHash), toBase64Url(salt)).run();
-      const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
+      const inserted = await env.DB.prepare("INSERT INTO users (nickname, email, gender, address_ciphertext, address_iv, password_hash, password_salt) VALUES (?, ?, ?, '', '', ?, ?)")
+        .bind(nickname, email, gender, toBase64Url(passwordHash), toBase64Url(salt)).run();
+      const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
       const token = await signSession(user.id, env.SESSION_SECRET);
       return json({ user, token }, 201, headers);
     } catch (error) {
-      if (String(error.message).toLowerCase().includes("unique")) return json({ error: "이 이메일은 이미 가입되어 있습니다." }, 409, headers);
+      if (String(error.message).toLowerCase().includes("unique")) {
+        if (String(error.message).toLowerCase().includes("nickname")) return json({ error: "이미 사용 중인 닉네임입니다." }, 409, headers);
+        return json({ error: "이 이메일은 이미 가입되어 있습니다." }, 409, headers);
+      }
       throw error;
     }
   }
@@ -143,7 +157,7 @@ async function handleAuth(request, env, url, headers) {
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
     if (!user || !password) return json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, 401, headers);
     const candidate = await hashPassword(password, fromBase64Url(user.password_salt));
     const expected = fromBase64Url(user.password_hash);
@@ -157,7 +171,7 @@ async function handleAuth(request, env, url, headers) {
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const userId = await readSession(request, env.SESSION_SECRET);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
@@ -171,13 +185,17 @@ async function handleAuth(request, env, url, headers) {
     const gender = typeof body.gender === "string" ? body.gender : "";
     const bio = typeof body.bio === "string" ? body.bio.trim() : "";
     const avatarColor = typeof body.avatar_color === "string" ? body.avatar_color : "violet";
-    if (nickname.length < 2 || nickname.length > 30) return json({ error: "닉네임은 2~30자로 입력해 주세요." }, 400, headers);
+    const avatarImage = body.avatar_image === null || body.avatar_image === "" ? null : typeof body.avatar_image === "string" ? body.avatar_image : undefined;
+    if (!isValidNickname(nickname)) return json({ error: "닉네임은 한글과 영문 대소문자만 사용해 2~20바이트로 입력해 주세요." }, 400, headers);
     if (!["female", "male", "nonbinary", "prefer_not_to_say"].includes(gender)) return json({ error: "성별 항목을 선택해 주세요." }, 400, headers);
     if (bio.length > 240) return json({ error: "소개는 240자 이내로 입력해 주세요." }, 400, headers);
     if (!["violet", "cyan", "rose", "amber"].includes(avatarColor)) return json({ error: "올바르지 않은 아바타 색상입니다." }, 400, headers);
+    if (avatarImage === undefined || (avatarImage !== null && (!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(avatarImage) || avatarImage.length > 120000))) return json({ error: "프로필 이미지는 JPG, PNG 또는 WebP 형식의 90KB 이하 파일이어야 합니다." }, 400, headers);
 
-    await env.DB.prepare("UPDATE users SET nickname = ?, gender = ?, bio = ?, avatar_color = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?").bind(nickname, gender, bio, avatarColor, userId).run();
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, created_at FROM users WHERE id = ?").bind(userId).first();
+    const duplicate = await env.DB.prepare("SELECT 1 AS found FROM users WHERE nickname = ? COLLATE NOCASE AND id != ? LIMIT 1").bind(nickname, userId).first();
+    if (duplicate) return json({ error: "이미 사용 중인 닉네임입니다." }, 409, headers);
+    await env.DB.prepare("UPDATE users SET nickname = ?, gender = ?, bio = ?, avatar_color = ?, avatar_image = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?").bind(nickname, gender, bio, avatarColor, avatarImage, userId).run();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
@@ -217,76 +235,21 @@ async function handleApi(request, env, url) {
     return json({ posts: result.results }, 200, headers);
   }
 
-  if (url.pathname === "/api/users/me/comments" && request.method === "GET") {
-    const userId = await readSession(request, env.SESSION_SECRET);
-    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
-    const result = await env.DB.prepare("SELECT i.id, i.post_id, i.content, i.created_at, p.title AS post_title, p.deleted_at AS post_deleted_at FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = 'comment' ORDER BY i.created_at DESC, i.id DESC LIMIT 100").bind(userId).all();
-    return json({ comments: result.results }, 200, headers);
-  }
-
-  if (url.pathname === "/api/users/me/commented-posts" && request.method === "GET") {
-    const userId = await readSession(request, env.SESSION_SECRET);
-    if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
-    const result = await env.DB.prepare("SELECT p.id, p.category, p.title, p.author, p.created_at, MAX(i.created_at) AS activity_at, COUNT(i.id) AS my_comment_count FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = 'comment' AND p.deleted_at IS NULL GROUP BY p.id ORDER BY activity_at DESC, p.id DESC LIMIT 100").bind(userId).all();
-    return json({ posts: result.results }, 200, headers);
-  }
-
-  for (const [route, interactionType] of [["liked-posts", "like"], ["bookmarked-posts", "bookmark"]]) {
-    if (url.pathname === `/api/users/me/${route}` && request.method === "GET") {
-      const userId = await readSession(request, env.SESSION_SECRET);
-      if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
-      const result = await env.DB.prepare("SELECT p.id, p.category, p.title, p.author, p.created_at, i.created_at AS activity_at FROM post_interactions i JOIN posts p ON p.id = i.post_id WHERE i.user_id = ? AND i.interaction_type = ? AND p.deleted_at IS NULL ORDER BY i.created_at DESC, p.id DESC LIMIT 100").bind(userId, interactionType).all();
-      return json({ posts: result.results }, 200, headers);
-    }
-  }
-
   if (url.pathname === "/api/posts" && request.method === "GET") {
     const page = Math.max(1, Math.min(10000, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1));
     const category = url.searchParams.get("category") || "";
     const query = (url.searchParams.get("q") || "").trim().slice(0, 100);
-    const searchScope = url.searchParams.get("scope") || "all";
     if (category && !ALLOWED_CATEGORIES.has(category)) return json({ error: "올바르지 않은 분류입니다." }, 400, headers);
-    if (!["all", "title", "author"].includes(searchScope)) return json({ error: "올바르지 않은 검색 범위입니다." }, 400, headers);
 
-    const conditions = ["p.deleted_at IS NULL", "p.category != 'notice'"];
+    const conditions = ["deleted_at IS NULL"];
     const values = [];
-    if (category === "notice") conditions.push("1 = 0");
-    else if (category) { conditions.push("p.category = ?"); values.push(category); }
-    if (query) {
-      const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
-      if (searchScope === "title") {
-        conditions.push("p.title LIKE ? ESCAPE '\\'");
-        values.push(escaped);
-      } else if (searchScope === "author") {
-        conditions.push("p.author LIKE ? ESCAPE '\\'");
-        values.push(escaped);
-      } else {
-        conditions.push("(p.title LIKE ? ESCAPE '\\' OR p.content LIKE ? ESCAPE '\\' OR EXISTS (SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment' AND i.content LIKE ? ESCAPE '\\'))");
-        values.push(escaped, escaped, escaped);
-      }
-    }
-    const where = `WHERE ${conditions.join(" AND ")}`;
+    if (category) { conditions.push("category = ?"); values.push(category); }
+    if (query) { conditions.push("(title LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')"); const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`; values.push(escaped, escaped); }
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
     const offset = (page - 1) * PAGE_SIZE;
     const viewerId = await readSession(request, env.SESSION_SECRET);
-    const noticeConditions = ["p.deleted_at IS NULL", "p.category = 'notice'"];
-    const noticeValues = [];
-    if (category && category !== "notice") noticeConditions.push("1 = 0");
-    if (query) {
-      const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
-      if (searchScope === "title") {
-        noticeConditions.push("p.title LIKE ? ESCAPE '\\'");
-        noticeValues.push(escaped);
-      } else if (searchScope === "author") {
-        noticeConditions.push("p.author LIKE ? ESCAPE '\\'");
-        noticeValues.push(escaped);
-      } else {
-        noticeConditions.push("(p.title LIKE ? ESCAPE '\\' OR p.content LIKE ? ESCAPE '\\' OR EXISTS (SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment' AND i.content LIKE ? ESCAPE '\\'))");
-        noticeValues.push(escaped, escaped, escaped);
-      }
-    }
-    const noticeWhere = `WHERE ${noticeConditions.join(" AND ")}`;
-    const [count, result, notices] = await Promise.all([
-      env.DB.prepare(`SELECT COUNT(*) AS total FROM posts p ${where}`).bind(...values).first(),
+    const [count, result] = await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) AS total FROM posts ${where}`).bind(...values).first(),
       env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
         (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
         (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
@@ -294,15 +257,8 @@ async function handleApi(request, env, url) {
         CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
         CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
         FROM posts p ${where} ORDER BY p.created_at DESC, p.id DESC LIMIT ? OFFSET ?`).bind(viewerId, viewerId, viewerId, viewerId, ...values, PAGE_SIZE, offset).all(),
-      env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
-        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
-        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
-        (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'bookmark') AS bookmarks_count,
-        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'like') END AS liked_by_me,
-        CASE WHEN ? IS NULL THEN 0 ELSE EXISTS(SELECT 1 FROM post_interactions i WHERE i.post_id = p.id AND i.user_id = ? AND i.interaction_type = 'bookmark') END AS bookmarked_by_me
-        FROM posts p ${noticeWhere} ORDER BY p.created_at DESC, p.id DESC`).bind(viewerId, viewerId, viewerId, viewerId, ...noticeValues).all(),
     ]);
-    return json({ posts: result.results, notices: notices.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
+    return json({ posts: result.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
   }
 
   const commentsMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/comments$/);
@@ -344,38 +300,6 @@ async function handleApi(request, env, url) {
   }
 
   const singleMatch = url.pathname.match(/^\/api\/posts\/(\d+)$/);
-  if (singleMatch && request.method === "GET" && url.searchParams.get("include_deleted") === "1") {
-    const postId = Number(singleMatch[1]);
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, author_id, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NOT NULL").bind(postId).first();
-    return post ? json({ post, deleted: true }, 200, headers) : json({ error: "삭제된 게시글을 찾을 수 없습니다." }, 404, headers);
-  }
-  if (singleMatch && ["PUT", "DELETE"].includes(request.method)) {
-    const userId = await readSession(request, env.SESSION_SECRET);
-    if (!userId) return json({ error: "게시글 수정과 삭제는 로그인 후 이용할 수 있습니다." }, 401, headers);
-    const postId = Number(singleMatch[1]);
-    const existing = await env.DB.prepare("SELECT id, author_id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
-    if (!existing) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
-    if (Number(existing.author_id) !== userId) return json({ error: "본인이 작성한 게시글만 수정하거나 삭제할 수 있습니다." }, 403, headers);
-
-    if (request.method === "DELETE") {
-      await env.DB.prepare("UPDATE posts SET deleted_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND author_id = ? AND deleted_at IS NULL").bind(postId, userId).run();
-      return json({ ok: true, deleted: true }, 200, headers);
-    }
-
-    let body;
-    try { body = await request.json(); }
-    catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
-    const category = typeof body.category === "string" ? body.category.trim() : "";
-    const title = typeof body.title === "string" ? body.title.trim() : "";
-    const content = typeof body.content === "string" ? body.content.trim() : "";
-    if (!ALLOWED_CATEGORIES.has(category) || category === "notice") return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
-    if (!title || title.length > 160) return json({ error: "제목은 1~160자로 입력해 주세요." }, 400, headers);
-    if (!content || content.length > 10000) return json({ error: "내용은 1~10,000자로 입력해 주세요." }, 400, headers);
-    await env.DB.prepare("UPDATE posts SET category = ?, title = ?, content = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND author_id = ? AND deleted_at IS NULL").bind(category, title, content, postId, userId).run();
-    const post = await env.DB.prepare("SELECT id, category, title, content, author, author_id, created_at, updated_at, deleted_at FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
-    return json({ post }, 200, headers);
-  }
-
   if (singleMatch && request.method === "GET") {
     const postId = Number(singleMatch[1]);
     const viewerId = await readSession(request, env.SESSION_SECRET);

@@ -4,6 +4,7 @@
   const signupForm = document.getElementById('signupForm');
   const loginForm = document.getElementById('loginForm');
   const profileForm = document.getElementById('profileForm');
+  const homeProfileButton = document.getElementById('profileButton');
   const token = () => sessionStorage.getItem(tokenKey);
   const requestedNext = new URLSearchParams(window.location.search).get('next') || '';
   const allowedNext = ['post-write.html', 'board.html', 'profile.html'].includes(requestedNext) || /^post\.html\?id=\d+$/.test(requestedNext);
@@ -23,6 +24,56 @@
     if (!element) return;
     element.textContent = message;
     element.classList.toggle('success', success);
+  }
+
+  function showHomeProfile(user) {
+    if (!homeProfileButton) return;
+    const initials = document.getElementById('profileButtonInitials');
+    if (initials) {
+      initials.textContent = (user.nickname || 'AR').slice(0, 2).toUpperCase();
+      initials.hidden = Boolean(user.avatar_image);
+      const oldImage = homeProfileButton.querySelector('.avatar-image');
+      oldImage?.remove();
+      if (user.avatar_image) {
+        const image = document.createElement('img');
+        image.className = 'avatar-image';
+        image.src = user.avatar_image;
+        image.alt = '';
+        image.addEventListener('error', () => {
+          image.remove();
+          initials.hidden = false;
+        }, { once: true });
+        homeProfileButton.prepend(image);
+      }
+    }
+    homeProfileButton.dataset.color = user.avatar_color || 'violet';
+    homeProfileButton.setAttribute('aria-label', `${user.nickname} 프로필 보기`);
+    homeProfileButton.classList.add('is-signed-in');
+  }
+
+  if (homeProfileButton) {
+    homeProfileButton.addEventListener('click', async () => {
+      if (!token()) {
+        window.location.assign('login.html');
+        return;
+      }
+      homeProfileButton.disabled = true;
+      try {
+        const data = await request('/api/auth/me');
+        window.location.assign('profile.html');
+      } catch {
+        sessionStorage.removeItem(tokenKey);
+        window.location.assign('login.html');
+      } finally {
+        homeProfileButton.disabled = false;
+      }
+    });
+
+    if (token()) {
+      request('/api/auth/me')
+        .then(data => showHomeProfile(data.user))
+        .catch(() => sessionStorage.removeItem(tokenKey));
+    }
   }
 
   function escapeHtml(value) {
@@ -55,98 +106,117 @@
     }
   }
 
-  async function loadProfileComments() {
-    const list = document.getElementById('profileCommentList');
-    const status = document.getElementById('profileCommentsStatus');
-    if (!list || !status) return;
-    status.textContent = '댓글을 불러오는 중…';
-    try {
-      const data = await request('/api/users/me/comments');
-      const comments = Array.isArray(data.comments) ? data.comments : [];
-      if (!comments.length) {
-        status.textContent = '아직 작성한 댓글이 없습니다.';
-        return;
-      }
-      status.textContent = `${comments.length}개의 댓글`;
-      list.innerHTML = comments.map(comment => {
-        const date = new Date(comment.created_at);
-        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
-        const postTitle = escapeHtml(comment.post_title || '삭제된 게시글');
-        const body = escapeHtml(comment.content);
-        const deletedLabel = comment.post_deleted_at ? '<span class="profile-deleted-post-label">삭제된 게시글</span>' : '';
-        const postLink = `post.html?id=${encodeURIComponent(comment.post_id)}${comment.post_deleted_at ? '&deleted=1' : ''}`;
-        const content = `<span class="profile-post-category">댓글</span><span class="profile-comment-copy"><strong>${postTitle}${deletedLabel}</strong><span>${body}</span></span><time datetime="${escapeHtml(comment.created_at)}">${escapeHtml(dateLabel)}</time>`;
-        return `<li class="profile-post-item profile-comment-item"><a href="${postLink}">${content}</a></li>`;
-      }).join('');
-    } catch (error) {
-      status.textContent = error.message || '댓글을 불러오지 못했습니다.';
-    }
-  }
-
-  async function loadProfilePostCollection(path, listId, statusId, emptyMessage, marker) {
-    const list = document.getElementById(listId);
-    const status = document.getElementById(statusId);
-    if (!list || !status) return;
-    status.textContent = '목록을 불러오는 중…';
-    try {
-      const data = await request(path);
-      const posts = Array.isArray(data.posts) ? data.posts : [];
-      if (!posts.length) {
-        status.textContent = emptyMessage;
-        list.innerHTML = '';
-        return;
-      }
-      status.textContent = `${posts.length}개의 게시글`;
-      list.innerHTML = posts.map(post => {
-        const date = new Date(post.activity_at || post.created_at);
-        const dateLabel = Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
-        const category = escapeHtml(({ free: '자유', recommend: '게임 추천', guide: '공략·팁', recruit: '모집', notice: '공지' })[post.category] || '게시글');
-        const title = escapeHtml(post.title);
-        const detail = post.my_comment_count ? `<span class="profile-post-activity-count">댓글 ${Number(post.my_comment_count)}개</span>` : '';
-        return `<li class="profile-post-item"><a href="post.html?id=${encodeURIComponent(post.id)}"><span class="profile-post-category">${escapeHtml(marker || category)}</span><span class="profile-post-copy"><strong>${title}</strong>${detail}</span><time datetime="${escapeHtml(post.activity_at || post.created_at)}">${escapeHtml(dateLabel)}</time></a></li>`;
-      }).join('');
-    } catch (error) {
-      status.textContent = error.message || '목록을 불러오지 못했습니다.';
-    }
-  }
-
-  function initializeProfileActivityTabs() {
-    const tabs = [...document.querySelectorAll('[data-activity-tab]')];
-    const panels = {
-      posts: document.getElementById('profilePostsPanel'),
-      comments: document.getElementById('profileCommentsPanel'),
-      'commented-posts': document.getElementById('profileCommentedPostsPanel'),
-      'liked-posts': document.getElementById('profileLikedPostsPanel'),
-      'bookmarked-posts': document.getElementById('profileBookmarkedPostsPanel'),
-    };
-    const loaders = {
-      posts: loadProfilePosts,
-      comments: loadProfileComments,
-      'commented-posts': () => loadProfilePostCollection('/api/users/me/commented-posts', 'profileCommentedPostsList', 'profileCommentedPostsStatus', '아직 댓글 단 게시글이 없습니다.', '내 댓글'),
-      'liked-posts': () => loadProfilePostCollection('/api/users/me/liked-posts', 'profileLikedPostsList', 'profileLikedPostsStatus', '아직 좋아요한 게시글이 없습니다.', '♥ 좋아요'),
-      'bookmarked-posts': () => loadProfilePostCollection('/api/users/me/bookmarked-posts', 'profileBookmarkedPostsList', 'profileBookmarkedPostsStatus', '아직 북마크한 게시글이 없습니다.', '▣ 북마크'),
-    };
-    tabs.forEach(tab => tab.addEventListener('click', () => {
-      const selected = tab.dataset.activityTab;
-      tabs.forEach(item => {
-        const active = item === tab;
-        item.classList.toggle('active', active);
-        item.setAttribute('aria-selected', String(active));
-        item.tabIndex = active ? 0 : -1;
-      });
-      for (const [name, panel] of Object.entries(panels)) panel.hidden = name !== selected;
-      if (token() && loaders[selected]) loaders[selected]();
-    }));
-    tabs.forEach((tab, index) => { tab.tabIndex = index === 0 ? 0 : -1; });
-  }
-
 
   if (signupForm) {
+    const nicknameInput = document.getElementById('nickname');
+    const nicknameHint = document.getElementById('nicknameHint');
+    const emailInput = document.getElementById('email');
+    const emailHint = document.getElementById('emailHint');
+    const signupSubmit = document.getElementById('signupSubmit');
+    let nicknameAvailable = false;
+    let nicknameRequestId = 0;
+    let nicknameTimer;
+
+    function setHint(element, message, state = '') {
+      element.textContent = message;
+      element.classList.toggle('error', state === 'error');
+      element.classList.toggle('success', state === 'success');
+    }
+
+    function utf8ByteLength(value) {
+      return new TextEncoder().encode(value).length;
+    }
+
+    function validNicknameCharacters(value) {
+      return /^[가-힣A-Za-z]+$/u.test(value);
+    }
+
+    function updateSignupAvailability() {
+      signupSubmit.disabled = !signupForm.checkValidity() || !nicknameAvailable;
+    }
+
+    function validateEmail() {
+      const value = emailInput.value.trim();
+      if (!value) {
+        emailInput.setAttribute('aria-invalid', 'false');
+        setHint(emailHint, '로그인에 사용할 이메일 주소를 입력해 주세요.');
+        updateSignupAvailability();
+        return false;
+      }
+      if (!emailInput.validity.valid) {
+        emailInput.setAttribute('aria-invalid', 'true');
+        setHint(emailHint, '올바른 이메일 형식으로 입력해 주세요.', 'error');
+        updateSignupAvailability();
+        return false;
+      }
+      emailInput.setAttribute('aria-invalid', 'false');
+      setHint(emailHint, '사용할 수 있는 이메일 형식입니다.', 'success');
+      updateSignupAvailability();
+      return true;
+    }
+
+    async function checkNickname() {
+      const value = nicknameInput.value.trim();
+      const requestId = ++nicknameRequestId;
+      nicknameAvailable = false;
+      nicknameInput.removeAttribute('aria-invalid');
+      if (!value) {
+        setHint(nicknameHint, '2~20바이트');
+        updateSignupAvailability();
+        return;
+      }
+      const byteLength = utf8ByteLength(value);
+      if (!validNicknameCharacters(value)) {
+        nicknameInput.setAttribute('aria-invalid', 'true');
+        setHint(nicknameHint, '닉네임은 한글과 영문 대소문자만 사용할 수 있습니다.', 'error');
+        updateSignupAvailability();
+        return;
+      }
+      if (byteLength < 2 || byteLength > 20) {
+        nicknameInput.setAttribute('aria-invalid', 'true');
+        setHint(nicknameHint, `현재 ${byteLength}바이트입니다. 닉네임은 2~20바이트로 입력해 주세요.`, 'error');
+        updateSignupAvailability();
+        return;
+      }
+      setHint(nicknameHint, '중복 여부를 확인하고 있습니다…');
+      updateSignupAvailability();
+      try {
+        const result = await request(`/api/auth/nickname-availability?nickname=${encodeURIComponent(value)}`);
+        if (requestId !== nicknameRequestId) return;
+        nicknameAvailable = result.available === true;
+        nicknameInput.setAttribute('aria-invalid', String(!nicknameAvailable));
+        setHint(nicknameHint, nicknameAvailable ? '사용할 수 있는 닉네임입니다.' : '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.', nicknameAvailable ? 'success' : 'error');
+      } catch {
+        if (requestId !== nicknameRequestId) return;
+        nicknameAvailable = false;
+        setHint(nicknameHint, '닉네임을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.', 'error');
+      }
+      updateSignupAvailability();
+    }
+
+    nicknameInput.addEventListener('input', () => {
+      nicknameAvailable = false;
+      clearTimeout(nicknameTimer);
+      nicknameTimer = setTimeout(checkNickname, 300);
+      updateSignupAvailability();
+    });
+    nicknameInput.addEventListener('blur', checkNickname);
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
+    signupForm.addEventListener('input', updateSignupAvailability);
+    signupForm.addEventListener('change', updateSignupAvailability);
+
     signupForm.addEventListener('submit', async event => {
       event.preventDefault();
       const message = document.getElementById('signupMessage');
       const submit = signupForm.querySelector('[type="submit"]');
       const form = new FormData(signupForm);
+      validateEmail();
+      await checkNickname();
+      if (!nicknameAvailable) {
+        setMessage(message, '사용할 수 있는 닉네임을 입력해 주세요.');
+        return;
+      }
       if (form.get('password') !== form.get('passwordConfirm')) {
         setMessage(message, '비밀번호와 비밀번호 확인이 일치하지 않습니다.');
         return;
@@ -160,7 +230,6 @@
             nickname: form.get('nickname'),
             email: form.get('email'),
             gender: form.get('gender'),
-            address: form.get('address'),
             password: form.get('password'),
           }),
         });
@@ -194,6 +263,27 @@
     }
   }
 
+  function setProfileAvatarImage(imageData, nickname) {
+    for (const id of ['profileAvatar', 'profileAvatarPreview']) {
+      const element = document.getElementById(id);
+      if (!element) continue;
+      element.replaceChildren();
+      if (imageData) {
+        const image = document.createElement('img');
+        image.className = 'profile-avatar-image';
+        image.src = imageData;
+        image.alt = '';
+        image.addEventListener('error', () => {
+          image.remove();
+          element.textContent = (nickname || 'AR').slice(0, 2).toUpperCase();
+        }, { once: true });
+        element.append(image);
+      } else {
+        element.textContent = (nickname || 'AR').slice(0, 2).toUpperCase();
+      }
+    }
+  }
+
   function showProfile(user) {
     const required = document.getElementById('profileAuthRequired');
     const content = document.getElementById('profilePage');
@@ -208,10 +298,8 @@
     const radio = profileForm.querySelector(`input[name="avatar_color"][value="${color}"]`);
     if (radio) radio.checked = true;
     setAvatarColor(color);
-    for (const id of ['sidebarNickname', 'profileAvatar', 'profileAvatarPreview']) {
-      const element = document.getElementById(id);
-      if (element) element.textContent = id.includes('Avatar') ? user.nickname.slice(0, 2).toUpperCase() : user.nickname;
-    }
+    document.getElementById('sidebarNickname').textContent = user.nickname;
+    setProfileAvatarImage(user.avatar_image, user.nickname);
     const createdAt = new Date(user.created_at);
     document.getElementById('memberSince').textContent = Number.isNaN(createdAt.getTime())
       ? '정보 없음'
@@ -222,6 +310,13 @@
     const required = document.getElementById('profileAuthRequired');
     const content = document.getElementById('profilePage');
     if (required) required.hidden = false;
+    if (content) content.hidden = true;
+  }
+
+  function showProfileLoading() {
+    const required = document.getElementById('profileAuthRequired');
+    const content = document.getElementById('profilePage');
+    if (required) required.hidden = true;
     if (content) content.hidden = true;
   }
 
@@ -262,12 +357,16 @@
     const message = document.getElementById('profileMessage');
     const logoutButton = document.getElementById('profileLogout');
     const colorInputs = [...profileForm.querySelectorAll('input[name="avatar_color"]')];
-    initializeProfileActivityTabs();
+    const avatarFileInput = document.getElementById('profileAvatarFile');
+    const clearAvatarButton = document.getElementById('clearProfileAvatar');
+    let avatarImage = null;
+    showProfileLoading();
     if (!token()) {
       showLoggedOutProfile();
     } else {
       request('/api/auth/me')
         .then(data => {
+          avatarImage = data.user.avatar_image || null;
           showProfile(data.user);
           loadProfilePosts();
         })
@@ -278,6 +377,45 @@
     }
 
     colorInputs.forEach(input => input.addEventListener('change', () => setAvatarColor(input.value)));
+    avatarFileInput?.addEventListener('change', async () => {
+      const file = avatarFileInput.files?.[0];
+      if (!file) return;
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        setMessage(message, 'JPG, PNG 또는 WebP 이미지를 선택해 주세요.');
+        avatarFileInput.value = '';
+        return;
+      }
+      try {
+        const image = await createImageBitmap(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const context = canvas.getContext('2d');
+        const scale = Math.max(256 / image.width, 256 / image.height);
+        const width = image.width * scale;
+        const height = image.height * scale;
+        context.drawImage(image, (256 - width) / 2, (256 - height) / 2, width, height);
+        image.close();
+        let quality = 0.82;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > 115000 && quality > 0.35) {
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        if (dataUrl.length > 115000) throw new Error('선택한 이미지가 너무 커서 저장할 수 없습니다.');
+        avatarImage = dataUrl;
+        setProfileAvatarImage(avatarImage, document.getElementById('profileNickname').value);
+        setMessage(message, '이미지를 미리보기로 설정했습니다. 저장을 눌러 적용해 주세요.', true);
+      } catch (error) {
+        setMessage(message, error.message || '이미지를 불러오지 못했습니다.');
+      }
+    });
+    clearAvatarButton?.addEventListener('click', () => {
+      avatarImage = null;
+      avatarFileInput.value = '';
+      setProfileAvatarImage(null, document.getElementById('profileNickname').value);
+      setMessage(message, '프로필 이미지 삭제를 선택했습니다. 저장을 눌러 적용해 주세요.');
+    });
     profileForm.addEventListener('submit', async event => {
       event.preventDefault();
       const submit = profileForm.querySelector('[type="submit"]');
@@ -292,6 +430,7 @@
             gender: data.get('gender'),
             bio: data.get('bio'),
             avatar_color: data.get('avatar_color'),
+            avatar_image: avatarImage,
           }),
         });
         showProfile(result.user);
