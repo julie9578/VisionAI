@@ -14,6 +14,16 @@ function configuredAdminEmails(env) {
   return new Set(values.map(value => value.trim().toLowerCase()).filter(Boolean));
 }
 
+async function requireAdministrator(request, env, headers) {
+  const userId = await readSession(request, env.SESSION_SECRET);
+  if (!userId) return { error: json({ error: "관리자 로그인이 필요합니다." }, 401, headers) };
+  const user = await env.DB.prepare("SELECT email, role FROM users WHERE id = ?").bind(userId).first();
+  if (user?.role !== "admin" || !configuredAdminEmails(env).has((user.email || "").trim().toLowerCase())) {
+    return { error: json({ error: "관리자 권한이 필요합니다." }, 403, headers) };
+  }
+  return { userId, user };
+}
+
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -295,6 +305,100 @@ async function handleApi(request, env, url) {
 
   const rateLimited = await rateLimitAuthRequest(request, env, url);
   if (rateLimited) return json(await rateLimited.json(), 429, { ...headers, "retry-after": rateLimited.headers.get("retry-after") || "60" });
+
+  if (url.pathname.startsWith("/api/admin/")) {
+    const authorization = await requireAdministrator(request, env, headers);
+    if (authorization.error) return authorization.error;
+
+    if (url.pathname === "/api/admin/me" && request.method === "GET") {
+      return json({ administrator: true, user: { id: authorization.user.id, nickname: authorization.user.nickname } }, 200, headers);
+    }
+
+    if (url.pathname === "/api/admin/posts" && request.method === "GET") {
+      const page = Math.max(1, Math.min(10000, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1));
+      const category = url.searchParams.get("category") || "";
+      const query = (url.searchParams.get("q") || "").trim().slice(0, 100);
+      if (category && !ALLOWED_CATEGORIES.has(category)) return json({ error: "올바르지 않은 분류입니다." }, 400, headers);
+      const conditions = ["p.deleted_at IS NULL"];
+      const values = [];
+      if (category) { conditions.push("p.category = ?"); values.push(category); }
+      if (query) {
+        conditions.push("(p.title LIKE ? ESCAPE '\\' OR p.content LIKE ? ESCAPE '\\' OR p.author LIKE ? ESCAPE '\\')");
+        const escaped = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+        values.push(escaped, escaped, escaped);
+      }
+      const where = `WHERE ${conditions.join(" AND ")}`;
+      const offset = (page - 1) * PAGE_SIZE;
+      const [count, results] = await Promise.all([
+        env.DB.prepare(`SELECT COUNT(*) AS total FROM posts p ${where}`).bind(...values).first(),
+        env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at,
+          (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id=p.id AND i.interaction_type='comment') AS comments_count
+          FROM posts p ${where} ORDER BY p.created_at DESC, p.id DESC LIMIT ? OFFSET ?`)
+          .bind(...values, PAGE_SIZE, offset).all(),
+      ]);
+      return json({ posts: results.results, page, pageSize: PAGE_SIZE, total: count.total }, 200, headers);
+    }
+
+    const adminPostCommentsMatch = url.pathname.match(/^\/api\/admin\/posts\/(\d+)\/comments$/);
+    if (adminPostCommentsMatch && request.method === "GET") {
+      const postId = Number(adminPostCommentsMatch[1]);
+      const post = await env.DB.prepare("SELECT id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+      if (!post) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+      const result = await env.DB.prepare("SELECT i.id, i.content, i.created_at, u.id AS author_id, u.nickname AS author FROM post_interactions i JOIN users u ON u.id=i.user_id WHERE i.post_id=? AND i.interaction_type='comment' ORDER BY i.created_at DESC,i.id DESC")
+        .bind(postId).all();
+      return json({ comments: result.results }, 200, headers);
+    }
+
+    const adminPostMatch = url.pathname.match(/^\/api\/admin\/posts\/(\d+)$/);
+    if (adminPostMatch && request.method === "PUT") {
+      const postId = Number(adminPostMatch[1]);
+      const post = await env.DB.prepare("SELECT id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+      if (!post) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+      let body;
+      try { body = await request.json(); }
+      catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+      const category = typeof body.category === "string" ? body.category.trim() : "";
+      if (!ALLOWED_CATEGORIES.has(category)) return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
+      const result = await env.DB.prepare("UPDATE posts SET category = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND deleted_at IS NULL")
+        .bind(category, postId).run();
+      if (!result.meta.changes) return json({ error: "게시글 분류를 변경하지 못했습니다." }, 404, headers);
+      return json({ ok: true, id: postId, category }, 200, headers);
+    }
+
+    const adminPostCategoryMatch = url.pathname.match(/^\/api\/admin\/posts\/(\d+)\/category$/);
+    if (adminPostCategoryMatch && request.method === "PUT") {
+      const postId = Number(adminPostCategoryMatch[1]);
+      const post = await env.DB.prepare("SELECT id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
+      if (!post) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+      let body;
+      try { body = await request.json(); }
+      catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
+      const category = typeof body.category === "string" ? body.category.trim() : "";
+      if (!ALLOWED_CATEGORIES.has(category)) return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
+      const result = await env.DB.prepare("UPDATE posts SET category = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND deleted_at IS NULL")
+        .bind(category, postId).run();
+      if (!result.meta.changes) return json({ error: "게시글 분류를 변경하지 못했습니다." }, 404, headers);
+      return json({ ok: true, id: postId, category }, 200, headers);
+    }
+
+    if (adminPostMatch && request.method === "DELETE") {
+      const postId = Number(adminPostMatch[1]);
+      const result = await env.DB.prepare("UPDATE posts SET deleted_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND deleted_at IS NULL")
+        .bind(postId).run();
+      if (!result.meta.changes) return json({ error: "게시글을 찾을 수 없습니다." }, 404, headers);
+      return json({ ok: true, id: postId, deleted: true }, 200, headers);
+    }
+
+    const adminCommentMatch = url.pathname.match(/^\/api\/admin\/comments\/(\d+)$/);
+    if (adminCommentMatch && request.method === "DELETE") {
+      const commentId = Number(adminCommentMatch[1]);
+      const result = await env.DB.prepare("DELETE FROM post_interactions WHERE id = ? AND interaction_type = 'comment'").bind(commentId).run();
+      if (!result.meta.changes) return json({ error: "댓글을 찾을 수 없습니다." }, 404, headers);
+      return json({ ok: true, id: commentId, deleted: true }, 200, headers);
+    }
+
+    return json({ error: "지원하지 않는 관리자 API 경로 또는 메서드입니다." }, 404, headers);
+  }
 
   if (url.pathname.startsWith("/api/auth/")) {
     const authResponse = await handleAuth(request, env, url, headers);

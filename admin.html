@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c0b14" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>관리자 — ARCADE</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="board.css" />
+  <link rel="stylesheet" href="community.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell nav">
+      <a class="logo" href="index.html" aria-label="ARCADE 홈"><span class="logo-mark">🎮</span>ARCADE</a>
+      <nav class="nav-links" aria-label="관리자 메뉴"><a href="index.html#games">게임 탐색</a><a href="board.html">게시판</a><a class="active" href="admin.html" aria-current="page">관리자</a></nav>
+      <button class="profile-logout admin-logout" id="adminLogout" type="button">로그아웃</button>
+    </div>
+  </header>
+  <main class="shell admin-page">
+    <p class="profile-breadcrumb"><a href="index.html">홈</a>　/　관리자</p>
+    <section class="admin-header"><div><p class="section-kicker">ARCADE ADMIN</p><h1>게시판 관리</h1><p>게시글 카테고리 변경과 게시글·댓글 삭제를 관리합니다.</p></div><span class="admin-badge">관리자 전용</span></section>
+    <p class="community-message" id="adminStatus" role="status" aria-live="polite">관리자 권한을 확인하고 있습니다…</p>
+    <section class="admin-console" id="adminConsole" hidden>
+      <form class="admin-search" id="adminSearchForm" role="search">
+        <label class="visually-hidden" for="adminCategory">카테고리</label>
+        <select id="adminCategory" name="category" aria-label="카테고리">
+          <option value="">전체 카테고리</option><option value="free">자유</option><option value="recommend">게임 추천</option><option value="guide">공략·팁</option><option value="recruit">모집</option><option value="notice">공지</option>
+        </select>
+        <label class="visually-hidden" for="adminQuery">게시글 검색</label>
+        <input id="adminQuery" name="q" type="search" maxlength="100" placeholder="제목, 내용, 작성자 검색" />
+        <button class="button" type="submit">검색</button>
+      </form>
+      <p class="admin-result-status" id="adminResultStatus" role="status" aria-live="polite"></p>
+      <div class="admin-post-list" id="adminPostList" aria-live="polite"></div>
+      <div class="admin-pagination" id="adminPagination" aria-label="관리자 게시글 페이지"></div>
+      <section class="admin-comments" id="adminComments" hidden>
+        <div class="admin-comments-heading"><div><p class="section-kicker">COMMENTS</p><h2>댓글 관리</h2></div><button class="button secondary" id="closeAdminComments" type="button">닫기</button></div>
+        <p class="admin-comment-post-title" id="adminCommentPostTitle"></p>
+        <p class="community-message" id="adminCommentStatus" role="status" aria-live="polite"></p>
+        <div class="admin-comment-list" id="adminCommentList"></div>
+      </section>
+    </section>
+  </main>
+  <footer><div class="shell"><a class="footer-logo" href="index.html">ARCADE</a><span>© 2026 ARCADE · PLAY YOUR WAY</span></div></footer>
+  <script src="admin.js"></script>
+</body>
+</html>

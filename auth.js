@@ -99,6 +99,13 @@
       profilePopoverAction.href = 'profile-edit.html';
       profilePopoverAction.textContent = '프로필 편집';
     }
+    const adminPopoverAction = document.getElementById('adminPopoverAction');
+    if (adminPopoverAction) {
+      adminPopoverAction.hidden = true;
+      request('/api/admin/me')
+        .then(() => { adminPopoverAction.hidden = false; })
+        .catch(() => { adminPopoverAction.hidden = true; });
+    }
     if (profilePopoverAvatar) {
       profilePopoverAvatar.dataset.color = user.avatar_color || 'violet';
       profilePopoverAvatar.textContent = user.avatar_image ? '' : nickname.slice(0, 2).toUpperCase();
