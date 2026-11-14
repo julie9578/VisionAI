@@ -77,7 +77,7 @@
       button.disabled = true;
       button.textContent = '저장 중…';
       try {
-        await api(`/api/admin/posts/${card.dataset.postId}`, { method: 'PUT', body: JSON.stringify({ category: select.value }) });
+        await api(`/api/admin/posts/${card.dataset.postId}/category`, { method: 'PUT', body: JSON.stringify({ category: select.value }) });
         setStatus(resultStatus, '게시글 카테고리를 변경했습니다.', true);
         await loadPosts();
       } catch (error) {
@@ -89,11 +89,11 @@
 
     list.querySelectorAll('.admin-delete-post').forEach(button => button.addEventListener('click', async () => {
       const card = button.closest('.admin-post-card');
-      if (!window.confirm('이 게시글을 삭제할까요? 본문은 소프트 삭제되어 일반 목록에서 숨겨집니다.')) return;
+      if (!window.confirm('이 게시글을 숨길까요? 복구 가능한 상태로 보관되며 일반 목록에서는 보이지 않습니다.')) return;
       button.disabled = true;
       try {
         await api(`/api/admin/posts/${card.dataset.postId}`, { method: 'DELETE' });
-        setStatus(resultStatus, '게시글을 삭제했습니다.', true);
+        setStatus(resultStatus, '게시글을 숨겼습니다. 게시글과 관련 반응 데이터는 보존됩니다.', true);
         await loadPosts();
         commentsPanel.hidden = true;
       } catch (error) {
