@@ -9,6 +9,8 @@
   const searchScope = document.getElementById('boardSearchScope');
   const pagination = document.getElementById('boardPagination');
   const skeleton = document.getElementById('boardSkeleton');
+  const boardCategoryToggle = document.getElementById('boardCategoryToggle');
+  const boardCategories = document.getElementById('boardCategories');
   const categoryButtons = [...document.querySelectorAll('[data-category]')];
   const writeButton = document.querySelector('.board-write');
   let selectedCategory = new URLSearchParams(location.search).get('category') || '';
@@ -126,6 +128,12 @@
   searchCategory.value = selectedCategory;
   searchScope.value = selectedSearchScope;
   categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
+  boardCategoryToggle?.addEventListener('click', () => {
+    const expanded = boardCategoryToggle.getAttribute('aria-expanded') === 'true';
+    boardCategoryToggle.setAttribute('aria-expanded', String(!expanded));
+    boardCategoryToggle.setAttribute('aria-label', expanded ? '게시판 카테고리 펼치기' : '게시판 카테고리 접기');
+    boardCategories.classList.toggle('categories-open', !expanded);
+  });
   searchForm.addEventListener('submit', event => {
     event.preventDefault();
     query = searchInput.value.trim();
@@ -145,10 +153,25 @@
       item.classList.toggle('active', selected);
       item.setAttribute('aria-pressed', String(selected));
     });
+    if (boardCategoryToggle) {
+      boardCategoryToggle.setAttribute('aria-expanded', 'false');
+      boardCategoryToggle.setAttribute('aria-label', '게시판 카테고리 펼치기');
+      boardCategories.classList.remove('categories-open');
+    }
     loadPosts();
   }));
 
-  searchCategory.addEventListener('change', () => { selectedCategory = searchCategory.value; selectedPage = 1; categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); }); loadPosts(); });
+  searchCategory.addEventListener('change', () => {
+    selectedCategory = searchCategory.value;
+    selectedPage = 1;
+    categoryButtons.forEach(button => { const active = button.dataset.category === selectedCategory; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
+    if (boardCategoryToggle) {
+      boardCategoryToggle.setAttribute('aria-expanded', 'false');
+      boardCategoryToggle.setAttribute('aria-label', '게시판 카테고리 펼치기');
+      boardCategories.classList.remove('categories-open');
+    }
+    loadPosts();
+  });
 
   writeButton.addEventListener('click', event => {
     event.preventDefault();

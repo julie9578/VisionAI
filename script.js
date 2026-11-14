@@ -117,6 +117,8 @@ function initializeArcade() {
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('gameSort');
     const filters = [...document.querySelectorAll('.filter')];
+    const gameCategoryToggle = document.getElementById('gameCategoryToggle');
+    const gameFilters = document.getElementById('gameFilters');
     let activeFilter = '전체';
     let activeSort = 'recommended';
     let sortDirection = 'asc';
@@ -212,6 +214,12 @@ function initializeArcade() {
     }
 
     searchInput.addEventListener('input', renderGames);
+    gameCategoryToggle?.addEventListener('click', () => {
+      const expanded = gameCategoryToggle.getAttribute('aria-expanded') === 'true';
+      gameCategoryToggle.setAttribute('aria-expanded', String(!expanded));
+      gameCategoryToggle.setAttribute('aria-label', expanded ? '게임 카테고리 펼치기' : '게임 카테고리 접기');
+      gameFilters.classList.toggle('filters-open', !expanded);
+    });
     sortDirection.disabled = activeSort === 'recommended';
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
@@ -236,6 +244,11 @@ function initializeArcade() {
         filter.classList.toggle('active', selected);
         filter.setAttribute('aria-pressed', String(selected));
       });
+      if (gameCategoryToggle) {
+        gameCategoryToggle.setAttribute('aria-expanded', 'false');
+        gameCategoryToggle.setAttribute('aria-label', '게임 카테고리 펼치기');
+        gameFilters.classList.remove('filters-open');
+      }
       renderGames();
     }));
 

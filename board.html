@@ -55,7 +55,9 @@
       </div>
 
       <div class="board-toolbar">
-        <nav class="board-categories" aria-label="게시글 카테고리">
+        <div class="board-category-menu">
+        <button class="category-menu-toggle" id="boardCategoryToggle" type="button" aria-expanded="false" aria-controls="boardCategories" aria-label="게시판 카테고리 펼치기"><span class="hamburger-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="category-menu-label">카테고리</span></button>
+        <nav class="board-categories" id="boardCategories" aria-label="게시글 카테고리">
           <button class="category-chip active" type="button" data-category="" aria-pressed="true">전체</button>
           <button class="category-chip" type="button" data-category="free" aria-pressed="false">자유</button>
           <button class="category-chip" type="button" data-category="recommend" aria-pressed="false">게임 추천</button>
@@ -63,6 +65,7 @@
           <button class="category-chip" type="button" data-category="recruit" aria-pressed="false">모집</button>
           <button class="category-chip" type="button" data-category="notice" aria-pressed="false">공지</button>
         </nav>
+        </div>
         <form class="board-search" id="boardSearchForm" role="search">
           <label class="visually-hidden" for="boardSearchCategory">검색할 게시판 분류</label>
           <select id="boardSearchCategory" name="category" aria-label="검색할 게시판 분류">
