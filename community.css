@@ -55,6 +55,13 @@
 .comment-item { padding: 13px 0; border-bottom: 1px solid #ffffff0e; }
 .comment-item:last-child { border-bottom: 0; }
 .comment-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; color: #888397; font-size: 10px; }
+.comment-owner-actions, .comment-edit-actions { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; }
+.comment-owner-actions button, .comment-edit-actions button { min-height: 28px; padding: 0 9px; border: 1px solid #ffffff1c; border-radius: 7px; background: #ffffff05; color: #c8c2d2; font: inherit; font-size: 10px; cursor: pointer; }
+.comment-owner-actions button:hover, .comment-edit-actions button:hover { border-color: #b398f3; color: #fff; }
+.comment-owner-actions .comment-delete-button { color: #ffadc0; }
+.comment-edit-actions { justify-content: flex-end; margin-left: 0; }
+.comment-edit-actions .comment-edit-save-button { border-color: #a477ff68; background: #a477ff20; color: #e5d9ff; }
+.comment-item textarea[aria-label="댓글 수정 내용"] { width: 100%; min-height: 80px; margin-top: 8px; padding: 10px; border: 1px solid #ffffff20; border-radius: 8px; background: #0d0c14; color: var(--text); font: inherit; font-size: 12px; line-height: 1.7; resize: vertical; }
 .comment-author-link { font-weight: 700; }
 .comment-content { margin: 8px 0 0; color: #d5d0de; font-size: 12px; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
 .comment-form { display: grid; gap: 10px; margin-top: 17px; padding-top: 17px; border-top: 1px solid var(--line); }
@@ -67,6 +74,7 @@
 .user-profile-avatar[data-color="cyan"] { background: linear-gradient(145deg, #63dce3, #36839d); }
 .user-profile-avatar[data-color="rose"] { background: linear-gradient(145deg, #ff88b9, #b84b81); }
 .user-profile-avatar[data-color="amber"] { background: linear-gradient(145deg, #f2ce83, #b97935); }
+.user-profile-avatar-image { display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .user-profile-identity h1 { margin: 0; font-size: 23px; }
 .user-profile-identity p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .user-profile-bio { margin: 22px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 11px; color: #d5d0de; font-size: 12px; line-height: 1.8; white-space: pre-wrap; }

@@ -191,7 +191,6 @@
     }
   }
 
-
   if (signupForm) {
     const nicknameInput = document.getElementById('nickname');
     const nicknameHint = document.getElementById('nicknameHint');
@@ -409,7 +408,10 @@
       window.location.replace(`login.html?next=${encodeURIComponent('profile.html')}`);
     } else {
       request('/api/auth/me')
-        .then(data => showProfile(data.user))
+        .then(async data => {
+          showProfile(data.user);
+          await loadProfilePosts();
+        })
         .catch(() => {
           clearToken();
           window.location.replace(`login.html?next=${encodeURIComponent('profile.html')}`);

@@ -30,6 +30,26 @@
     return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
   }
 
+  function renderUserAvatar(element, user) {
+    const nickname = user.nickname || 'AR';
+    const fallback = nickname.slice(0, 2).toUpperCase();
+    element.dataset.color = user.avatar_color || 'violet';
+    element.replaceChildren();
+    if (!user.avatar_image) {
+      element.textContent = fallback;
+      return;
+    }
+    const image = document.createElement('img');
+    image.className = 'user-profile-avatar-image';
+    image.src = user.avatar_image;
+    image.alt = `${nickname} 프로필 사진`;
+    image.addEventListener('error', () => {
+      image.remove();
+      element.textContent = fallback;
+    }, { once: true });
+    element.append(image);
+  }
+
   async function initializeWritePage() {
     const editor = document.getElementById('editorPanel');
     const loginRequired = document.getElementById('writeLoginRequired');
@@ -86,7 +106,72 @@
 
     function renderComments(comments) {
       document.getElementById('commentCount').textContent = String(comments.length);
-      commentList.innerHTML = comments.length ? comments.map(comment => `<article class="comment-item"><div class="comment-meta"><a class="comment-author-link" href="user.html?id=${encodeURIComponent(comment.author_id)}">${escapeHtml(comment.author)}</a><time>${escapeHtml(formatDate(comment.created_at))}</time></div><p class="comment-content">${escapeHtml(comment.content)}</p></article>`).join('') : '<p class="empty-comments">아직 댓글이 없습니다.</p>';
+      const viewerId = Number(window.__arcadeViewerId) || 0;
+      commentList.innerHTML = comments.length ? comments.map(comment => {
+        const ownerActions = viewerId && Number(comment.author_id) === viewerId
+          ? `<div class="comment-owner-actions"><button class="comment-owner-edit-button" type="button" data-comment-id="${Number(comment.id)}">수정</button><button class="comment-delete-button" type="button" data-comment-id="${Number(comment.id)}">삭제</button></div>`
+          : '';
+        return `<article class="comment-item" data-comment-id="${Number(comment.id)}"><div class="comment-meta"><a class="comment-author-link" href="user.html?id=${encodeURIComponent(comment.author_id)}">${escapeHtml(comment.author)}</a><time>${escapeHtml(formatDate(comment.created_at))}</time>${ownerActions}</div><p class="comment-content">${escapeHtml(comment.content)}</p></article>`;
+      }).join('') : '<p class="empty-comments">아직 댓글이 없습니다.</p>';
+      commentList.querySelectorAll('.comment-owner-edit-button').forEach(button => button.addEventListener('click', async () => {
+        const item = button.closest('.comment-item');
+        const paragraph = item.querySelector('.comment-content');
+        const originalContent = paragraph.textContent;
+        const textarea = document.createElement('textarea');
+        textarea.maxLength = 2000;
+        textarea.value = originalContent;
+        textarea.setAttribute('aria-label', '댓글 수정 내용');
+        const actions = document.createElement('div');
+        actions.className = 'comment-edit-actions';
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.className = 'comment-edit-save-button';
+        save.textContent = '저장';
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'comment-edit-cancel-button';
+        cancel.textContent = '취소';
+        actions.append(save, cancel);
+        paragraph.replaceWith(textarea);
+        button.parentElement.replaceWith(actions);
+        textarea.focus();
+        cancel.addEventListener('click', async () => {
+          await loadComments();
+          setMessage(commentMessage, '댓글 수정을 취소했습니다.');
+        });
+        save.addEventListener('click', async () => {
+          save.disabled = true;
+          const normalized = textarea.value.trim();
+          if (!normalized || normalized.length > 2000) {
+            setMessage(commentMessage, '댓글은 1~2,000자로 입력해 주세요.');
+            save.disabled = false;
+            textarea.focus();
+            return;
+          }
+          try {
+            await api(`/api/posts/${postId}/comments/${button.dataset.commentId}`, {
+              method: 'PUT', body: JSON.stringify({ content: normalized }),
+            });
+            await loadComments();
+            setMessage(commentMessage, '댓글을 수정했습니다.', true);
+          } catch (error) {
+            setMessage(commentMessage, error.message);
+            save.disabled = false;
+          }
+        });
+      }));
+      commentList.querySelectorAll('.comment-delete-button').forEach(button => button.addEventListener('click', async () => {
+        if (!window.confirm('이 댓글을 삭제할까요?')) return;
+        button.disabled = true;
+        try {
+          await api(`/api/posts/${postId}/comments/${button.dataset.commentId}`, { method: 'DELETE' });
+          await loadComments();
+          setMessage(commentMessage, '댓글을 삭제했습니다.', true);
+        } catch (error) {
+          setMessage(commentMessage, error.message);
+          button.disabled = false;
+        }
+      }));
     }
 
     async function loadComments() {
@@ -101,6 +186,7 @@
       ]);
       const post = data.post;
       if (!post) throw new Error('게시글을 찾을 수 없습니다.');
+      window.__arcadeViewerId = currentUser?.user?.id || 0;
       document.title = `${post.title} — 게시판 | ARCADE`;
       status.textContent = '';
       if (data.deleted || post.deleted_at) {
@@ -211,22 +297,23 @@
     const userId = params.get('id');
     const nickname = fallbackName;
     try {
-      const endpoint = userId ? `/api/users/${encodeURIComponent(userId)}` : `/api/users?nickname=${encodeURIComponent(nickname || '')}`;
+      const endpoint = userId
+        ? `/api/users/${encodeURIComponent(userId)}`
+        : `/api/users?nickname=${encodeURIComponent(nickname || '')}`;
       const data = await api(endpoint);
       const user = data.user;
       card.hidden = false;
       status.textContent = '';
       document.title = `${user.nickname} — 플레이어 프로필 | ARCADE`;
       document.getElementById('userNickname').textContent = user.nickname;
-      document.getElementById('userAvatar').textContent = user.nickname.slice(0, 2).toUpperCase();
-      document.getElementById('userAvatar').dataset.color = user.avatar_color || 'violet';
+      renderUserAvatar(document.getElementById('userAvatar'), user);
       document.getElementById('userBio').textContent = user.bio || '아직 자기소개가 없습니다.';
       document.getElementById('userMemberSince').textContent = `가입일 ${formatDate(user.created_at)}`;
     } catch (error) {
       if (!userId && fallbackName) {
         card.hidden = false;
         document.getElementById('userNickname').textContent = fallbackName;
-        document.getElementById('userAvatar').textContent = fallbackName.slice(0, 2).toUpperCase();
+        renderUserAvatar(document.getElementById('userAvatar'), { nickname: fallbackName });
         document.getElementById('userBio').textContent = '이 작성자의 계정은 아직 ARCADE 회원으로 등록되지 않아 공개 프로필 정보가 없습니다.';
         document.getElementById('userMemberSince').textContent = '회원 프로필 정보 없음';
         status.textContent = '';
