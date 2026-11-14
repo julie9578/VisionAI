@@ -2,9 +2,13 @@
 
 인기 게임을 둘러보고, 취향에 맞는 다음 플레이를 발견할 수 있는 한국어 게임 큐레이션 홈페이지입니다.
 
-**공식 홈페이지 (Cloudflare Pages, 보안 헤더 적용):** https://visionai-arcade.pages.dev/
-**레거시 GitHub Pages 미러 (보안 응답 헤더 설정 불가):** https://julie9578.github.io/VisionAI/
-**게시판 API:** https://arcade-board-api.nextarcade.workers.dev/
+## 공식 사이트와 배포
+
+**공식 홈페이지는 Cloudflare Pages에서 제공하며 보안 헤더가 적용됩니다.** 방문 주소는 <https://visionai-arcade.pages.dev/>입니다. 게시판 페이지도 같은 도메인에서 이용할 수 있습니다.
+
+**GitHub Pages 주소는 레거시 미러입니다.** <https://julie9578.github.io/VisionAI/>는 GitHub Pages의 호환성 때문에 사용자 지정 HTTP 보안 헤더를 설정할 수 없습니다. 따라서 보안 헤더가 적용된 공식 사이트로 Cloudflare Pages 링크를 사용합니다.
+
+**게시판·회원 API는 Cloudflare Worker에서 별도로 운영됩니다.** API 주소는 <https://arcade-board-api.nextarcade.workers.dev/>이며, 정적 사이트 배포와 Worker 배포는 서로 별도 작업입니다.
 
 ## 주요 기능
 
@@ -117,17 +121,17 @@ Cloudflare Pages에서 정적 사이트를 제공하며 Cloudflare D1은 별도 
 
 회원 정보는 이메일 중복을 방지하고 비밀번호를 PBKDF2 해시로 저장합니다. 집 주소는 AES-GCM 암호문과 IV로만 저장하며 API는 원문 주소를 반환하지 않습니다. 로그인 토큰은 브라우저 탭 세션(`sessionStorage`)에 저장됩니다. 집 주소와 성별은 민감한 개인정보이므로 실제 서비스 운영 전에 수집 필요성·보유기간·동의 및 개인정보 처리방침을 검토하고, 필요하지 않다면 수집 항목을 줄이세요.
 
-## 배포
+## 배포 방법
 
-- 정적 홈페이지는 Cloudflare Pages `visionai-arcade` 프로젝트로 배포합니다. GitHub Pages는 기존 링크 호환용 미러이며, GitHub Pages에서는 임의의 HTTP 보안 응답 헤더를 설정할 수 없으므로 공식 링크로 안내하지 않습니다.
-- 저장소의 `cloudflare-pages/_headers`가 정적 응답에 보안 헤더를 적용합니다. 배포 전에 main을 최신으로 맞추고 깨끗한 작업 트리에서 실행합니다.
+**Cloudflare Pages 배포는 저장소의 전용 스크립트로 수행합니다.** `cloudflare-pages/_headers`가 HTML과 정적 자산에 보안 응답 헤더를 적용합니다. 배포 전에는 `main` 브랜치를 최신 상태로 맞추고 모든 변경을 커밋해 작업 트리를 깨끗하게 합니다.
 
-  ```powershell
-  .\scripts\deploy-cloudflare-pages.ps1
-  ```
+```powershell
+.\scripts\deploy-cloudflare-pages.ps1
+```
 
-- GitHub Pages 미러는 저장소 GitHub Pages 설정에서 계속 빌드될 수 있지만, 보안 헤더가 필요한 배포에는 Cloudflare Pages URL을 사용합니다.
-- Worker API는 별도 배포입니다. `wrangler.jsonc`의 `ALLOWED_ORIGINS`에는 공식 Cloudflare Pages origin이 포함돼 있습니다.
+**이 스크립트는 공개 웹 파일만 업로드합니다.** HTML, CSS, 브라우저 JavaScript, 이미지, `robots.txt`, `sitemap.xml`과 보안 헤더 설정만 staging 디렉터리에 복사합니다. Worker 소스, D1 마이그레이션, 로컬 SQLite, `.env`와 Wrangler 설정은 정적 배포물에 포함하지 않습니다.
+
+**게시판 API는 별도로 배포합니다.** `wrangler.jsonc`의 `ALLOWED_ORIGINS`에는 공식 Cloudflare Pages origin이 포함되어야 하며, API 코드를 변경한 경우에만 별도의 Wrangler Worker 배포가 필요합니다.
 
 ## 기술
 
