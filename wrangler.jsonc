@@ -2,7 +2,6 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "arcade-board-api",
 	"main": "src/worker.js",
-	"pages_build_output_dir": "dist",
 	"compatibility_date": "2026-11-01",
 	"d1_databases": [
 		{
