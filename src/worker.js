@@ -7,6 +7,13 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const AUTH_RATE_WINDOW_SECONDS = 60;
 const AUTH_RATE_MAX_REQUESTS = 5;
 
+function configuredAdminEmails(env) {
+  const values = [env.ADMIN_EMAILS, env.ADMIN_EMAIL]
+    .filter(value => typeof value === "string")
+    .flatMap(value => value.split(/[;,\n]/));
+  return new Set(values.map(value => value.trim().toLowerCase()).filter(Boolean));
+}
+
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -159,7 +166,10 @@ async function handleAuth(request, env, url, headers) {
 
   if (url.pathname === "/api/auth/signup" && request.method === "POST") {
     if (!env.SESSION_SECRET) return json({ error: "회원 API 보안 키가 설정되지 않았습니다." }, 503, headers);
-    if (env.ADMIN_EMAIL && !env.ADMIN_EMAIL.includes("@")) return json({ error: "관리자 이메일이 올바르게 설정되지 않았습니다." }, 503, headers);
+    const administratorEmails = configuredAdminEmails(env);
+    if ([...administratorEmails].some(email => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+      return json({ error: "관리자 이메일 목록이 올바르게 설정되지 않았습니다." }, 503, headers);
+    }
     let body;
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const nickname = typeof body.nickname === "string" ? body.nickname.trim() : "";
@@ -172,8 +182,7 @@ async function handleAuth(request, env, url, headers) {
     if (password.length < 10 || password.length > 128) return json({ error: "비밀번호는 10~128자로 입력해 주세요." }, 400, headers);
     const duplicate = await env.DB.prepare("SELECT 1 AS found FROM users WHERE nickname = ? COLLATE NOCASE LIMIT 1").bind(nickname).first();
     if (duplicate) return json({ error: "이미 사용 중인 닉네임입니다." }, 409, headers);
-    const configuredAdminEmail = (env.ADMIN_EMAIL || "").trim().toLowerCase();
-    if (configuredAdminEmail && email === configuredAdminEmail) return json({ error: "해당 이메일은 운영자가 별도로 개설해야 합니다." }, 403, headers);
+    if (administratorEmails.has(email)) return json({ error: "해당 이메일은 운영자가 별도로 개설해야 합니다." }, 403, headers);
 
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const passwordHash = await hashPassword(password, salt);
@@ -452,8 +461,8 @@ async function handleApi(request, env, url) {
     if (!PUBLIC_CATEGORIES.has(category) && category !== "notice") return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
     if (category === "notice" && post.category !== "notice") {
       const administrator = await env.DB.prepare("SELECT email, role FROM users WHERE id = ?").bind(userId).first();
-      const configuredAdminEmail = (env.ADMIN_EMAIL || "").trim().toLowerCase();
-      if (!configuredAdminEmail || administrator?.role !== "admin" || administrator.email !== configuredAdminEmail) {
+      const administratorEmails = configuredAdminEmails(env);
+      if (!administratorEmails.size || administrator?.role !== "admin" || !administratorEmails.has((administrator.email || "").trim().toLowerCase())) {
         return json({ error: "공지사항 작성 권한이 없습니다." }, 403, headers);
       }
     }
@@ -477,8 +486,8 @@ async function handleApi(request, env, url) {
     if (!PUBLIC_CATEGORIES.has(category) && category !== "notice") return json({ error: "올바른 게시글 분류를 선택해 주세요." }, 400, headers);
     if (category === "notice") {
       const administrator = await env.DB.prepare("SELECT email, role FROM users WHERE id = ?").bind(userId).first();
-      const configuredAdminEmail = (env.ADMIN_EMAIL || "").trim().toLowerCase();
-      if (!configuredAdminEmail || administrator?.role !== "admin" || administrator.email !== configuredAdminEmail) {
+      const administratorEmails = configuredAdminEmails(env);
+      if (!administratorEmails.size || administrator?.role !== "admin" || !administratorEmails.has((administrator.email || "").trim().toLowerCase())) {
         return json({ error: "공지사항 작성 권한이 없습니다." }, 403, headers);
       }
     }

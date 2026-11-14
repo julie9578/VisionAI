@@ -136,8 +136,9 @@ Cloudflare Pages에서 정적 사이트를 제공하며 Cloudflare D1은 별도 
 ### 운영 공지 관리자 설정 후속 작업 (미완료)
 
 - 2026-11-14 보안 조치로 D1의 `users.role` 컬럼과 Worker 공지 권한 검사가 적용됐습니다. 공개 가입은 항상 `user` 역할만 받으며, 기존 계정도 기본 `user`로 유지됩니다.
-- Wrangler secret `ADMIN_EMAIL`이 아직 설정되지 않았으므로 **현재는 관리자도 포함해 아무도 새 공지를 작성할 수 없습니다**. 기존 공지 읽기에는 영향이 없습니다. 이 fail-closed 상태는 일반 계정의 공지 위조를 차단하기 위한 의도된 임시 조치입니다.
-- 운영 관리자가 계정을 확정한 후에만 Cloudflare Worker의 `ADMIN_EMAIL` secret을 설정하고, 확인된 사용자 계정 한 개의 `users.role`을 `admin`으로 승격합니다. 실제 secret 값은 문서/Git에 기록하지 마세요.
+- Cloudflare Worker secret `ADMIN_EMAILS`에 쉼표, 세미콜론 또는 줄바꿈으로 관리자 이메일을 여러 개 넣을 수 있습니다. 기존의 단일 `ADMIN_EMAIL` secret도 호환됩니다. 둘 다 설정된 경우 두 목록을 합쳐 사용합니다. **이메일 목록만으로 관리자 권한이 생기지는 않습니다.**
+- 새 관리자를 추가할 때는 승인한 이메일을 secret 전체 목록에 넣고, 해당 기존 계정을 별도로 `users.role='admin'`으로 승격한 뒤 Worker를 재배포합니다. 목록 또는 역할 중 하나라도 제거되면 공지 쓰기 권한이 거부됩니다. 공개 회원가입은 언제나 `user` 역할만 부여합니다. 이메일 주소와 secret 값은 문서/Git/공개 이슈에 기록하지 마세요.
+- `ADMIN_EMAILS` 목록이 비어 있거나 사용자 역할이 `admin`이 아닌 경우 공지 작성은 거부됩니다( fail-closed ).
 - 완료 확인: `GET /api/posts`를 정상 조회하고, 일반 사용자 공지 등록은 403, 지정된 관리자 공지 등록은 성공함을 승인된 테스트 계정으로 검증합니다. 후속 GitHub 이슈: <https://github.com/julie9578/VisionAI/issues/21>.
 
 ## 기술
