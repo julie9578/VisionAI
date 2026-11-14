@@ -52,10 +52,13 @@ try {
   Write-Output "Deploying commit $commit ($commitMessage) to Cloudflare Pages project visionai-arcade..."
   Push-Location $repoRoot
   try {
+    $previousNativePreference = $PSNativeCommandUseErrorActionPreference
+    $PSNativeCommandUseErrorActionPreference = $false
     & $wrangler.Source pages deploy $deploymentDirectory --project-name visionai-arcade --branch main --commit-hash $commit --commit-message $commitMessage
     $deployExitCode = $LASTEXITCODE
   }
   finally {
+    $PSNativeCommandUseErrorActionPreference = $previousNativePreference
     Pop-Location
   }
   if ($deployExitCode -ne 0) {
