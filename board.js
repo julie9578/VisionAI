@@ -101,17 +101,18 @@
     status.textContent = '게시글을 불러오는 중…';
     try {
       const requestHeaders = { accept: 'application/json' };
-      const authToken = sessionStorage.getItem(tokenKey);
+      const authToken = localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey);
       if (authToken) requestHeaders.authorization = `Bearer ${authToken}`;
       const response = await fetch(`${apiBase}/api/posts?${params.toString()}`, { headers: requestHeaders });
       if (!response.ok) throw new Error(`API ${response.status}`);
       const data = await response.json();
-      const notices = data.notices || [];
+      const notices = selectedCategory === '' || selectedCategory === 'notice' ? data.notices || [] : [];
       const posts = data.posts || [];
       const page = Number(data.page) || selectedPage;
       const pageSize = Number(data.pageSize) || 20;
-      const total = Number(data.total) + notices.length;
-      renderPosts([...notices, ...posts], total, page, pageSize);
+      const visibleNotices = selectedPage === 1 ? notices : [];
+      const total = Number(data.total) + (selectedCategory === '' ? notices.length : 0);
+      renderPosts([...visibleNotices, ...posts], total, page, pageSize);
       renderPagination(page, data.total, pageSize);
       status.textContent = '';
       apiAvailable = true;

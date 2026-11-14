@@ -11,6 +11,14 @@
       "migrations_dir": "migrations"
 		}
 	],
+  "durable_objects": {
+    "bindings": [
+      { "name": "AUTH_RATE_LIMITER", "class_name": "AuthRateLimiter" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1-auth-rate-limiter", "new_sqlite_classes": ["AuthRateLimiter"] }
+  ],
   "secrets": {
     "required": ["SESSION_SECRET", "ADDRESS_ENCRYPTION_KEY"]
   },

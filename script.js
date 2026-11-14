@@ -27,9 +27,8 @@ function initializeArcade() {
     ];
     const extraScreenshots = {
       valorant: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/7a9fef9c2e67d0dc32e555a6bf3f75a6879bad5d-1920x1080.jpg?accountingTag=VAL'],
-      'hades-2': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_ef0f63061d0a0a9a7e46f3b84f125d25330e8f19.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_f28befd916e59b8bf0a8a801b8a498b8adaa01eb.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_b88cb7b48a86f07a7288bf37141f6558279f9bfc.1920x1080.jpg?t=1779901265'],
       'stardew-valley': ['https://www.stardewvalley.net/wp-content/uploads/2018/12/NightMarket-1-1.png', 'https://www.stardewvalley.net/wp-content/uploads/2018/12/Multiplayer_Screenshot2-1.png', 'https://www.stardewvalley.net/wp-content/uploads/2018/12/StardewValley_12-1.png'],
-      'elden-ring': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_dcdac9e4b26ac0ee5248bfd2967d764fd00cdb42.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_3c41384a24d86dddd58a8f61db77f9dc0bfda8b5.1920x1080.jpg?t=1790290043'],
+      'lethal-company': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_78075e9a94675823024f12fce9d69b243cca94f8.1920x1080.jpg?t=1775380053', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_51860be59845771c01a3a4d9ab1ebf773f16fef5.1920x1080.jpg?t=1775380053', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/ss_08fa3ef83b6eb70313119096f82285fa411f02e5.1920x1080.jpg?t=1775380053'],
       'cyberpunk-2077': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/ss_2f649b68d579bf87011487d29bc4ccbfdd97d34f.1920x1080.jpg?t=1792682505', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/900f9bda156599fcd235f08ffb64667f9baa1afe/ss_900f9bda156599fcd235f08ffb64667f9baa1afe.1920x1080.jpg?t=1792682505', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/f678ed77c2fe7060ac9c64e32e1472e3ec3ab7dc/ss_f678ed77c2fe7060ac9c64e32e1472e3ec3ab7dc.1920x1080.jpg?t=1792682505'],
       'persona-5-royal': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_0d70c3b765f8b769153ac69541753745ec023a6f.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_7b253f91a62895af594c84370194f4a3f9b6166d.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_b65a28e459b886feef348c8e16f8b9ca721a56e9.1920x1080.jpg'],
       'ori-will-of-wisps': ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_8f7f5c0d10fb9bca99a8a449c9a22c941e978fe6.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_4dd5c9a4e8bc4033ad4f1f72d86e9500b60c2dcf.1920x1080.jpg', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1057090/ss_f65eae01a42a09776e237dd7797f2aa0b5a69b53.1920x1080.jpg'],
@@ -84,7 +83,7 @@ function initializeArcade() {
         const steamAppId = game.url.match(/store\.steampowered\.com\/app\/(\d+)/)?.[1];
         const newsHubUrl = steamAppId ? `https://store.steampowered.com/news/app/${steamAppId}` : game.url;
         const update = latestUpdates[game.id];
-        const screenshots = [...new Set([game.image, ...(game.screenshots || []), ...(extraScreenshots[game.id] || [])].filter(Boolean))].slice(0, 4);
+      const screenshots = [...new Set([game.image, ...(game.screenshots || []), ...(extraScreenshots[game.id] || [])].filter(Boolean))].slice(0, 4);
         detailPage.innerHTML = `
           <p class="detail-breadcrumb"><a href="index.html">홈</a>　/　<a href="index.html#games">게임 둘러보기</a>　/　${game.title}</p>
           <article class="detail-hero">
@@ -101,7 +100,7 @@ function initializeArcade() {
           </article>
           <section class="detail-section" aria-labelledby="screenshotsTitle">
             <div class="detail-section-heading"><p class="section-kicker">SCREENSHOTS & ARTWORK</p><h2 id="screenshotsTitle">스크린샷 및 이미지</h2></div>
-            <div class="screenshot-grid">${screenshots.map((image, index) => `<figure class="screenshot-card"><img src="${image}" alt="${game.title} 게임 이미지 ${index + 1}" loading="lazy" /><figcaption class="screenshot-caption">${game.title} · ${index === 0 ? '대표 이미지' : '게임 이미지'}</figcaption></figure>`).join('')}</div>
+            <div class="screenshot-grid">${screenshots.map((image, index) => `<figure class="screenshot-card"><img src="${image}" alt="${game.title} 게임 이미지 ${index + 1}" loading="lazy" onerror="this.closest('figure').remove()" /><figcaption class="screenshot-caption">${game.title} · ${index === 0 ? '대표 이미지' : '게임 이미지'}</figcaption></figure>`).join('')}</div>
           </section>
           <section class="detail-section latest-news" aria-labelledby="latestNewsTitle">
             <div class="detail-section-heading"><p class="section-kicker">LATEST UPDATES</p><h2 id="latestNewsTitle">최신 변경 및 업데이트</h2></div>
@@ -224,8 +223,9 @@ function initializeArcade() {
     sortSelect.addEventListener('change', () => {
       activeSort = sortSelect.value;
       sortDirection.disabled = activeSort === 'recommended';
-      sortDirection.textContent = sortDirection === 'asc' ? '↑' : '↓';
-      sortDirection.setAttribute('aria-label', activeSort === 'recommended'
+      const sortDirectionButton = document.getElementById('sortDirection');
+      sortDirectionButton.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      sortDirectionButton.setAttribute('aria-label', activeSort === 'recommended'
         ? '추천순은 즐겨찾기 게임과 비슷한 태그 순으로 정렬합니다'
         : sortDirection === 'asc' ? '오름차순으로 정렬' : '내림차순으로 정렬');
       renderGames();

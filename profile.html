@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0c0b14" />
   <meta name="description" content="내 ARCADE 회원 정보와 프로필을 확인하세요." />
-  <link rel="canonical" href="https://julie9578.github.io/VisionAI/profile.html" />
+  <link rel="canonical" href="https://visionai-arcade.pages.dev/profile.html" />
   <meta name="robots" content="noindex,follow" />
   <meta property="og:type" content="profile" />
   <meta property="og:site_name" content="ARCADE" />
   <meta property="og:title" content="내 프로필 — ARCADE" />
   <meta property="og:description" content="ARCADE 회원 프로필과 계정 정보를 확인하세요." />
-  <meta property="og:url" content="https://julie9578.github.io/VisionAI/profile.html" />
-  <meta property="og:image" content="https://julie9578.github.io/VisionAI/og-image.svg" />
+  <meta property="og:url" content="https://visionai-arcade.pages.dev/profile.html" />
+  <meta property="og:image" content="https://visionai-arcade.pages.dev/og-image.svg" />
   <meta property="og:image:alt" content="ARCADE 게임 라운지" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="내 프로필 — ARCADE" />
   <meta name="twitter:description" content="ARCADE 회원 프로필과 계정 정보를 확인하세요." />
-  <meta name="twitter:image" content="https://julie9578.github.io/VisionAI/og-image.svg" />
+  <meta name="twitter:image" content="https://visionai-arcade.pages.dev/og-image.svg" />
   <title>내 프로필 — ARCADE</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="auth.css" />
@@ -44,6 +44,7 @@
         <button class="profile-logout" id="profileLogout" type="button">로그아웃</button>
       </aside>
 
+      <div class="profile-main">
         <section class="profile-panel" id="public-profile" aria-labelledby="publicProfileTitle">
           <div class="profile-panel-heading"><div><h2 id="publicProfileTitle">기본 정보</h2><p>내 계정과 공개 프로필 정보입니다.</p></div><span class="profile-section-icon" aria-hidden="true">✦</span></div>
           <dl class="profile-details">
@@ -61,7 +62,7 @@
         </section>
         <section class="profile-panel" id="account-info" aria-labelledby="accountInfoTitle">
           <div class="profile-panel-heading"><div><h2 id="accountInfoTitle">계정 정보</h2><p>이메일과 가입 시 선택한 정보를 확인합니다.</p></div><span class="profile-section-icon" aria-hidden="true">♧</span></div>
-          <div class="profile-privacy-summary"><span aria-hidden="true">🔒</span><p>비밀번호는 해시 처리되며, 가입 시 입력한 집 주소는 암호화되어 저장됩니다. 비밀번호와 집 주소는 프로필 화면에 표시하지 않습니다.</p></div>
+          <div class="profile-privacy-summary"><span aria-hidden="true">🔒</span><p>비밀번호는 복호화할 수 없는 단방향 해시로 안전하게 저장됩니다. 비밀번호는 프로필 화면에 표시되지 않습니다.</p></div>
         </section>
       </div>
     </section>
