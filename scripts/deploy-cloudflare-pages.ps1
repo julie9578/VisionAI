@@ -18,7 +18,10 @@ if (-not $wrangler) {
 
 $commit = (& git -C $repoRoot rev-parse HEAD).Trim()
 $commitMessage = (& git -C $repoRoot log -1 --format=%s).Trim()
-$deploymentDirectory = Join-Path $env:TEMP ('visionai-pages-' + [guid]::NewGuid().ToString('N'))
+$deploymentDirectory = Join-Path $repoRoot 'dist'
+if (Test-Path -LiteralPath $deploymentDirectory) {
+  throw "Refusing to overwrite existing deployment directory: $deploymentDirectory"
+}
 New-Item -ItemType Directory -Path $deploymentDirectory | Out-Null
 
 try {
