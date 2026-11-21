@@ -127,12 +127,22 @@ async function readSession(request, secret) {
 }
 
 async function rateLimitAuthRequest(request, env, url) {
-  if (!env.AUTH_RATE_LIMITER || request.method !== "POST" || !["/api/auth/login", "/api/auth/signup"].includes(url.pathname)) return null;
-  const clientAddress = request.headers.get("cf-connecting-ip") || "unknown";
-  const key = env.AUTH_RATE_LIMITER.idFromName(`${url.pathname}:${clientAddress}`);
-  const stub = env.AUTH_RATE_LIMITER.get(key);
-  const response = await stub.fetch("https://rate-limit.internal/check", { method: "POST" });
-  return response.status === 429 ? response : null;
+  if (request.method !== "POST" || !["/api/auth/login", "/api/auth/signup"].includes(url.pathname)) return null;
+  if (!env.AUTH_RATE_LIMITER) return { status: 503 };
+
+  try {
+    const clientAddress = request.headers.get("cf-connecting-ip") || "unknown";
+    const key = env.AUTH_RATE_LIMITER.idFromName(`${url.pathname}:${clientAddress}`);
+    const stub = env.AUTH_RATE_LIMITER.get(key);
+    const response = await stub.fetch("https://rate-limit.internal/check", { method: "POST" });
+    if (response.status === 204) return null;
+    if (response.status === 429) {
+      return { status: 429, retryAfter: response.headers.get("retry-after") || "60" };
+    }
+  } catch (error) {
+    console.error(JSON.stringify({ message: "Authentication rate limiter unavailable", error: String(error) }));
+  }
+  return { status: 503 };
 }
 
 export class AuthRateLimiter {
@@ -304,7 +314,12 @@ async function handleApi(request, env, url) {
   if (!validOrigin(request, env)) return json({ error: "허용되지 않은 요청 출처입니다." }, 403, headers);
 
   const rateLimited = await rateLimitAuthRequest(request, env, url);
-  if (rateLimited) return json(await rateLimited.json(), 429, { ...headers, "retry-after": rateLimited.headers.get("retry-after") || "60" });
+  if (rateLimited?.status === 429) {
+    return json({ error: "인증 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." }, 429, { ...headers, "retry-after": rateLimited.retryAfter });
+  }
+  if (rateLimited) {
+    return json({ error: "인증 서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요." }, 503, headers);
+  }
 
   if (url.pathname.startsWith("/api/admin/")) {
     const authorization = await requireAdministrator(request, env, headers);
