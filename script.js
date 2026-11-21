@@ -1,9 +1,9 @@
 function initializeArcade() {
   const games = [
       { id: 'valorant', title: '발로란트', english: 'VALORANT', genre: '액션', tag: '전술 슈팅', reviewScore: null, steamRank: null, ratingSource: null, emoji: '🎯', cover: 'valorant', url: 'https://playvalorant.com/ko-kr/', image: 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/9167b57d3c081d04e75abe28387d87a27bb83953-3440x1020.jpg?accountingTag=VAL', imagePosition: 'center 43%', description: '요원마다 고유한 능력을 활용해 공격과 수비를 펼치는 5대5 전술 슈팅 게임입니다. 정확한 사격과 팀 전략으로 라운드를 승리로 이끄세요.', screenshots: ['https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b7e3f4fddaad9797eff1541359ed6c7ec4222f17-1920x1080.jpg?accountingTag=VAL', 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/afb2198aaba170268feaaf799511a56ee40192be-1920x1080.jpg?accountingTag=VAL'] },
-      { id: 'hades-2', title: '하데스 II', english: 'HADES II', genre: '액션', tag: '로그라이크 RPG', reviewScore: 93, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🔥', cover: 'hades', url: 'https://www.supergiantgames.com/games/hades-ii/', image: 'https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=900&q=80', imagePosition: 'center 38%', description: '시간의 타이탄에 맞서 지하 세계 너머를 탐험하는 로그라이크 액션 게임입니다. 어둠의 마법과 다양한 무기를 조합해 매번 새로운 전투에 도전하세요.', screenshots: ['https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=1200&q=80'] },
+      { id: 'hades-2', title: '하데스 II', english: 'HADES II', genre: '액션', tag: '로그라이크 RPG', reviewScore: 93, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🔥', cover: 'hades', url: 'https://www.supergiantgames.com/games/hades-ii/', image: 'https://images.ctfassets.net/5owu3y35gz1g/2J66RQRNqhF3jK5dbPOt9h/6fe752a31a2b87715c56cd0612cbcaed/3840x2160_v1.0_KeyArt.png?w=900&q=80', imagePosition: 'center 38%', description: '시간의 타이탄에 맞서 지하 세계 너머를 탐험하는 로그라이크 액션 게임입니다. 어둠의 마법과 다양한 무기를 조합해 매번 새로운 전투에 도전하세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_ef0f63061d0a0a9a7e46f3b84f125d25330e8f19.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_f28befd916e59b8bf0a8a801b8a498b8adaa01eb.1920x1080.jpg?t=1779901265', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/ss_b88cb7b48a86f07a7288bf37141f6558279f9bfc.1920x1080.jpg?t=1779901265'] },
       { id: 'stardew-valley', title: '스타듀 밸리', english: 'STARDEW VALLEY', genre: '인디', tag: '농장 시뮬레이션', reviewScore: 98, steamRank: 23, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🌻', cover: 'stardew', url: 'https://www.stardewvalley.net/', image: 'https://www.stardewvalley.net/wp-content/uploads/2017/12/stardewbackground.png', imagePosition: 'center 48%', description: '할아버지에게 물려받은 농장을 가꾸며 나만의 새로운 삶을 시작하세요. 작물을 기르고, 낚시와 채집을 즐기고, 마을 주민들과 관계를 쌓을 수 있습니다.', screenshots: ['https://www.stardewvalley.net/wp-content/uploads/2018/12/1_1screenshot15.png'] },
-      { id: 'elden-ring', title: '엘든 링', english: 'ELDEN RING', genre: 'RPG', tag: '다크 판타지', reviewScore: 92, steamRank: 67, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🐉', cover: 'elden', url: 'https://www.bandainamcoent.com/games/elden-ring', image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/library_600x900_2x.jpg', imageFit: 'contain', imagePosition: 'center 35%', description: '광활한 틈새의 땅을 탐험하는 다크 판타지 액션 RPG입니다. 자신만의 캐릭터와 전투 방식을 만들고, 숨겨진 이야기와 강력한 적들을 만나보세요.', screenshots: ['https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/library_600x900_2x.jpg'] },
+      { id: 'elden-ring', title: '엘든 링', english: 'ELDEN RING', genre: 'RPG', tag: '다크 판타지', reviewScore: 92, steamRank: 67, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🐉', cover: 'elden', url: 'https://www.bandainamcoent.com/games/elden-ring', image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/library_600x900_2x.jpg', imageFit: 'contain', imagePosition: 'center 35%', description: '광활한 틈새의 땅을 탐험하는 다크 판타지 액션 RPG입니다. 자신만의 캐릭터와 전투 방식을 만들고, 숨겨진 이야기와 강력한 적들을 만나보세요.', screenshots: ['https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_943bf6fe62352757d9070c1d33e50b92fe8539f1.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_dcdac9e4b26ac0ee5248bfd2967d764fd00cdb42.1920x1080.jpg?t=1790290043', 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/ss_3c41384a24d86dddd58a8f61db77f9dc0bfda8b5.1920x1080.jpg?t=1790290043'] },
       { id: 'zelda-totk', title: '젤다의 전설', english: 'TEARS OF THE KINGDOM', genre: '어드벤처', tag: '오픈월드 탐험', reviewScore: null, steamRank: null, ratingSource: null, emoji: '🗡️', cover: 'zelda', url: 'https://www.nintendo.com/us/store/products/the-legend-of-zelda-tears-of-the-kingdom-switch/', image: 'https://assets.nintendo.com/image/upload/ar_16:9,b_auto:border,c_lpad/b_white/f_auto/q_auto/dpr_2.0/store/software/switch/70010000063714/fb30eab428df3fc993b41c76e20f72e4d76d49734d17d31996b5ab61c414b117', imagePosition: 'center 38%', description: '하이랄의 대지와 하늘섬을 자유롭게 누비는 어드벤처입니다. 링크의 새로운 능력으로 탐험하고, 물체를 조합해 나만의 해법을 만들어 보세요.', screenshots: ['https://assets.nintendo.com/video/upload/so_1,f_jpg,q_auto/Microsites/zelda-tears-of-the-kingdom/videos/totk_microsite_features_ultrahand.jpg', 'https://assets.nintendo.com/video/upload/so_1,f_jpg,q_auto/Microsites/zelda-tears-of-the-kingdom/videos/totk_microsite_features_fuse.jpg', 'https://assets.nintendo.com/video/upload/so_1,f_jpg,q_auto/Microsites/zelda-tears-of-the-kingdom/videos/totk_microsite_features_ascend.jpg'] },
       { id: 'cyberpunk-2077', title: '사이버펑크 2077', english: 'CYBERPUNK 2077', genre: 'RPG', tag: '오픈월드 미래', reviewScore: 94, steamRank: 8, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🌆', cover: 'cyber', url: 'https://www.cyberpunk.net/kr/ko/', image: 'https://www.cyberpunk.net/build/images/social-thumbnail-en-ddcf4d23.jpg', imagePosition: 'center 40%', description: '거대 도시 나이트 시티를 무대로 펼쳐지는 오픈월드 액션 RPG입니다. 용병 V가 되어 의뢰를 수행하고, 선택에 따라 달라지는 이야기를 경험하세요.' },
       { id: 'persona-5-royal', title: '페르소나 5 더 로열', english: 'PERSONA 5 ROYAL', genre: 'RPG', tag: '턴제 스토리', reviewScore: 95, steamRank: null, ratingSource: 'Steam 최근 30일 긍정 리뷰 · 2026-11-01 확인', emoji: '🎭', cover: 'persona', url: 'https://persona.atlus.com/p5r/', image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg?t=1783356822", imagePosition: 'center 35%', description: '낮에는 도쿄에서 학생으로 생활하고 밤에는 마음의 세계를 바꾸는 괴도로 활약하는 스타일리시 JRPG입니다. 동료들과의 관계와 턴제 전투를 즐겨보세요.', screenshots: ["https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg?t=1783356822", "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_a3258aba84ae2f2ff13a02a160f7495bfc152adb.1920x1080.jpg?t=1783356822", "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_ddcc016b8e5c434ccbd1a89c0157ce73acf905ae.1920x1080.jpg?t=1783356822"] },
@@ -83,7 +83,17 @@ function initializeArcade() {
         const steamAppId = game.url.match(/store\.steampowered\.com\/app\/(\d+)/)?.[1];
         const newsHubUrl = steamAppId ? `https://store.steampowered.com/news/app/${steamAppId}` : game.url;
         const update = latestUpdates[game.id];
-      const screenshots = [...new Set([game.image, ...(game.screenshots || []), ...(extraScreenshots[game.id] || [])].filter(Boolean))].slice(0, 4);
+        const seenImages = new Set();
+        const screenshots = [game.image, ...(game.screenshots || []), ...(extraScreenshots[game.id] || [])]
+          .filter(Boolean)
+          .filter(image => {
+            const url = new URL(image, window.location.href);
+            const key = `${url.origin}${url.pathname}`;
+            if (seenImages.has(key)) return false;
+            seenImages.add(key);
+            return true;
+          })
+          .slice(0, 4);
         detailPage.innerHTML = `
           <p class="detail-breadcrumb"><a href="index.html">홈</a>　/　<a href="index.html#games">게임 둘러보기</a>　/　${game.title}</p>
           <article class="detail-hero">
@@ -100,13 +110,24 @@ function initializeArcade() {
           </article>
           <section class="detail-section" aria-labelledby="screenshotsTitle">
             <div class="detail-section-heading"><p class="section-kicker">SCREENSHOTS & ARTWORK</p><h2 id="screenshotsTitle">스크린샷 및 이미지</h2></div>
-            <div class="screenshot-grid">${screenshots.map((image, index) => `<figure class="screenshot-card"><img src="${image}" alt="${game.title} 게임 이미지 ${index + 1}" loading="lazy" onerror="this.closest('figure').remove()" /><figcaption class="screenshot-caption">${game.title} · ${index === 0 ? '대표 이미지' : '게임 이미지'}</figcaption></figure>`).join('')}</div>
+            <div class="screenshot-grid">${screenshots.map((image, index) => `<figure class="screenshot-card"><img src="${image}" alt="${game.title} 게임 이미지 ${index + 1}" loading="lazy" /><figcaption class="screenshot-caption">${game.title} · ${index === 0 ? '대표 이미지' : '게임 이미지'}</figcaption></figure>`).join('')}</div>
           </section>
           <section class="detail-section latest-news" aria-labelledby="latestNewsTitle">
             <div class="detail-section-heading"><p class="section-kicker">LATEST UPDATES</p><h2 id="latestNewsTitle">최신 변경 및 업데이트</h2></div>
             ${update ? `<article class="latest-news-item"><p class="latest-news-summary">${update.summary}</p><div class="latest-news-meta"><time datetime="${update.date}">${update.date}</time><span>Steam 공식 공지 · 2026-11-08 확인</span></div><a href="${update.url}" target="_blank" rel="noopener noreferrer">원문 보기 <span aria-hidden="true">↗</span></a></article>` : `<p class="latest-news-empty">2026-11-08 확인 기준으로 표시할 공식 업데이트 공지가 없습니다. 아래 공식 채널에서 최신 소식을 확인해 주세요.</p>`}
             <a class="latest-news-hub" href="${newsHubUrl}" target="_blank" rel="noopener noreferrer">${steamAppId ? 'Steam 최신 소식 모두 보기' : '게임 공식 홈페이지에서 소식 확인'} <span aria-hidden="true">↗</span></a>
           </section>`;
+        detailPage.querySelectorAll('.screenshot-card img').forEach(image => {
+          const showImageError = () => {
+            const message = document.createElement('div');
+            message.className = 'screenshot-unavailable';
+            message.setAttribute('role', 'status');
+            message.textContent = '이미지를 불러올 수 없습니다.';
+            image.replaceWith(message);
+          };
+          image.addEventListener('error', showImageError, { once: true });
+          if (image.complete && image.naturalWidth === 0) showImageError();
+        });
       }
     }
 

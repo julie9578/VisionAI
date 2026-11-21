@@ -33,6 +33,7 @@
 .screenshot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .screenshot-card { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
 .screenshot-card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #171522; }
+.screenshot-unavailable { display: grid; width: 100%; aspect-ratio: 16 / 9; place-items: center; padding: 16px; background: #171522; color: var(--muted); font-size: 12px; text-align: center; }
 .screenshot-caption { margin: 0; padding: 10px 12px; color: var(--muted); font-size: 10px; }
 .detail-error a { color: #d5c2ff; text-decoration: underline; }
 @media (max-width: 700px) {
