@@ -457,10 +457,8 @@
           }),
         });
         passwordResetForm.reset();
-        passwordResetForm.hidden = true;
-        showPasswordResetButton.setAttribute('aria-expanded', 'false');
-        showPasswordResetButton.textContent = '비밀번호 재설정';
-        setMessage(message, '비밀번호를 안전하게 변경했습니다.', true);
+        clearToken();
+        window.location.replace('login.html?next=profile-edit.html&passwordChanged=1');
       } catch (error) {
         setMessage(message, error.message || '비밀번호를 변경하지 못했습니다.');
       } finally {
@@ -471,6 +469,9 @@
 
   if (loginForm) {
     const message = document.getElementById('loginMessage');
+    if (new URLSearchParams(window.location.search).get('passwordChanged') === '1') {
+      setMessage(message, '비밀번호가 변경되었습니다. 새 비밀번호로 다시 로그인해 주세요.', true);
+    }
     if (token()) {
       request('/api/auth/me').then(() => window.location.replace(loginDestination)).catch(() => clearToken());
     }

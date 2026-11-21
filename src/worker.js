@@ -15,7 +15,7 @@ function configuredAdminEmails(env) {
 }
 
 async function requireAdministrator(request, env, headers) {
-  const userId = await readSession(request, env.SESSION_SECRET);
+  const userId = await readSession(request, env.SESSION_SECRET, env.DB);
   if (!userId) return { error: json({ error: "관리자 로그인이 필요합니다." }, 401, headers) };
   const user = await env.DB.prepare("SELECT email, role FROM users WHERE id = ?").bind(userId).first();
   if (user?.role !== "admin" || !configuredAdminEmails(env).has((user.email || "").trim().toLowerCase())) {
@@ -99,17 +99,17 @@ async function encryptAddress(address, secret) {
   return { ciphertext: toBase64Url(new Uint8Array(encrypted)), iv: toBase64Url(iv) };
 }
 
-async function signSession(userId, secret) {
+async function signSession(userId, secret, sessionVersion = 0) {
   const header = toBase64Url(new TextEncoder().encode(JSON.stringify({ alg: "HS256", typ: "JWT" })));
   const now = Math.floor(Date.now() / 1000);
-  const payload = toBase64Url(new TextEncoder().encode(JSON.stringify({ sub: String(userId), iat: now, exp: now + SESSION_TTL_SECONDS })));
+  const payload = toBase64Url(new TextEncoder().encode(JSON.stringify({ sub: String(userId), sv: Number(sessionVersion) || 0, iat: now, exp: now + SESSION_TTL_SECONDS })));
   const unsigned = `${header}.${payload}`;
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(unsigned));
   return `${unsigned}.${toBase64Url(new Uint8Array(signature))}`;
 }
 
-async function readSession(request, secret) {
+async function readSession(request, secret, db) {
   try {
     const token = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
     const parts = token.split(".");
@@ -119,8 +119,13 @@ async function readSession(request, secret) {
     const valid = await crypto.subtle.verify("HMAC", key, fromBase64Url(parts[2]), new TextEncoder().encode(unsigned));
     if (!valid) return null;
     const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(parts[1])));
-    if (!payload.sub || payload.exp <= Math.floor(Date.now() / 1000)) return null;
-    return Number(payload.sub);
+    const userId = Number(payload.sub);
+    const sessionVersion = payload.sv === undefined ? 0 : payload.sv;
+    if (!Number.isSafeInteger(userId) || userId <= 0 || !Number.isSafeInteger(sessionVersion) || sessionVersion < 0) return null;
+    if (!Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000) || !db) return null;
+    const sessionUser = await db.prepare("SELECT session_version FROM users WHERE id = ?").bind(userId).first();
+    if (!sessionUser || Number(sessionUser.session_version) !== sessionVersion) return null;
+    return userId;
   } catch {
     return null;
   }
@@ -209,8 +214,8 @@ async function handleAuth(request, env, url, headers) {
     try {
       const inserted = await env.DB.prepare("INSERT INTO users (nickname, email, gender, address_ciphertext, address_iv, password_hash, password_salt, role) VALUES (?, ?, ?, '', '', ?, ?, ?)")
         .bind(nickname, email, gender, toBase64Url(passwordHash), toBase64Url(salt), "user").run();
-      const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, role, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
-      const token = await signSession(user.id, env.SESSION_SECRET);
+      const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, role, session_version, created_at FROM users WHERE id = ?").bind(inserted.meta.last_row_id).first();
+      const token = await signSession(user.id, env.SESSION_SECRET, user.session_version);
       return json({ user: publicUser(user), token }, 201, headers);
     } catch (error) {
       if (String(error.message).toLowerCase().includes("unique")) {
@@ -227,7 +232,7 @@ async function handleAuth(request, env, url, headers) {
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, role, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
+    const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, role, session_version, password_hash, password_salt, created_at FROM users WHERE email = ?").bind(email).first();
     if (!user || !password) return json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, 401, headers);
     const candidate = await hashPassword(password, fromBase64Url(user.password_salt));
     const expected = fromBase64Url(user.password_hash);
@@ -235,18 +240,18 @@ async function handleAuth(request, env, url, headers) {
       return json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." }, 401, headers);
     }
     await env.DB.prepare("UPDATE users SET last_login_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?").bind(user.id).run();
-    return json({ user: publicUser(user), token: await signSession(user.id, env.SESSION_SECRET) }, 200, headers);
+    return json({ user: publicUser(user), token: await signSession(user.id, env.SESSION_SECRET, user.session_version) }, 200, headers);
   }
 
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     const user = await env.DB.prepare("SELECT id, nickname, email, gender, bio, avatar_color, avatar_image, role, created_at FROM users WHERE id = ?").bind(userId).first();
     return user ? json({ user: publicUser(user) }, 200, headers) : json({ error: "사용자를 찾을 수 없습니다." }, 404, headers);
   }
 
   if (url.pathname === "/api/auth/me" && request.method === "PUT") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     let body;
     try { body = await request.json(); }
@@ -270,7 +275,7 @@ async function handleAuth(request, env, url, headers) {
   }
 
   if (url.pathname === "/api/auth/change-password" && request.method === "POST") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     let body;
     try { body = await request.json(); }
@@ -295,7 +300,7 @@ async function handleAuth(request, env, url, headers) {
 
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const passwordHash = await hashPassword(newPassword, salt);
-    await env.DB.prepare("UPDATE users SET password_hash = ?, password_salt = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?")
+    await env.DB.prepare("UPDATE users SET password_hash = ?, password_salt = ?, session_version = session_version + 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?")
       .bind(toBase64Url(passwordHash), toBase64Url(salt), userId)
       .run();
     return json({ ok: true }, 200, headers);
@@ -433,7 +438,7 @@ async function handleApi(request, env, url) {
   }
 
   if (url.pathname === "/api/users/me/posts" && request.method === "GET") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "로그인이 필요합니다." }, 401, headers);
     const result = await env.DB.prepare("SELECT id, category, title, author, created_at FROM posts WHERE author_id = ? AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 100").bind(userId).all();
     return json({ posts: result.results }, 200, headers);
@@ -461,7 +466,7 @@ async function handleApi(request, env, url) {
     }
     const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
     const offset = (page - 1) * PAGE_SIZE;
-    const viewerId = await readSession(request, env.SESSION_SECRET);
+    const viewerId = await readSession(request, env.SESSION_SECRET, env.DB);
     const countWhere = where.replace(/\bdeleted_at\b/g, "p.deleted_at").replace(/\bcategory\b/g, "p.category");
     const [count, result] = await Promise.all([
       env.DB.prepare(`SELECT COUNT(*) AS total FROM posts p ${countWhere}`).bind(...values).first(),
@@ -486,7 +491,7 @@ async function handleApi(request, env, url) {
   }
 
   if (commentsMatch && request.method === "POST") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "댓글 작성은 로그인 후 이용할 수 있습니다." }, 401, headers);
     let body;
     try { body = await request.json(); } catch { return json({ error: "JSON 요청 본문이 필요합니다." }, 400, headers); }
@@ -500,7 +505,7 @@ async function handleApi(request, env, url) {
 
   const commentMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/comments\/(\d+)$/);
   if (commentMatch && ["PUT", "DELETE"].includes(request.method)) {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "댓글을 수정하거나 삭제하려면 로그인해 주세요." }, 401, headers);
     const postId = Number(commentMatch[1]);
     const commentId = Number(commentMatch[2]);
@@ -529,7 +534,7 @@ async function handleApi(request, env, url) {
 
   const reactionMatch = url.pathname.match(/^\/api\/posts\/(\d+)\/(like|bookmark)$/);
   if (reactionMatch && ["PUT", "DELETE"].includes(request.method)) {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "좋아요와 북마크는 로그인 후 이용할 수 있습니다." }, 401, headers);
     const postId = Number(reactionMatch[1]);
     const interactionType = reactionMatch[2];
@@ -546,7 +551,7 @@ async function handleApi(request, env, url) {
   const singleMatch = url.pathname.match(/^\/api\/posts\/(\d+)$/);
   if (singleMatch && request.method === "GET") {
     const postId = Number(singleMatch[1]);
-    const viewerId = await readSession(request, env.SESSION_SECRET);
+    const viewerId = await readSession(request, env.SESSION_SECRET, env.DB);
     const post = await env.DB.prepare(`SELECT p.id, p.category, p.title, p.content, p.author, p.author_id, p.created_at, p.updated_at, p.deleted_at,
       (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'comment') AS comments_count,
       (SELECT COUNT(*) FROM post_interactions i WHERE i.post_id = p.id AND i.interaction_type = 'like') AS likes_count,
@@ -558,7 +563,7 @@ async function handleApi(request, env, url) {
   }
 
   if (singleMatch && ["PUT", "DELETE"].includes(request.method)) {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "게시글 수정과 삭제는 로그인 후 이용할 수 있습니다." }, 401, headers);
     const postId = Number(singleMatch[1]);
     const post = await env.DB.prepare("SELECT id, category, author_id FROM posts WHERE id = ? AND deleted_at IS NULL").bind(postId).first();
@@ -596,7 +601,7 @@ async function handleApi(request, env, url) {
   }
 
   if (url.pathname === "/api/posts" && request.method === "POST") {
-    const userId = await readSession(request, env.SESSION_SECRET);
+    const userId = await readSession(request, env.SESSION_SECRET, env.DB);
     if (!userId) return json({ error: "게시글 작성은 로그인 후 이용할 수 있습니다." }, 401, headers);
     let body;
     try { body = await request.json(); }
